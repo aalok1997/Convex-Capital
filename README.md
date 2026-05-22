@@ -6,8 +6,8 @@ A public, paper-traded portfolio dashboard inspired by [mispricedassets.io](http
 
 ## What's in the box
 
-- `pipeline/` — Python data pipeline (yfinance + pandas + arch). Reads `trades.csv`, fetches prices/fundamentals/news, computes signals/volatility/correlation/stress, writes `web/data/snapshot.json`.
-- `web/` — Single-file static dashboard (HTML + Chart.js via CDN) that renders the snapshot. This is the deployable folder.
+- `pipeline/` — Python data pipeline (yfinance + pandas + arch). Reads `trades.csv`, fetches prices/fundamentals/news, computes signals/volatility/correlation/stress, writes `docs/data/snapshot.json`.
+- `docs/` — Single-file static dashboard (HTML + Chart.js via CDN) that renders the snapshot. This is the deployable folder (served by GitHub Pages).
 - `.github/workflows/refresh.yml` — Optional GitHub Actions cron that re-runs the pipeline each weekday after market close and commits the new snapshot.
 - `trades.csv` — Your trade ledger (the only file you edit day-to-day).
 
@@ -32,12 +32,12 @@ Sample / fixture mode for offline testing of the layout:
 python -m pipeline.run --sample-data --sample-portfolio
 ```
 
-Both modes write `web/data/snapshot.json`.
+Both modes write `docs/data/snapshot.json`.
 
 ## Viewing the dashboard locally
 
 ```bash
-python -m http.server 8000 --directory web
+python -m http.server 8000 --directory docs
 ```
 
 Then open <http://localhost:8000>.
@@ -59,12 +59,12 @@ Then re-run the pipeline. The dashboard auto-refreshes the next time it's loaded
 
 ## Deploying
 
-The `web/` folder is a static site. Any of these will work for free:
+The `docs/` folder is a static site. Any of these will work for free:
 
-- **Vercel** — `vercel --prod web` (or connect the repo and set the output dir to `web`).
-- **Netlify** — drag-and-drop `web/`, or connect the repo with `web` as the publish directory.
-- **Cloudflare Pages** — same; build output `web`.
-- **GitHub Pages** — push to a `gh-pages` branch with the contents of `web/` at the root.
+- **GitHub Pages** (used here) — Settings → Pages → Source: `main`, folder: `/docs`.
+- **Vercel** — `vercel --prod docs` (or connect the repo and set the output dir to `docs`).
+- **Netlify** — drag-and-drop `docs/`, or connect the repo with `docs` as the publish directory.
+- **Cloudflare Pages** — same; build output `docs`.
 
 For automatic daily refresh, enable the included GitHub Actions workflow (`.github/workflows/refresh.yml`). It runs the pipeline at 21:30 UTC on weekdays (≈ 5:30 PM ET, after US market close), commits the updated snapshot, and your static host re-deploys automatically. No API keys needed for the yfinance backend.
 
