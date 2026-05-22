@@ -1,0 +1,623 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Convex Capital</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --panel: #11151c;
+    --panel-2: #161b24;
+    --border: #1f2632;
+    --text: #d6deeb;
+    --muted: #7f8aa3;
+    --accent: #4ade80;       /* bullish green */
+    --danger: #f87171;       /* bearish red */
+    --warn: #fbbf24;
+    --info: #60a5fa;
+    --strong-buy: #22c55e;
+    --buy: #4ade80;
+    --lean-bull: #84cc16;
+    --neutral: #6b7280;
+    --lean-bear: #f59e0b;
+    --sell: #ef4444;
+    --strong-sell: #b91c1c;
+    --mono: ui-monospace, "JetBrains Mono", "Fira Code", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text);
+    font-family: var(--mono); font-size: 13px; line-height: 1.5; }
+  a { color: var(--info); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .container { max-width: 1280px; margin: 0 auto; padding: 24px; }
+  header.topbar { display: flex; justify-content: space-between; align-items: center;
+    padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .brand { font-size: 18px; font-weight: 600; letter-spacing: 0.05em; }
+  .brand .accent { color: var(--accent); }
+  .tagline { color: var(--muted); font-size: 11px; max-width: 520px; text-align: right; }
+  .grid { display: grid; gap: 16px; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: repeat(3, 1fr); }
+  .grid-4 { grid-template-columns: repeat(4, 1fr); }
+  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+  .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
+    padding: 16px; }
+  .panel h2 { font-size: 11px; letter-spacing: 0.15em; color: var(--muted);
+    text-transform: uppercase; margin: 0 0 12px 0; font-weight: 500; }
+  .stat { display: flex; justify-content: space-between; align-items: baseline;
+    padding: 4px 0; }
+  .stat .label { color: var(--muted); font-size: 11px; }
+  .stat .val { font-size: 14px; font-weight: 600; }
+  .pos { color: var(--accent); }
+  .neg { color: var(--danger); }
+  .muted { color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; color: var(--muted); font-weight: 500; font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.1em; padding: 6px 8px;
+    border-bottom: 1px solid var(--border); }
+  td { padding: 6px 8px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px;
+    font-weight: 700; letter-spacing: 0.05em; }
+  .pill-strong-buy   { background: var(--strong-buy);   color: #0b0e14; }
+  .pill-buy          { background: var(--buy);          color: #0b0e14; }
+  .pill-lean-bull    { background: var(--lean-bull);    color: #0b0e14; }
+  .pill-neutral      { background: #2b3344;             color: var(--text); }
+  .pill-lean-bear    { background: var(--lean-bear);    color: #0b0e14; }
+  .pill-sell         { background: var(--sell);         color: #fff; }
+  .pill-strong-sell  { background: var(--strong-sell);  color: #fff; }
+  .regime-LOW       { background: #14532d; color: #86efac; }
+  .regime-NORMAL    { background: #1e293b; color: #94a3b8; }
+  .regime-HIGH      { background: #78350f; color: #fde68a; }
+  .regime-EXTREME   { background: #7f1d1d; color: #fecaca; }
+  .signal-SIGNAL    { background: var(--strong-buy); color: #0b0e14; }
+  .signal-BASE      { background: var(--info);       color: #0b0e14; }
+  .signal-WEAK      { background: #2b3344;            color: var(--muted); }
+  .summary-strip { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;
+    margin-bottom: 24px; }
+  .summary-card { background: var(--panel); border: 1px solid var(--border);
+    border-radius: 8px; padding: 14px; }
+  .summary-card .label { font-size: 10px; color: var(--muted); text-transform: uppercase;
+    letter-spacing: 0.1em; }
+  .summary-card .value { font-size: 22px; font-weight: 700; margin-top: 4px; }
+  .chart-wrap { position: relative; height: 300px; }
+  .chart-wrap-sm { position: relative; height: 220px; }
+  .corr-table { font-size: 9px; }
+  .corr-table td, .corr-table th { padding: 3px 4px; text-align: center; }
+  .ticker-tag { display: inline-block; background: #1e293b; color: var(--info);
+    padding: 1px 6px; border-radius: 3px; font-size: 10px; font-weight: 600;
+    margin-right: 8px; }
+  .news-item { padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .news-item:last-child { border-bottom: none; }
+  .news-item .meta { color: var(--muted); font-size: 10px; margin-top: 2px; }
+  .footer { text-align: center; color: var(--muted); font-size: 11px; padding: 32px 16px;
+    border-top: 1px solid var(--border); margin-top: 32px; }
+  .empty { color: var(--muted); padding: 24px; text-align: center; font-size: 12px;
+    background: var(--panel-2); border-radius: 6px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; }
+  .legend .swatch { display: inline-block; width: 10px; height: 10px;
+    border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+  .session-line { font-family: var(--mono); color: var(--muted); font-size: 11px;
+    text-align: center; }
+  .session-line .green { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <header class="topbar">
+    <div>
+      <div class="brand">
+        <span class="accent">&gt;</span> CONVEX <span class="accent">CAPITAL</span>
+      </div>
+      <div class="muted" id="generated-at" style="font-size: 11px; margin-top: 4px;"></div>
+    </div>
+    <div class="tagline" id="tagline"></div>
+  </header>
+
+  <!-- Top summary strip -->
+  <div class="summary-strip" id="summary-strip"></div>
+
+  <!-- NAV curve -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Portfolio Performance vs Benchmarks</h2>
+    <div class="chart-wrap"><canvas id="navChart"></canvas></div>
+    <div class="legend" id="navLegend" style="margin-top: 8px;"></div>
+  </div>
+
+  <!-- Exposure row -->
+  <div class="grid grid-2" style="margin-bottom: 16px;">
+    <div class="panel">
+      <h2>Sector Exposure</h2>
+      <div class="chart-wrap-sm"><canvas id="sectorChart"></canvas></div>
+    </div>
+    <div class="panel">
+      <h2>Geographic Exposure</h2>
+      <div class="chart-wrap-sm"><canvas id="geoChart"></canvas></div>
+    </div>
+  </div>
+
+  <!-- Holdings -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Holdings</h2>
+    <div id="holdings-table"></div>
+  </div>
+
+  <!-- Signals + Volatility -->
+  <div class="grid grid-2" style="margin-bottom: 16px;">
+    <div class="panel">
+      <h2>Technical Signals</h2>
+      <div class="muted" id="signals-summary" style="margin-bottom: 8px; font-size: 11px;"></div>
+      <div id="signals-table"></div>
+    </div>
+    <div class="panel">
+      <h2>Volatility Regime &middot; HV20 vs GARCH(1,1)</h2>
+      <div class="muted" id="vol-summary" style="margin-bottom: 8px; font-size: 11px;"></div>
+      <div id="vol-table"></div>
+    </div>
+  </div>
+
+  <!-- Stress + Risk metrics -->
+  <div class="grid grid-2" style="margin-bottom: 16px;">
+    <div class="panel">
+      <h2>Risk Metrics</h2>
+      <div id="risk-metrics"></div>
+    </div>
+    <div class="panel">
+      <h2>Historical Stress Tests</h2>
+      <div id="stress-table"></div>
+    </div>
+  </div>
+
+  <!-- Correlation matrix -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Correlation Matrix &middot; 252-day log returns</h2>
+    <div id="corr-matrix"></div>
+  </div>
+
+  <!-- Trade blotter -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Trade Blotter</h2>
+    <div id="blotter"></div>
+  </div>
+
+  <!-- News + Income/Dividends -->
+  <div class="grid grid-2" style="margin-bottom: 16px;">
+    <div class="panel">
+      <h2>News</h2>
+      <div id="news"></div>
+    </div>
+    <div class="panel">
+      <h2>Dividend &amp; Income</h2>
+      <div id="income-summary"></div>
+      <div id="income-table" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+
+  <!-- Fundamentals -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Fundamentals</h2>
+    <div id="fundamentals"></div>
+  </div>
+
+  <div class="footer">
+    <div class="session-line">
+      <span class="green">&gt;</span> session.active &middot; CONVEX CAPITAL &middot;
+      <span id="footer-date"></span>
+    </div>
+    <div style="margin-top: 8px;">
+      Hypothetical / paper-traded performance. For educational and tracking
+      purposes only. Not investment advice. Not an offer to manage assets.
+    </div>
+  </div>
+</div>
+
+<script>
+const SECTOR_COLORS = ["#4ade80","#60a5fa","#f59e0b","#a78bfa","#f87171",
+                       "#22d3ee","#fbbf24","#34d399","#fb7185","#94a3b8"];
+
+function fmtMoney(n, opts={}) {
+  if (n == null || isNaN(n)) return "—";
+  const d = opts.decimals ?? 0;
+  return "$" + Number(n).toLocaleString("en-US",
+    {minimumFractionDigits: d, maximumFractionDigits: d});
+}
+function fmtPct(n, d=2) {
+  if (n == null || isNaN(n)) return "—";
+  return (n*100).toFixed(d) + "%";
+}
+function fmtNum(n, d=2) {
+  if (n == null || isNaN(n)) return "—";
+  return Number(n).toFixed(d);
+}
+function pnlClass(n) { return n >= 0 ? "pos" : "neg"; }
+function signalPillClass(label) {
+  return "pill pill-" + (label || "neutral").toLowerCase().replace(/\s+/g, "-");
+}
+
+async function load() {
+  const res = await fetch("data/snapshot.json", {cache: "no-store"});
+  const d = await res.json();
+
+  document.getElementById("tagline").textContent = d.tagline || "";
+  document.getElementById("generated-at").textContent =
+    "Snapshot: " + (d.generated_at || "");
+  document.getElementById("footer-date").textContent =
+    (d.generated_at || "").slice(0, 10);
+
+  renderSummary(d);
+  renderNav(d);
+  renderDonut("sectorChart", d.sector_exposure);
+  renderDonut("geoChart", d.geographic_exposure);
+  renderHoldings(d.holdings);
+  renderSignals(d.signals);
+  renderVol(d.volatility);
+  renderRiskMetrics(d.metrics, d.summary);
+  renderStress(d.stress_tests);
+  renderCorrelation(d.correlation);
+  renderBlotter(d.trade_blotter);
+  renderNews(d.news);
+  renderIncome(d.income);
+  renderFundamentals(d.fundamentals);
+}
+
+function renderSummary(d) {
+  const s = d.summary;
+  const m = d.metrics || {};
+  const cards = [
+    {label:"NAV", value: fmtMoney(s.nav)},
+    {label:"Total Return", value: fmtPct(s.total_return), cls: pnlClass(s.total_return)},
+    {label:"Cash", value: fmtMoney(s.cash)},
+    {label:"Open Positions", value: s.open_positions},
+    {label:"Sharpe", value: fmtNum(m.sharpe, 2)},
+  ];
+  document.getElementById("summary-strip").innerHTML =
+    cards.map(c => `
+      <div class="summary-card">
+        <div class="label">${c.label}</div>
+        <div class="value ${c.cls||""}">${c.value}</div>
+      </div>`).join("");
+}
+
+function renderNav(d) {
+  const navData = (d.nav_curve || []).map(p => ({
+    x: p.date, y: ((p.value / d.summary.deposits) - 1) * 100
+  }));
+  const datasets = [{
+    label: "Convex Capital",
+    data: navData,
+    borderColor: "#4ade80",
+    backgroundColor: "rgba(74,222,128,0.1)",
+    borderWidth: 2,
+    fill: true,
+    tension: 0.1,
+    pointRadius: 0,
+  }];
+  for (const [name, series] of Object.entries(d.benchmarks || {})) {
+    const colors = {SPY: "#60a5fa", IWM: "#a78bfa"};
+    datasets.push({
+      label: name,
+      data: series.map(p => ({x: p.date, y: p.value * 100})),
+      borderColor: colors[name] || "#94a3b8",
+      borderWidth: 1.5,
+      borderDash: [4, 3],
+      fill: false,
+      tension: 0.1,
+      pointRadius: 0,
+    });
+  }
+  new Chart(document.getElementById("navChart"), {
+    type: "line",
+    data: {datasets},
+    options: {
+      maintainAspectRatio: false,
+      interaction: {mode: "index", intersect: false},
+      scales: {
+        x: {type: "time", time: {unit: "month"}, grid: {color: "#1f2632"},
+            ticks: {color: "#7f8aa3"}},
+        y: {grid: {color: "#1f2632"}, ticks: {color: "#7f8aa3",
+            callback: v => v.toFixed(0) + "%"}},
+      },
+      plugins: {
+        legend: {labels: {color: "#d6deeb"}},
+        tooltip: {callbacks: {label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toFixed(2)}%`}}
+      }
+    }
+  });
+}
+
+function renderDonut(id, items) {
+  if (!items || items.length === 0) {
+    const c = document.getElementById(id);
+    c.parentElement.innerHTML = `<div class="empty">No exposure yet</div>`;
+    return;
+  }
+  new Chart(document.getElementById(id), {
+    type: "doughnut",
+    data: {
+      labels: items.map(i => i.name),
+      datasets: [{
+        data: items.map(i => i.pct * 100),
+        backgroundColor: items.map((_, i) => SECTOR_COLORS[i % SECTOR_COLORS.length]),
+        borderColor: "#0b0e14",
+        borderWidth: 2,
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {position: "right", labels: {color: "#d6deeb", font: {size: 11}}},
+        tooltip: {callbacks: {label: ctx => `${ctx.label}: ${ctx.parsed.toFixed(2)}%`}}
+      }
+    }
+  });
+}
+
+function renderHoldings(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("holdings-table").innerHTML =
+      `<div class="empty">No open positions yet. Add a BUY row to trades.csv to populate.</div>`;
+    return;
+  }
+  const html = `<table>
+    <thead><tr>
+      <th>Ticker</th><th>Company</th><th>Sector</th>
+      <th class="num">Shares</th><th class="num">Price</th>
+      <th class="num">Mkt Value</th><th class="num">Unrealized P&amp;L</th>
+    </tr></thead>
+    <tbody>${rows.map(h => `
+      <tr>
+        <td><span class="ticker-tag">${h.ticker}</span></td>
+        <td>${h.company || ""}</td>
+        <td class="muted">${h.sector || ""}</td>
+        <td class="num">${h.shares.toLocaleString()}</td>
+        <td class="num">${fmtMoney(h.price, {decimals: 2})}</td>
+        <td class="num">${fmtMoney(h.market_value)}</td>
+        <td class="num ${pnlClass(h.unrealized_pnl)}">${(h.unrealized_pnl >= 0 ? "+" : "")}${fmtMoney(h.unrealized_pnl)}</td>
+      </tr>`).join("")}
+    </tbody>
+  </table>`;
+  document.getElementById("holdings-table").innerHTML = html;
+}
+
+function renderSignals(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("signals-table").innerHTML =
+      `<div class="empty">No tickers to score</div>`;
+    return;
+  }
+  const sorted = [...rows].sort((a,b) => b.composite - a.composite);
+  const bull = sorted.filter(r => r.composite > 0).length;
+  const neutral = sorted.filter(r => r.composite === 0).length;
+  const bear = sorted.filter(r => r.composite < 0).length;
+  const avg = sorted.reduce((a,r) => a + r.composite, 0) / sorted.length;
+  document.getElementById("signals-summary").innerHTML =
+    `<span class="pos">▲ BULLISH: ${bull}</span> &middot; ` +
+    `NEUTRAL: ${neutral} &middot; ` +
+    `<span class="neg">▼ BEARISH: ${bear}</span> &middot; ` +
+    `AVG SCORE: ${avg >= 0 ? "+" : ""}${avg.toFixed(2)}`;
+  const html = `<table>
+    <thead><tr><th>Ticker</th><th>Signal</th><th class="num">Composite</th><th class="num">RSI</th></tr></thead>
+    <tbody>${sorted.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td><span class="${signalPillClass(r.label)}">${r.label}</span></td>
+        <td class="num ${r.composite>=0?"pos":"neg"}">${r.composite >= 0 ? "+" : ""}${r.composite.toFixed(2)}</td>
+        <td class="num">${r.rsi != null ? r.rsi.toFixed(1) : "—"}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+  document.getElementById("signals-table").innerHTML = html;
+}
+
+function renderVol(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("vol-table").innerHTML =
+      `<div class="empty">No tickers to analyze</div>`;
+    return;
+  }
+  const expansions = rows.filter(r => r.expansion != null);
+  const avgExp = expansions.length ?
+    expansions.reduce((a,r) => a + r.expansion, 0) / expansions.length : 0;
+  document.getElementById("vol-summary").innerHTML =
+    `AVG EXPANSION: ${(avgExp*100).toFixed(1)}% &middot; ` +
+    `tickers: ${rows.length}`;
+  const sorted = [...rows].sort((a,b) => (b.expansion ?? -99) - (a.expansion ?? -99));
+  const html = `<table>
+    <thead><tr><th>Ticker</th><th class="num">HV 20D</th><th class="num">GARCH</th>
+    <th class="num">Expansion</th><th>Regime</th><th>Signal</th></tr></thead>
+    <tbody>${sorted.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="num">${r.hv20 != null ? (r.hv20*100).toFixed(0)+"%" : "—"}</td>
+        <td class="num">${r.garch != null ? (r.garch*100).toFixed(0)+"%" : "—"}</td>
+        <td class="num ${(r.expansion??0)>=0?"pos":"neg"}">${r.expansion != null ? (r.expansion>=0?"+":"")+(r.expansion*100).toFixed(0)+"%" : "—"}</td>
+        <td><span class="pill regime-${r.regime}">${r.regime}</span></td>
+        <td><span class="pill signal-${r.signal}">${r.signal}</span></td>
+      </tr>`).join("")}
+    </tbody></table>`;
+  document.getElementById("vol-table").innerHTML = html;
+}
+
+function renderRiskMetrics(m, s) {
+  m = m || {}; s = s || {};
+  const rows = [
+    ["Annualized Return", fmtPct(m.annualized_return), m.annualized_return >= 0 ? "pos" : "neg"],
+    ["Annualized Volatility", fmtPct(m.annualized_vol)],
+    ["Sharpe Ratio", fmtNum(m.sharpe, 2)],
+    ["Sortino Ratio", fmtNum(m.sortino, 2)],
+    ["Max Drawdown", fmtPct(m.max_drawdown), "neg"],
+    ["Beta (SPY)", fmtNum(m.beta_spy, 2)],
+    ["VaR 95% (1d)", fmtPct(m.var_95_1d), "neg"],
+    ["Realized P&L", fmtMoney(s.realized_pnl), s.realized_pnl >= 0 ? "pos" : "neg"],
+  ];
+  const html = `<table><tbody>${rows.map(r => `
+    <tr><td class="muted">${r[0]}</td><td class="num ${r[2]||""}">${r[1]}</td></tr>
+  `).join("")}</tbody></table>`;
+  document.getElementById("risk-metrics").innerHTML = html;
+}
+
+function renderStress(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("stress-table").innerHTML =
+      `<div class="empty">Add positions to compute stress impacts</div>`;
+    return;
+  }
+  const html = `<table>
+    <thead><tr><th>Scenario</th><th class="num">Mkt Move</th>
+    <th class="num">Impact</th><th class="num">Stressed NAV</th><th class="num">P&amp;L</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td>${r.scenario}</td>
+        <td class="num neg">${(r.market_move*100).toFixed(1)}%</td>
+        <td class="num ${r.portfolio_impact>=0?"pos":"neg"}">${(r.portfolio_impact>=0?"+":"")}${(r.portfolio_impact*100).toFixed(1)}%</td>
+        <td class="num">${fmtMoney(r.stressed_nav)}</td>
+        <td class="num ${r.pnl>=0?"pos":"neg"}">${(r.pnl>=0?"+":"")}${fmtMoney(r.pnl)}</td>
+      </tr>`).join("")}
+    </tbody></table>
+    <div class="muted" style="margin-top: 8px; font-size: 10px;">
+      Method: portfolio_beta × historical SPY peak-to-trough move (linear approximation).
+      Beta is regressed on 252 trading days.
+    </div>`;
+  document.getElementById("stress-table").innerHTML = html;
+}
+
+function renderCorrelation(c) {
+  if (!c || !c.tickers || c.tickers.length === 0) {
+    document.getElementById("corr-matrix").innerHTML =
+      `<div class="empty">Need at least 2 positions to compute correlation</div>`;
+    return;
+  }
+  const colorFor = v => {
+    if (v == null) return "#11151c";
+    const t = Math.max(-1, Math.min(1, v));
+    if (t >= 0) return `rgba(74,222,128,${0.15 + t*0.55})`;
+    return `rgba(248,113,113,${0.15 + (-t)*0.55})`;
+  };
+  const tickers = c.tickers;
+  let html = `<table class="corr-table"><thead><tr><th></th>` +
+    tickers.map(t => `<th>${t}</th>`).join("") + `</tr></thead><tbody>`;
+  for (let i = 0; i < tickers.length; i++) {
+    html += `<tr><th>${tickers[i]}</th>`;
+    for (let j = 0; j < tickers.length; j++) {
+      const v = c.matrix[i][j];
+      const txt = v == null ? "—" : v.toFixed(2);
+      html += `<td style="background:${colorFor(v)}">${txt}</td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</tbody></table>`;
+  document.getElementById("corr-matrix").innerHTML = html;
+}
+
+function renderBlotter(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("blotter").innerHTML =
+      `<div class="empty">No trades yet</div>`;
+    return;
+  }
+  const html = `<table>
+    <thead><tr><th>Date</th><th>Ticker</th><th>Action</th>
+    <th class="num">Shares</th><th class="num">Price</th><th class="num">Value</th></tr></thead>
+    <tbody>${rows.slice(0, 30).map(r => `
+      <tr>
+        <td class="muted">${r.date}</td>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="${r.action === "BUY" ? "pos" : "neg"}">${r.action}</td>
+        <td class="num">${r.shares.toLocaleString()}</td>
+        <td class="num">${fmtMoney(r.price, {decimals: 2})}</td>
+        <td class="num">${fmtMoney(r.value)}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+  document.getElementById("blotter").innerHTML = html;
+}
+
+function renderNews(items) {
+  if (!items || items.length === 0) {
+    document.getElementById("news").innerHTML =
+      `<div class="empty">No news yet</div>`;
+    return;
+  }
+  const html = items.slice(0, 12).map(n => `
+    <div class="news-item">
+      <span class="ticker-tag">${n.ticker}</span>
+      ${n.link ? `<a href="${n.link}" target="_blank" rel="noopener">${escape(n.title)}</a>` : escape(n.title)}
+      <div class="meta">${escape(n.publisher || "")} &middot; ${(n.published||"").slice(0,10)}</div>
+    </div>`).join("");
+  document.getElementById("news").innerHTML = html;
+}
+
+function renderIncome(inc) {
+  if (!inc) {
+    document.getElementById("income-summary").innerHTML =
+      `<div class="empty">No income yet</div>`;
+    return;
+  }
+  document.getElementById("income-summary").innerHTML = `
+    <div class="grid grid-3">
+      <div><div class="muted" style="font-size:10px;">Total Annual</div>
+           <div class="pos" style="font-size:18px; font-weight:700;">${fmtMoney(inc.total_annual_income)}</div></div>
+      <div><div class="muted" style="font-size:10px;">Dividend</div>
+           <div style="font-size:18px; font-weight:700;">${fmtMoney(inc.dividend_income)}</div></div>
+      <div><div class="muted" style="font-size:10px;">Cash @ ${(inc.cash_yield*100).toFixed(2)}%</div>
+           <div style="font-size:18px; font-weight:700;">${fmtMoney(inc.cash_income)}</div></div>
+    </div>`;
+  if (!inc.rows || inc.rows.length === 0) {
+    document.getElementById("income-table").innerHTML = "";
+    return;
+  }
+  const html = `<table>
+    <thead><tr><th>Ticker</th><th class="num">Yield</th><th class="num">Rate</th>
+    <th class="num">Shares</th><th class="num">Annual Inc</th><th>Ex-Date</th></tr></thead>
+    <tbody>${inc.rows.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="num">${r.yield != null ? (r.yield*100).toFixed(2)+"%" : "—"}</td>
+        <td class="num">${fmtMoney(r.div_rate, {decimals: 2})}</td>
+        <td class="num">${r.shares.toLocaleString()}</td>
+        <td class="num pos">${fmtMoney(r.annual_income, {decimals: 0})}</td>
+        <td class="muted">${r.ex_dividend_date || "—"}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+  document.getElementById("income-table").innerHTML = html;
+}
+
+function renderFundamentals(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("fundamentals").innerHTML =
+      `<div class="empty">No tickers to analyze</div>`;
+    return;
+  }
+  const fmtBn = n => n == null ? "—" : "$" + (n/1e9).toFixed(1) + "B";
+  const html = `<table>
+    <thead><tr><th>Ticker</th><th class="num">Mkt Cap</th>
+    <th class="num">P/E</th><th class="num">Fwd P/E</th><th class="num">P/S</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="num">${fmtBn(r.market_cap)}</td>
+        <td class="num">${fmtNum(r.trailing_pe, 1)}</td>
+        <td class="num">${fmtNum(r.forward_pe, 1)}</td>
+        <td class="num">${fmtNum(r.price_to_sales, 2)}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+  document.getElementById("fundamentals").innerHTML = html;
+}
+
+function escape(s) {
+  return String(s||"").replace(/[&<>"']/g, c =>
+    ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+load().catch(err => {
+  document.body.innerHTML = `<div style="padding:48px;color:#f87171;font-family:monospace">
+    Failed to load snapshot: ${err}<br><br>
+    Run <code>python -m pipeline.run</code> first to generate <code>data/snapshot.json</code>.
+  </div>`;
+});
+</script>
+</body>
+</html>
