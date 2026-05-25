@@ -25,7 +25,9 @@ from .portfolio import (load_trades, replay, daily_nav_curve, benchmark_curves,
                         PortfolioState)
 from .signals import compute_signal
 from .volatility import vol_panel
-from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics)
+from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics,
+                   monte_carlo, factor_stress, correlation_tail_stress,
+                   liquidity_stress, drawdown_curve)
 
 
 BENCHMARKS = ("SPY", "IWM")
@@ -167,6 +169,12 @@ def main(argv=None):
             portfolio_beta = 0.0
     metrics["beta_spy"] = portfolio_beta
     stress = stress_tests(portfolio_beta, nav_now)
+    mc = monte_carlo(nav)
+    factor = factor_stress(holdings, nav_now)
+    closes_for_corr = {tk: h.df["Close"] for tk, h in histories.items() if not h.df.empty}
+    corr_tail = correlation_tail_stress(holdings, closes_for_corr, nav_now)
+    liquidity = liquidity_stress(holdings, histories)
+    dd_series = drawdown_curve(nav)
 
     # Income / dividend tracker
     income_rows = []
@@ -193,7 +201,7 @@ def main(argv=None):
     cash_income = state.cash * cash_yield
     total_income = total_dividend_income + cash_income
 
-    # Fundamentals tab
+    # Fundamentals — split into Valuation and Profitability sub-tabs in the UI
     fundamentals = []
     for tk in tickers:
         info = infos.get(tk)
@@ -205,6 +213,14 @@ def main(argv=None):
             "trailing_pe": info.trailing_pe,
             "forward_pe": info.forward_pe,
             "price_to_sales": info.price_to_sales,
+            "price_to_book": info.price_to_book,
+            "ev_to_ebitda": info.ev_to_ebitda,
+            "profit_margin": info.profit_margin,
+            "operating_margin": info.operating_margin,
+            "return_on_equity": info.return_on_equity,
+            "return_on_assets": info.return_on_assets,
+            "revenue_growth": info.revenue_growth,
+            "earnings_growth": info.earnings_growth,
         })
 
     # Trade blotter
@@ -249,6 +265,7 @@ def main(argv=None):
         },
         "metrics": _scrub(metrics),
         "nav_curve": _series_to_records(nav),
+        "drawdown_curve": _series_to_records(dd_series),
         "benchmarks": {b: _series_to_records(s) for b, s in bench_curves.items()},
         "holdings": holdings,
         "sector_exposure": sector_exposure,
@@ -257,6 +274,10 @@ def main(argv=None):
         "volatility": vol_rows,
         "correlation": _corr_to_dict(cm),
         "stress_tests": stress,
+        "monte_carlo": _scrub(mc),
+        "factor_stress": _scrub(factor),
+        "correlation_tail_risk": _scrub(corr_tail),
+        "liquidity": liquidity,
         "income": {
             "total_annual_income": total_income,
             "dividend_income": total_dividend_income,

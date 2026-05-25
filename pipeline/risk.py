@@ -107,6 +107,252 @@ def stress_tests(portfolio_beta: float, current_nav: float) -> List[dict]:
 
 
 # ---------------------------------------------------------------------------
+# Monte Carlo: bootstrap historical daily NAV returns over a forward horizon.
+# Honest scenario analysis: future is sampled with replacement from past, so
+# the shape of the distribution (fat tails included) is preserved without
+# assuming normality.
+# ---------------------------------------------------------------------------
+
+def monte_carlo(nav: pd.Series,
+                horizon_days: int = 21,
+                n_paths: int = 10_000,
+                seed: int = 42) -> dict:
+    if nav is None or len(nav) < 30:
+        return {}
+    rets = nav.pct_change().dropna().values
+    if len(rets) < 20:
+        return {}
+    rng = np.random.default_rng(seed)
+    sims = rng.choice(rets, size=(n_paths, horizon_days), replace=True)
+    # Compound each path's daily returns to a terminal-return multiple.
+    path_mult = np.cumprod(1.0 + sims, axis=1)
+    terminal = path_mult[:, -1] - 1.0
+    # Worst intra-horizon drawdown per path.
+    running_max = np.maximum.accumulate(path_mult, axis=1)
+    dd = (path_mult - running_max) / running_max
+    max_dd = dd.min(axis=1)
+    current_nav = float(nav.iloc[-1])
+    pct = lambda a, p: float(np.percentile(a, p))
+    return {
+        "horizon_days": horizon_days,
+        "n_paths": n_paths,
+        "current_nav": current_nav,
+        "terminal_return": {
+            "p5": pct(terminal, 5), "p25": pct(terminal, 25),
+            "p50": pct(terminal, 50), "p75": pct(terminal, 75),
+            "p95": pct(terminal, 95),
+            "prob_negative": float((terminal < 0).mean()),
+        },
+        "terminal_nav": {
+            "p5": current_nav * (1 + pct(terminal, 5)),
+            "p50": current_nav * (1 + pct(terminal, 50)),
+            "p95": current_nav * (1 + pct(terminal, 95)),
+        },
+        "max_drawdown": {
+            "p5": pct(max_dd, 5), "p50": pct(max_dd, 50),
+            "p95": pct(max_dd, 95),
+        },
+        "method": "Bootstrap of historical daily NAV returns. "
+                  "10,000 paths, 21-trading-day horizon (~1 month).",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Factor stress: pre-defined sector + geography shocks applied to current
+# positions. Transparent and documented — every shock is in the snapshot.
+# ---------------------------------------------------------------------------
+
+# (scenario_name, description, {sector: shock_pct}, {country: shock_pct})
+FACTOR_SCENARIOS: List[dict] = [
+    {
+        "name": "Tech Selloff -15%",
+        "description": "Concentrated drawdown in Tech and Communication Services.",
+        "sector_shocks": {"Technology": -0.15, "Communication Services": -0.10},
+        "country_shocks": {},
+    },
+    {
+        "name": "Rate Shock (+100bp)",
+        "description": "Long-duration growth and rate-sensitive sectors hit; banks benefit.",
+        "sector_shocks": {"Technology": -0.08, "Consumer Cyclical": -0.10,
+                          "Financial Services": +0.05, "Real Estate": -0.12,
+                          "Utilities": -0.06},
+        "country_shocks": {},
+    },
+    {
+        "name": "Energy Spike (+30%)",
+        "description": "Oil shock — producers rally, downstream consumers pinched.",
+        "sector_shocks": {"Energy": +0.30, "Industrials": -0.05,
+                          "Consumer Cyclical": -0.07, "Consumer Defensive": -0.03},
+        "country_shocks": {},
+    },
+    {
+        "name": "Recession (broad -20%)",
+        "description": "Cyclicals and credit-sensitive names down hard; defensives flat.",
+        "sector_shocks": {"Technology": -0.15, "Consumer Cyclical": -0.22,
+                          "Financial Services": -0.18, "Industrials": -0.18,
+                          "Energy": -0.20, "Materials": -0.20,
+                          "Communication Services": -0.12, "Healthcare": -0.04,
+                          "Consumer Defensive": -0.02, "Utilities": 0.0,
+                          "Real Estate": -0.15},
+        "country_shocks": {},
+    },
+    {
+        "name": "China Decoupling",
+        "description": "China-listed and China-revenue names take a 25% hit.",
+        "sector_shocks": {},
+        "country_shocks": {"China": -0.25, "Hong Kong": -0.20},
+    },
+    {
+        "name": "Risk-On Rally",
+        "description": "Growth and cyclicals rip; defensives lag.",
+        "sector_shocks": {"Technology": +0.12, "Consumer Cyclical": +0.10,
+                          "Financial Services": +0.06, "Communication Services": +0.08,
+                          "Healthcare": +0.02, "Consumer Defensive": +0.01,
+                          "Utilities": -0.01},
+        "country_shocks": {},
+    },
+]
+
+
+def factor_stress(holdings: List[dict], current_nav: float) -> List[dict]:
+    """
+    Apply pre-defined factor scenarios to current holdings.
+
+    Each position is shocked by its sector AND country shock (additively when
+    both apply). Cash is untouched.
+    """
+    if not holdings or current_nav <= 0:
+        return []
+    equity = sum(h.get("market_value", 0) for h in holdings)
+    out = []
+    for scen in FACTOR_SCENARIOS:
+        ssh = scen["sector_shocks"]
+        csh = scen["country_shocks"]
+        pnl = 0.0
+        for h in holdings:
+            shock = ssh.get(h.get("sector"), 0.0) + csh.get(h.get("country"), 0.0)
+            pnl += h.get("market_value", 0) * shock
+        impact_pct = pnl / current_nav  # impact as fraction of NAV (cash unchanged)
+        out.append({
+            "scenario": scen["name"],
+            "description": scen["description"],
+            "shocks": {**{f"sector:{k}": v for k, v in ssh.items()},
+                       **{f"country:{k}": v for k, v in csh.items()}},
+            "pnl": float(pnl),
+            "stressed_nav": float(current_nav + pnl),
+            "portfolio_impact": float(impact_pct),
+            "equity_at_risk_pct": float(equity / current_nav) if current_nav else 0.0,
+        })
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Correlation tail risk: portfolio volatility under normal correlation vs.
+# stressed correlation where every cross-correlation collapses to 1
+# (the "diversification fails when you need it most" scenario).
+# ---------------------------------------------------------------------------
+
+def correlation_tail_stress(holdings: List[dict],
+                            closes: Dict[str, pd.Series],
+                            current_nav: float,
+                            lookback: int = 252) -> dict:
+    if not holdings or current_nav <= 0:
+        return {}
+    weights = {}
+    for h in holdings:
+        weights[h["ticker"]] = h.get("market_value", 0) / current_nav
+    tickers = [t for t in weights if t in closes and not closes[t].empty]
+    if len(tickers) < 2:
+        return {}
+    rets_df = pd.DataFrame({t: np.log(closes[t] / closes[t].shift(1)) for t in tickers}).dropna().tail(lookback)
+    if rets_df.empty:
+        return {}
+    w = np.array([weights[t] for t in tickers])
+    vols = rets_df.std().values * math.sqrt(252)
+    corr = rets_df.corr().values
+    # Portfolio annual vol under current correlation
+    cov = np.outer(vols, vols) * corr
+    port_vol_current = float(math.sqrt(max(w @ cov @ w, 0.0)))
+    # Stressed: all off-diagonal correlations forced to 1.0
+    corr_stressed = np.ones_like(corr)
+    cov_stressed = np.outer(vols, vols) * corr_stressed
+    port_vol_stressed = float(math.sqrt(max(w @ cov_stressed @ w, 0.0)))
+    # 3-sigma shock under each regime, expressed as dollar P&L on NAV
+    equity_share = sum(weights.values())
+    pnl_3sigma_current = -current_nav * equity_share * port_vol_current / math.sqrt(252) * 3
+    pnl_3sigma_stressed = -current_nav * equity_share * port_vol_stressed / math.sqrt(252) * 3
+    return {
+        "current_correlation_avg": float(np.mean(corr[np.triu_indices_from(corr, k=1)])) if len(tickers) > 1 else 0.0,
+        "port_vol_annual_current": port_vol_current,
+        "port_vol_annual_stressed_corr1": port_vol_stressed,
+        "vol_expansion_pct": float((port_vol_stressed - port_vol_current) / port_vol_current) if port_vol_current > 0 else 0.0,
+        "pnl_3sigma_1d_current": float(pnl_3sigma_current),
+        "pnl_3sigma_1d_stressed": float(pnl_3sigma_stressed),
+        "n_positions": len(tickers),
+        "method": "Portfolio variance recomputed with all cross-correlations forced "
+                  "to 1.0, holding individual vols constant. 3σ 1-day P&L uses "
+                  "stressed annualized vol / √252.",
+    }
+
+
+# ---------------------------------------------------------------------------
+# Liquidity: days to exit each position at 10% participation of ADV.
+# ---------------------------------------------------------------------------
+
+PARTICIPATION_RATE = 0.10  # max % of daily volume we'd take without moving the market
+
+
+def liquidity_stress(holdings: List[dict],
+                     histories: Dict[str, 'PriceHistory']) -> List[dict]:
+    out = []
+    for h in holdings:
+        tk = h["ticker"]
+        ph = histories.get(tk)
+        if ph is None or ph.df.empty:
+            continue
+        vol20 = float(ph.df["Volume"].tail(20).mean()) if "Volume" in ph.df.columns else 0.0
+        last = float(ph.df["Close"].iloc[-1]) if not ph.df.empty else 0.0
+        adv_dollar = vol20 * last
+        if adv_dollar <= 0:
+            continue
+        share_capacity = vol20 * PARTICIPATION_RATE
+        days_to_exit = h["shares"] / share_capacity if share_capacity > 0 else float("inf")
+        # Classification matches mispriced-style tags.
+        if days_to_exit < 0.25:
+            tag = "DEEP"
+        elif days_to_exit < 1.0:
+            tag = "LIQUID"
+        elif days_to_exit < 3.0:
+            tag = "OK"
+        elif days_to_exit < 10.0:
+            tag = "THIN"
+        else:
+            tag = "ILLIQUID"
+        out.append({
+            "ticker": tk,
+            "shares": float(h["shares"]),
+            "position_value": float(h.get("market_value", 0)),
+            "avg_daily_volume_20d": float(vol20),
+            "avg_daily_dollar_volume": float(adv_dollar),
+            "days_to_exit": float(days_to_exit),
+            "liquidity_tag": tag,
+        })
+    out.sort(key=lambda r: -r["days_to_exit"])
+    return out
+
+
+# ---------------------------------------------------------------------------
+# Drawdown curve from NAV.
+# ---------------------------------------------------------------------------
+
+def drawdown_curve(nav: pd.Series) -> pd.Series:
+    if nav is None or nav.empty:
+        return pd.Series(dtype=float)
+    cummax = nav.cummax()
+    return (nav - cummax) / cummax
+
+
+# ---------------------------------------------------------------------------
 # Portfolio metrics
 # ---------------------------------------------------------------------------
 

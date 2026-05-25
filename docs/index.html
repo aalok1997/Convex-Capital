@@ -104,6 +104,23 @@
   .session-line { font-family: var(--mono); color: var(--muted); font-size: 11px;
     text-align: center; }
   .session-line .green { color: var(--accent); }
+  /* Tab strip used inside panels (e.g. Stress Tests, Fundamentals) */
+  .tabs { display: flex; gap: 4px; margin-bottom: 12px; border-bottom: 1px solid var(--border); }
+  .tab { background: transparent; border: none; color: var(--muted); padding: 6px 10px;
+    font-family: var(--mono); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+    cursor: pointer; border-bottom: 2px solid transparent; }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; }
+  .tab-pane.active { display: block; }
+  .liq-LIQUID, .liq-DEEP { background: #14532d; color: #86efac; }
+  .liq-OK { background: #1e293b; color: #94a3b8; }
+  .liq-THIN { background: #78350f; color: #fde68a; }
+  .liq-ILLIQUID { background: #7f1d1d; color: #fecaca; }
+  .mc-bar { height: 10px; background: linear-gradient(90deg, var(--danger) 0%, var(--warn) 50%, var(--accent) 100%);
+    border-radius: 4px; position: relative; margin: 6px 0 14px 0; }
+  .mc-marker { position: absolute; top: -3px; width: 2px; height: 16px; background: var(--text); }
+  .chart-wrap-xs { position: relative; height: 120px; }
 </style>
 </head>
 <body>
@@ -122,11 +139,13 @@
   <!-- Top summary strip -->
   <div class="summary-strip" id="summary-strip"></div>
 
-  <!-- NAV curve -->
+  <!-- NAV curve + Drawdown -->
   <div class="panel" style="margin-bottom: 16px;">
     <h2>Portfolio Performance vs Benchmarks</h2>
     <div class="chart-wrap"><canvas id="navChart"></canvas></div>
     <div class="legend" id="navLegend" style="margin-top: 8px;"></div>
+    <h2 style="margin-top: 20px;">Drawdown</h2>
+    <div class="chart-wrap-xs"><canvas id="ddChart"></canvas></div>
   </div>
 
   <!-- Exposure row -->
@@ -161,16 +180,27 @@
     </div>
   </div>
 
-  <!-- Stress + Risk metrics -->
-  <div class="grid grid-2" style="margin-bottom: 16px;">
-    <div class="panel">
-      <h2>Risk Metrics</h2>
-      <div id="risk-metrics"></div>
+  <!-- Risk metrics -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Risk Metrics</h2>
+    <div id="risk-metrics"></div>
+  </div>
+
+  <!-- Stress test suite (tabs) -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Stress Tests</h2>
+    <div class="tabs" id="stress-tabs">
+      <button class="tab active" data-tab="historical">Historical</button>
+      <button class="tab" data-tab="montecarlo">Monte Carlo</button>
+      <button class="tab" data-tab="factor">Factor Stress</button>
+      <button class="tab" data-tab="corrtail">Correlation Tail</button>
+      <button class="tab" data-tab="liquidity">Liquidity</button>
     </div>
-    <div class="panel">
-      <h2>Historical Stress Tests</h2>
-      <div id="stress-table"></div>
-    </div>
+    <div class="tab-pane active" data-pane="historical"><div id="stress-table"></div></div>
+    <div class="tab-pane" data-pane="montecarlo"><div id="montecarlo-panel"></div></div>
+    <div class="tab-pane" data-pane="factor"><div id="factor-panel"></div></div>
+    <div class="tab-pane" data-pane="corrtail"><div id="corrtail-panel"></div></div>
+    <div class="tab-pane" data-pane="liquidity"><div id="liquidity-panel"></div></div>
   </div>
 
   <!-- Correlation matrix -->
@@ -198,10 +228,15 @@
     </div>
   </div>
 
-  <!-- Fundamentals -->
+  <!-- Fundamentals (tabs) -->
   <div class="panel" style="margin-bottom: 16px;">
     <h2>Fundamentals</h2>
-    <div id="fundamentals"></div>
+    <div class="tabs" id="fund-tabs">
+      <button class="tab active" data-tab="valuation">Valuation</button>
+      <button class="tab" data-tab="profitability">Profitability</button>
+    </div>
+    <div class="tab-pane active" data-pane="valuation"><div id="fund-valuation"></div></div>
+    <div class="tab-pane" data-pane="profitability"><div id="fund-profitability"></div></div>
   </div>
 
   <div class="footer">
@@ -251,6 +286,7 @@ async function load() {
 
   renderSummary(d);
   renderNav(d);
+  renderDrawdown(d.drawdown_curve);
   renderDonut("sectorChart", d.sector_exposure);
   renderDonut("geoChart", d.geographic_exposure);
   renderHoldings(d.holdings);
@@ -258,11 +294,31 @@ async function load() {
   renderVol(d.volatility);
   renderRiskMetrics(d.metrics, d.summary);
   renderStress(d.stress_tests);
+  renderMonteCarlo(d.monte_carlo);
+  renderFactor(d.factor_stress);
+  renderCorrTail(d.correlation_tail_risk);
+  renderLiquidity(d.liquidity);
   renderCorrelation(d.correlation);
   renderBlotter(d.trade_blotter);
   renderNews(d.news);
   renderIncome(d.income);
-  renderFundamentals(d.fundamentals);
+  renderValuation(d.fundamentals);
+  renderProfitability(d.fundamentals);
+  wireTabs();
+}
+
+function wireTabs() {
+  document.querySelectorAll(".tabs").forEach(group => {
+    group.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const tab = btn.dataset.tab;
+        const panel = group.parentElement;
+        group.querySelectorAll(".tab").forEach(b => b.classList.toggle("active", b === btn));
+        panel.querySelectorAll(":scope > .tab-pane").forEach(p =>
+          p.classList.toggle("active", p.dataset.pane === tab));
+      });
+    });
+  });
 }
 
 function renderSummary(d) {
@@ -585,16 +641,17 @@ function renderIncome(inc) {
   document.getElementById("income-table").innerHTML = html;
 }
 
-function renderFundamentals(rows) {
+function renderValuation(rows) {
   if (!rows || rows.length === 0) {
-    document.getElementById("fundamentals").innerHTML =
+    document.getElementById("fund-valuation").innerHTML =
       `<div class="empty">No tickers to analyze</div>`;
     return;
   }
   const fmtBn = n => n == null ? "—" : "$" + (n/1e9).toFixed(1) + "B";
   const html = `<table>
     <thead><tr><th>Ticker</th><th class="num">Mkt Cap</th>
-    <th class="num">P/E</th><th class="num">Fwd P/E</th><th class="num">P/S</th></tr></thead>
+    <th class="num">P/E</th><th class="num">Fwd P/E</th>
+    <th class="num">P/S</th><th class="num">P/B</th><th class="num">EV/EBITDA</th></tr></thead>
     <tbody>${rows.map(r => `
       <tr>
         <td><span class="ticker-tag">${r.ticker}</span></td>
@@ -602,9 +659,216 @@ function renderFundamentals(rows) {
         <td class="num">${fmtNum(r.trailing_pe, 1)}</td>
         <td class="num">${fmtNum(r.forward_pe, 1)}</td>
         <td class="num">${fmtNum(r.price_to_sales, 2)}</td>
+        <td class="num">${fmtNum(r.price_to_book, 2)}</td>
+        <td class="num">${fmtNum(r.ev_to_ebitda, 1)}</td>
       </tr>`).join("")}
     </tbody></table>`;
-  document.getElementById("fundamentals").innerHTML = html;
+  document.getElementById("fund-valuation").innerHTML = html;
+}
+
+function renderProfitability(rows) {
+  if (!rows || rows.length === 0) {
+    document.getElementById("fund-profitability").innerHTML =
+      `<div class="empty">No tickers to analyze</div>`;
+    return;
+  }
+  const pct = n => n == null ? "—" : (n*100).toFixed(1) + "%";
+  const html = `<table>
+    <thead><tr><th>Ticker</th>
+    <th class="num">Profit Margin</th><th class="num">Op Margin</th>
+    <th class="num">ROE</th><th class="num">ROA</th>
+    <th class="num">Rev Growth</th><th class="num">EPS Growth</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="num ${(r.profit_margin??0)>=0?"pos":"neg"}">${pct(r.profit_margin)}</td>
+        <td class="num ${(r.operating_margin??0)>=0?"pos":"neg"}">${pct(r.operating_margin)}</td>
+        <td class="num ${(r.return_on_equity??0)>=0?"pos":"neg"}">${pct(r.return_on_equity)}</td>
+        <td class="num ${(r.return_on_assets??0)>=0?"pos":"neg"}">${pct(r.return_on_assets)}</td>
+        <td class="num ${(r.revenue_growth??0)>=0?"pos":"neg"}">${pct(r.revenue_growth)}</td>
+        <td class="num ${(r.earnings_growth??0)>=0?"pos":"neg"}">${pct(r.earnings_growth)}</td>
+      </tr>`).join("")}
+    </tbody></table>`;
+  document.getElementById("fund-profitability").innerHTML = html;
+}
+
+function renderDrawdown(curve) {
+  const canvas = document.getElementById("ddChart");
+  if (!canvas) return;
+  if (!curve || curve.length === 0) {
+    canvas.parentElement.innerHTML = `<div class="empty">No drawdown history yet</div>`;
+    return;
+  }
+  const data = curve.map(p => ({x: p.date, y: p.value * 100}));
+  new Chart(canvas, {
+    type: "line",
+    data: {datasets: [{
+      label: "Drawdown",
+      data,
+      borderColor: "#f87171",
+      backgroundColor: "rgba(248,113,113,0.25)",
+      borderWidth: 1.5,
+      fill: true,
+      tension: 0.1,
+      pointRadius: 0,
+    }]},
+    options: {
+      maintainAspectRatio: false,
+      interaction: {mode: "index", intersect: false},
+      scales: {
+        x: {type: "time", time: {unit: "month"}, grid: {color: "#1f2632"},
+            ticks: {color: "#7f8aa3"}},
+        y: {grid: {color: "#1f2632"}, ticks: {color: "#7f8aa3",
+            callback: v => v.toFixed(0) + "%"}, max: 0},
+      },
+      plugins: {
+        legend: {display: false},
+        tooltip: {callbacks: {label: ctx => `DD: ${ctx.parsed.y.toFixed(2)}%`}}
+      }
+    }
+  });
+}
+
+function renderMonteCarlo(mc) {
+  const el = document.getElementById("montecarlo-panel");
+  if (!mc || !mc.terminal_return) {
+    el.innerHTML = `<div class="empty">Need at least 30 days of NAV history to run Monte Carlo</div>`;
+    return;
+  }
+  const tr = mc.terminal_return, tn = mc.terminal_nav, dd = mc.max_drawdown;
+  el.innerHTML = `
+    <div class="grid grid-3" style="margin-bottom: 16px;">
+      <div class="summary-card">
+        <div class="label">Median Terminal NAV (${mc.horizon_days}d)</div>
+        <div class="value">${fmtMoney(tn.p50)}</div>
+        <div class="muted" style="font-size:10px; margin-top:4px;">${fmtPct(tr.p50)} from today</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">5th Percentile (worst case)</div>
+        <div class="value neg">${fmtMoney(tn.p5)}</div>
+        <div class="muted" style="font-size:10px; margin-top:4px;">${fmtPct(tr.p5)} · 1-in-20 outcome</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">95th Percentile (best case)</div>
+        <div class="value pos">${fmtMoney(tn.p95)}</div>
+        <div class="muted" style="font-size:10px; margin-top:4px;">${fmtPct(tr.p95)} · 1-in-20 outcome</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>Outcome</th>
+        <th class="num">P5</th><th class="num">P25</th>
+        <th class="num">P50</th><th class="num">P75</th><th class="num">P95</th></tr></thead>
+      <tbody>
+        <tr>
+          <td>Terminal return (${mc.horizon_days}d)</td>
+          <td class="num neg">${fmtPct(tr.p5)}</td>
+          <td class="num ${tr.p25>=0?"pos":"neg"}">${fmtPct(tr.p25)}</td>
+          <td class="num ${tr.p50>=0?"pos":"neg"}">${fmtPct(tr.p50)}</td>
+          <td class="num pos">${fmtPct(tr.p75)}</td>
+          <td class="num pos">${fmtPct(tr.p95)}</td>
+        </tr>
+        <tr>
+          <td>Max drawdown (in path)</td>
+          <td class="num neg">${fmtPct(dd.p5)}</td><td class="num">—</td>
+          <td class="num neg">${fmtPct(dd.p50)}</td><td class="num">—</td>
+          <td class="num neg">${fmtPct(dd.p95)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="muted" style="margin-top: 12px; font-size: 11px;">
+      Probability of negative return over ${mc.horizon_days}d:
+      <span class="${tr.prob_negative>=0.5?"neg":"pos"}">${fmtPct(tr.prob_negative, 1)}</span>
+    </div>
+    <div class="muted" style="margin-top: 6px; font-size: 10px;">Method: ${mc.method}</div>`;
+}
+
+function renderFactor(rows) {
+  const el = document.getElementById("factor-panel");
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<div class="empty">Need open positions to compute factor stress</div>`;
+    return;
+  }
+  const html = `<table>
+    <thead><tr><th>Scenario</th><th>Shocks Applied</th>
+      <th class="num">Impact</th><th class="num">Stressed NAV</th><th class="num">P&amp;L</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td><strong>${r.scenario}</strong>
+            <div class="muted" style="font-size:10px; margin-top:2px;">${escape(r.description || "")}</div></td>
+        <td class="muted" style="font-size:10px;">
+          ${Object.entries(r.shocks).map(([k,v]) =>
+            `${k.replace(/^sector:|^country:/,"")}: ${(v>=0?"+":"")+(v*100).toFixed(0)}%`).join(" · ") || "—"}
+        </td>
+        <td class="num ${r.portfolio_impact>=0?"pos":"neg"}">${(r.portfolio_impact>=0?"+":"")}${fmtPct(r.portfolio_impact)}</td>
+        <td class="num">${fmtMoney(r.stressed_nav)}</td>
+        <td class="num ${r.pnl>=0?"pos":"neg"}">${(r.pnl>=0?"+":"")}${fmtMoney(r.pnl)}</td>
+      </tr>`).join("")}
+    </tbody></table>
+    <div class="muted" style="margin-top: 8px; font-size: 10px;">
+      Method: each position is shocked by its sector AND country shock (additively). Cash is untouched.
+    </div>`;
+  el.innerHTML = html;
+}
+
+function renderCorrTail(c) {
+  const el = document.getElementById("corrtail-panel");
+  if (!c || !c.port_vol_annual_current) {
+    el.innerHTML = `<div class="empty">Need at least 2 positions to compute correlation tail risk</div>`;
+    return;
+  }
+  el.innerHTML = `
+    <div class="grid grid-3" style="margin-bottom: 16px;">
+      <div class="summary-card">
+        <div class="label">Avg Cross-Correlation</div>
+        <div class="value">${c.current_correlation_avg.toFixed(2)}</div>
+        <div class="muted" style="font-size:10px; margin-top:4px;">across ${c.n_positions} positions</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Portfolio Vol (current corr)</div>
+        <div class="value">${(c.port_vol_annual_current*100).toFixed(1)}%</div>
+        <div class="muted" style="font-size:10px; margin-top:4px;">annualized</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">Portfolio Vol (corr → 1)</div>
+        <div class="value neg">${(c.port_vol_annual_stressed_corr1*100).toFixed(1)}%</div>
+        <div class="muted" style="font-size:10px; margin-top:4px;">+${(c.vol_expansion_pct*100).toFixed(0)}% expansion</div>
+      </div>
+    </div>
+    <table>
+      <thead><tr><th>1-day 3σ Tail P&amp;L</th><th class="num">Current Regime</th><th class="num">Stressed (corr=1)</th></tr></thead>
+      <tbody><tr>
+        <td>Estimated worst-case 1-day loss</td>
+        <td class="num neg">${fmtMoney(c.pnl_3sigma_1d_current)}</td>
+        <td class="num neg">${fmtMoney(c.pnl_3sigma_1d_stressed)}</td>
+      </tr></tbody>
+    </table>
+    <div class="muted" style="margin-top: 10px; font-size: 10px;">Method: ${c.method}</div>`;
+}
+
+function renderLiquidity(rows) {
+  const el = document.getElementById("liquidity-panel");
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<div class="empty">No open positions</div>`;
+    return;
+  }
+  const fmtBn = n => n == null ? "—" : "$" + (n/1e6).toFixed(1) + "M";
+  el.innerHTML = `<table>
+    <thead><tr><th>Ticker</th><th class="num">Shares</th><th class="num">Position $</th>
+      <th class="num">Avg Daily $Vol (20d)</th><th class="num">Days to Exit</th><th>Tag</th></tr></thead>
+    <tbody>${rows.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="num">${r.shares.toLocaleString()}</td>
+        <td class="num">${fmtMoney(r.position_value)}</td>
+        <td class="num">${fmtBn(r.avg_daily_dollar_volume)}</td>
+        <td class="num">${r.days_to_exit < 0.01 ? "<0.01" : r.days_to_exit.toFixed(2)}</td>
+        <td><span class="pill liq-${r.liquidity_tag}">${r.liquidity_tag}</span></td>
+      </tr>`).join("")}
+    </tbody></table>
+    <div class="muted" style="margin-top: 8px; font-size: 10px;">
+      Method: days to exit = position shares / (20-day avg volume × 10% participation rate).
+      LIQUID &lt;1d · OK &lt;3d · THIN &lt;10d · ILLIQUID ≥10d.
+    </div>`;
 }
 
 function escape(s) {

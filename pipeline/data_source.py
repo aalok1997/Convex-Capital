@@ -35,10 +35,19 @@ class TickerInfo:
     trailing_pe: Optional[float]
     forward_pe: Optional[float]
     price_to_sales: Optional[float]
-    dividend_rate: Optional[float]
-    dividend_yield: Optional[float]
-    ex_dividend_date: Optional[str]
-    last_dividend_amount: Optional[float]
+    ev_to_ebitda: Optional[float] = None
+    price_to_book: Optional[float] = None
+    profit_margin: Optional[float] = None
+    operating_margin: Optional[float] = None
+    return_on_equity: Optional[float] = None
+    return_on_assets: Optional[float] = None
+    revenue_growth: Optional[float] = None
+    earnings_growth: Optional[float] = None
+    avg_volume_20d: Optional[float] = None
+    dividend_rate: Optional[float] = None
+    dividend_yield: Optional[float] = None
+    ex_dividend_date: Optional[str] = None
+    last_dividend_amount: Optional[float] = None
 
 
 @dataclass
@@ -120,6 +129,15 @@ class YFinanceSource:
             trailing_pe=_safe_float(info.get("trailingPE")),
             forward_pe=_safe_float(info.get("forwardPE")),
             price_to_sales=_safe_float(info.get("priceToSalesTrailing12Months")),
+            ev_to_ebitda=_safe_float(info.get("enterpriseToEbitda")),
+            price_to_book=_safe_float(info.get("priceToBook")),
+            profit_margin=_safe_float(info.get("profitMargins")),
+            operating_margin=_safe_float(info.get("operatingMargins")),
+            return_on_equity=_safe_float(info.get("returnOnEquity")),
+            return_on_assets=_safe_float(info.get("returnOnAssets")),
+            revenue_growth=_safe_float(info.get("revenueGrowth")),
+            earnings_growth=_safe_float(info.get("earningsGrowth")),
+            avg_volume_20d=_safe_float(info.get("averageVolume10days") or info.get("averageVolume")),
             dividend_rate=_safe_float(info.get("dividendRate")),
             dividend_yield=_safe_float(info.get("dividendYield")),
             ex_dividend_date=ex_div,
@@ -238,6 +256,15 @@ class SampleSource:
             trailing_pe=float(rng.uniform(8, 60)),
             forward_pe=float(rng.uniform(7, 45)),
             price_to_sales=float(rng.uniform(0.5, 15)),
+            ev_to_ebitda=float(rng.uniform(5, 30)),
+            price_to_book=float(rng.uniform(0.8, 18)),
+            profit_margin=float(rng.uniform(0.02, 0.35)),
+            operating_margin=float(rng.uniform(0.05, 0.40)),
+            return_on_equity=float(rng.uniform(0.05, 0.45)),
+            return_on_assets=float(rng.uniform(0.02, 0.20)),
+            revenue_growth=float(rng.uniform(-0.10, 0.40)),
+            earnings_growth=float(rng.uniform(-0.20, 0.60)),
+            avg_volume_20d=float(rng.integers(1_000_000, 30_000_000)),
             dividend_rate=float(rng.uniform(0, 4)) if ticker not in ("BABA", "GOOGL") else 0.0,
             dividend_yield=float(rng.uniform(0, 0.04)),
             ex_dividend_date=(dt.date.today() + dt.timedelta(days=int(rng.integers(-90, 90)))).isoformat(),
