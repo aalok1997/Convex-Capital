@@ -42,7 +42,9 @@
   .grid-2 { grid-template-columns: 1fr 1fr; }
   .grid-3 { grid-template-columns: repeat(3, 1fr); }
   .grid-4 { grid-template-columns: repeat(4, 1fr); }
-  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+  /* Risk Metrics is compact; Correlation Matrix gets the rest */
+  .grid-risk-corr { grid-template-columns: minmax(280px, 1fr) 2fr; }
+  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4, .grid-risk-corr { grid-template-columns: 1fr; } }
   .panel { background: var(--panel); border: 1px solid var(--border); border-radius: 8px;
     padding: 16px; }
   .panel h2 { font-size: 11px; letter-spacing: 0.15em; color: var(--muted);
@@ -121,6 +123,10 @@
     border-radius: 4px; position: relative; margin: 6px 0 14px 0; }
   .mc-marker { position: absolute; top: -3px; width: 2px; height: 16px; background: var(--text); }
   .chart-wrap-xs { position: relative; height: 120px; }
+  .stale-banner { background: #78350f; color: #fde68a; border: 1px solid #b45309;
+    padding: 8px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 16px;
+    display: none; }
+  .stale-banner.show { display: block; }
 </style>
 </head>
 <body>
@@ -135,6 +141,8 @@
     </div>
     <div class="tagline" id="tagline"></div>
   </header>
+
+  <div class="stale-banner" id="stale-banner"></div>
 
   <!-- Top summary strip -->
   <div class="summary-strip" id="summary-strip"></div>
@@ -180,10 +188,16 @@
     </div>
   </div>
 
-  <!-- Risk metrics -->
-  <div class="panel" style="margin-bottom: 16px;">
-    <h2>Risk Metrics</h2>
-    <div id="risk-metrics"></div>
+  <!-- Risk metrics + Correlation matrix side by side -->
+  <div class="grid grid-risk-corr" style="margin-bottom: 16px;">
+    <div class="panel">
+      <h2>Risk Metrics</h2>
+      <div id="risk-metrics"></div>
+    </div>
+    <div class="panel">
+      <h2>Correlation Matrix &middot; 252-day log returns</h2>
+      <div id="corr-matrix"></div>
+    </div>
   </div>
 
   <!-- Stress test suite (tabs) -->
@@ -201,12 +215,6 @@
     <div class="tab-pane" data-pane="factor"><div id="factor-panel"></div></div>
     <div class="tab-pane" data-pane="corrtail"><div id="corrtail-panel"></div></div>
     <div class="tab-pane" data-pane="liquidity"><div id="liquidity-panel"></div></div>
-  </div>
-
-  <!-- Correlation matrix -->
-  <div class="panel" style="margin-bottom: 16px;">
-    <h2>Correlation Matrix &middot; 252-day log returns</h2>
-    <div id="corr-matrix"></div>
   </div>
 
   <!-- Trade blotter -->
@@ -283,13 +291,14 @@ async function load() {
     "Snapshot: " + (d.generated_at || "");
   document.getElementById("footer-date").textContent =
     (d.generated_at || "").slice(0, 10);
+  renderStaleBanner(d.generated_at);
 
   renderSummary(d);
   renderNav(d);
   renderDrawdown(d.drawdown_curve);
   renderDonut("sectorChart", d.sector_exposure);
   renderDonut("geoChart", d.geographic_exposure);
-  renderHoldings(d.holdings);
+  renderHoldings(d.holdings, d.summary);
   renderSignals(d.signals);
   renderVol(d.volatility);
   renderRiskMetrics(d.metrics, d.summary);
@@ -305,6 +314,20 @@ async function load() {
   renderValuation(d.fundamentals);
   renderProfitability(d.fundamentals);
   wireTabs();
+}
+
+function renderStaleBanner(generatedAt) {
+  if (!generatedAt) return;
+  const banner = document.getElementById("stale-banner");
+  const gen = new Date(generatedAt);
+  if (isNaN(gen.getTime())) return;
+  const ageMs = Date.now() - gen.getTime();
+  const ageDays = Math.floor(ageMs / 86_400_000);
+  if (ageDays >= 1) {
+    banner.textContent =
+      `⚠ Data is ${ageDays} day${ageDays === 1 ? "" : "s"} old. Last update: ${generatedAt.slice(0,10)}.`;
+    banner.classList.add("show");
+  }
 }
 
 function wireTabs() {
@@ -413,19 +436,25 @@ function renderDonut(id, items) {
   });
 }
 
-function renderHoldings(rows) {
+function renderHoldings(rows, summary) {
   if (!rows || rows.length === 0) {
     document.getElementById("holdings-table").innerHTML =
       `<div class="empty">No open positions yet. Add a BUY row to trades.csv to populate.</div>`;
     return;
   }
+  const nav = (summary && summary.nav) || rows.reduce((a, h) => a + h.market_value, 0);
   const html = `<table>
     <thead><tr>
       <th>Ticker</th><th>Company</th><th>Sector</th>
       <th class="num">Shares</th><th class="num">Price</th>
-      <th class="num">Mkt Value</th><th class="num">Unrealized P&amp;L</th>
+      <th class="num">Mkt Value</th><th class="num">P&amp;L</th>
+      <th class="num">P&amp;L %</th><th class="num">Weight</th>
     </tr></thead>
-    <tbody>${rows.map(h => `
+    <tbody>${rows.map(h => {
+      const cost = (h.cost_basis || 0) * h.shares;
+      const pnlPct = cost > 0 ? h.unrealized_pnl / cost : 0;
+      const weight = nav > 0 ? h.market_value / nav : 0;
+      return `
       <tr>
         <td><span class="ticker-tag">${h.ticker}</span></td>
         <td>${h.company || ""}</td>
@@ -434,7 +463,10 @@ function renderHoldings(rows) {
         <td class="num">${fmtMoney(h.price, {decimals: 2})}</td>
         <td class="num">${fmtMoney(h.market_value)}</td>
         <td class="num ${pnlClass(h.unrealized_pnl)}">${(h.unrealized_pnl >= 0 ? "+" : "")}${fmtMoney(h.unrealized_pnl)}</td>
-      </tr>`).join("")}
+        <td class="num ${pnlClass(pnlPct)}">${(pnlPct >= 0 ? "+" : "")}${fmtPct(pnlPct)}</td>
+        <td class="num">${fmtPct(weight)}</td>
+      </tr>`;
+    }).join("")}
     </tbody>
   </table>`;
   document.getElementById("holdings-table").innerHTML = html;
@@ -456,15 +488,31 @@ function renderSignals(rows) {
     `NEUTRAL: ${neutral} &middot; ` +
     `<span class="neg">▼ BEARISH: ${bear}</span> &middot; ` +
     `AVG SCORE: ${avg >= 0 ? "+" : ""}${avg.toFixed(2)}`;
+  const subArrow = v => {
+    if (v == null || v === 0) return `<span class="muted">·</span>`;
+    return v > 0 ? `<span class="pos">▲</span>` : `<span class="neg">▼</span>`;
+  };
   const html = `<table>
-    <thead><tr><th>Ticker</th><th>Signal</th><th class="num">Composite</th><th class="num">RSI</th></tr></thead>
-    <tbody>${sorted.map(r => `
+    <thead><tr>
+      <th>Ticker</th><th>Signal</th><th class="num">Composite</th><th class="num">RSI</th>
+      <th class="num">MACD</th><th class="num">Trend</th><th class="num">BB</th>
+      <th class="num">Vol</th><th class="num">Range</th>
+    </tr></thead>
+    <tbody>${sorted.map(r => {
+      const s = r.subs || {};
+      return `
       <tr>
         <td><span class="ticker-tag">${r.ticker}</span></td>
         <td><span class="${signalPillClass(r.label)}">${r.label}</span></td>
         <td class="num ${r.composite>=0?"pos":"neg"}">${r.composite >= 0 ? "+" : ""}${r.composite.toFixed(2)}</td>
         <td class="num">${r.rsi != null ? r.rsi.toFixed(1) : "—"}</td>
-      </tr>`).join("")}
+        <td class="num">${subArrow(s.macd)}</td>
+        <td class="num">${subArrow(s.trend)}</td>
+        <td class="num">${subArrow(s.bb)}</td>
+        <td class="num">${subArrow(s.vol)}</td>
+        <td class="num">${subArrow(s.range)}</td>
+      </tr>`;
+    }).join("")}
     </tbody></table>`;
   document.getElementById("signals-table").innerHTML = html;
 }
