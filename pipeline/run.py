@@ -115,9 +115,13 @@ def main(argv=None):
 
     nav_now = state.cash + total_equity
 
-    # Sector / Geographic exposure as % of equity (excluding cash)
-    sector_exposure = _pct_breakdown(sector_value, total_equity)
-    geo_exposure = _pct_breakdown(geo_value, total_equity)
+    # Sector / Geographic exposure as % of NAV (cash counted as its own slice
+    # so the pies always sum to 100% of total portfolio value).
+    if state.cash > 0:
+        sector_value["Cash"] += state.cash
+        geo_value["Cash"] += state.cash
+    sector_exposure = _pct_breakdown(sector_value, nav_now)
+    geo_exposure = _pct_breakdown(geo_value, nav_now)
 
     # Per-ticker signals + vol panels
     signals_panel = []

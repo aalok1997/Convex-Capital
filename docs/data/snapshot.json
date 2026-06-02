@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-02T04:12:23.205968Z",
+  "generated_at": "2026-06-02T04:16:14.210196Z",
   "fund_name": "Convex Capital",
   "tagline": "Lose small. Win big. \u2014 Paper-traded portfolio. Hypothetical performance for educational purposes only.",
   "summary": {
@@ -12,7 +12,7 @@
     "open_positions": 14
   },
   "metrics": {
-    "beta_spy": 1.573765840315654
+    "beta_spy": 1.5737661386977237
   },
   "nav_curve": [
     {
@@ -200,54 +200,64 @@
     {
       "name": "Technology",
       "value": 437644.52466487885,
-      "pct": 0.4999416074603597
+      "pct": 0.4376445238027085
     },
     {
       "name": "Communication Services",
       "value": 137494.60889053345,
-      "pct": 0.15706645899089688
+      "pct": 0.13749460861966575
+    },
+    {
+      "name": "Cash",
+      "value": 124608.7200000001,
+      "pct": 0.12460871975451791
     },
     {
       "name": "Consumer Cyclical",
       "value": 112502.4801940918,
-      "pct": 0.12851679301730148
+      "pct": 0.11250247997245919
     },
     {
       "name": "Industrials",
       "value": 100195.0491027832,
-      "pct": 0.114457444535316
+      "pct": 0.10019504890539653
     },
     {
       "name": "Utilities",
       "value": 50046.92025756836,
-      "pct": 0.057170914639383064
+      "pct": 0.05004692015897472
     },
     {
       "name": "Financial Services",
       "value": 37507.69886016846,
-      "pct": 0.04284678135674286
+      "pct": 0.03750769878627738
     }
   ],
   "geographic_exposure": [
     {
       "name": "United States",
       "value": 650363.3635597229,
-      "pct": 0.7429401879535661
+      "pct": 0.6503633622784913
+    },
+    {
+      "name": "Cash",
+      "value": 124608.7200000001,
+      "pct": 0.12460871975451791
     },
     {
       "name": "Kazakhstan",
       "value": 112532.15771484375,
-      "pct": 0.1285506950235965
+      "pct": 0.11253215749315268
     },
     {
       "name": "China",
       "value": 75001.16023921967,
-      "pct": 0.08567729857948016
+      "pct": 0.07500116009146557
     },
     {
       "name": "Hong Kong",
       "value": 37494.60045623779,
-      "pct": 0.04283181844335721
+      "pct": 0.037494600382372525
     }
   ],
   "signals": [
@@ -468,16 +478,16 @@
     {
       "ticker": "CEG",
       "hv20": 0.5721449721653423,
-      "garch": 0.5866341434971241,
-      "expansion": 0.025324300722150816,
+      "garch": 0.5866381122461546,
+      "expansion": 0.025331237336511866,
       "regime": "EXTREME",
       "signal": "WEAK"
     },
     {
       "ticker": "CMI",
       "hv20": 0.45557244356433735,
-      "garch": 0.32561375641765583,
-      "expansion": -0.2852645917955491,
+      "garch": 0.3256136406254028,
+      "expansion": -0.2852648459642431,
       "regime": "HIGH",
       "signal": "WEAK"
     },
@@ -500,16 +510,16 @@
     {
       "ticker": "JAKK",
       "hv20": 0.30118730331886995,
-      "garch": 0.4658011575666862,
-      "expansion": 0.546549779601891,
+      "garch": 0.4658014397542476,
+      "expansion": 0.5465507165190793,
       "regime": "NORMAL",
       "signal": "SIGNAL"
     },
     {
       "ticker": "KSPI",
       "hv20": 0.23664842992146307,
-      "garch": 0.3312165010378453,
-      "expansion": 0.3996141920221769,
+      "garch": 0.331216387659406,
+      "expansion": 0.39961371292143094,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
@@ -540,8 +550,8 @@
     {
       "ticker": "VST",
       "hv20": 0.5180903069007724,
-      "garch": 0.5800618888897654,
-      "expansion": 0.11961540519780878,
+      "garch": 0.580061950949969,
+      "expansion": 0.11961552498426843,
       "regime": "HIGH",
       "signal": "BASE"
     },
@@ -810,49 +820,49 @@
     {
       "scenario": "COVID Crash (Feb-Mar 2020)",
       "market_move": -0.339,
-      "portfolio_impact": -0.5335066198670068,
-      "stressed_nav": 466493.3810519965,
-      "pnl": -533506.6209180277,
+      "portfolio_impact": -0.5335067210185284,
+      "stressed_nav": 466493.2799004747,
+      "pnl": -533506.7220695495,
       "description": "Rapid 33.9% selloff in SPY over 23 trading days as COVID-19 spread."
     },
     {
       "scenario": "2022 Rate Shock (Jan-Oct)",
       "market_move": -0.252,
-      "portfolio_impact": -0.3965889917595448,
-      "stressed_nav": 603411.0094291894,
-      "pnl": -396588.9925408348,
+      "portfolio_impact": -0.3965890669518264,
+      "stressed_nav": 603410.9342369077,
+      "pnl": -396589.06773311645,
       "description": "Grinding 9-month decline as the Fed hiked rates aggressively."
     },
     {
       "scenario": "GFC 2008-09",
       "market_move": -0.565,
-      "portfolio_impact": -0.8891776997783445,
-      "stressed_nav": 110822.30043997812,
-      "pnl": -889177.7015300461,
+      "portfolio_impact": -0.8891778683642139,
+      "stressed_nav": 110822.13185410842,
+      "pnl": -889177.8701159158,
       "description": "Credit crisis bear market; SPY drew down 56.5% from Oct 2007 peak."
     },
     {
       "scenario": "Dot-Com Bust (2000-02)",
       "market_move": -0.491,
-      "portfolio_impact": -0.7727190275949861,
-      "stressed_nav": 227280.9728527629,
-      "pnl": -772719.0291172613,
+      "portfolio_impact": -0.7727191741005823,
+      "stressed_nav": 227280.8263471664,
+      "pnl": -772719.1756228578,
       "description": "Tech bubble burst; SPY -49.1% peak-to-trough over 30 months."
     },
     {
       "scenario": "Black Monday (Oct 1987)",
       "market_move": -0.204,
-      "portfolio_impact": -0.3210482314243934,
-      "stressed_nav": 678951.769913158,
-      "pnl": -321048.23205686617,
+      "portfolio_impact": -0.3210482922943356,
+      "stressed_nav": 678951.7090432156,
+      "pnl": -321048.2929268086,
       "description": "Flash crash; -20.4% on a single trading day."
     },
     {
       "scenario": "Aug 2024 Yen Carry Unwind",
       "market_move": -0.084,
-      "portfolio_impact": -0.13219633058651495,
-      "stressed_nav": 867803.6711230793,
-      "pnl": -132196.33084694494,
+      "portfolio_impact": -0.1321963556506088,
+      "stressed_nav": 867803.6460589854,
+      "pnl": -132196.35591103882,
       "description": "Yen carry unwind shock; SPY -8.4% in one week."
     }
   ],
@@ -951,12 +961,12 @@
     }
   ],
   "correlation_tail_risk": {
-    "current_correlation_avg": 0.1731251235522555,
-    "port_vol_annual_current": 0.2550414934885376,
-    "port_vol_annual_stressed_corr1": 0.5063789855624071,
-    "vol_expansion_pct": 0.9854768674539833,
-    "pnl_3sigma_1d_current": -42192.381991232054,
-    "pnl_3sigma_1d_stressed": -83771.99842637329,
+    "current_correlation_avg": 0.17312513699759338,
+    "port_vol_annual_current": 0.2550414948517189,
+    "port_vol_annual_stressed_corr1": 0.5063789807774992,
+    "vol_expansion_pct": 0.9854768380804383,
+    "pnl_3sigma_1d_current": -42192.38221674778,
+    "pnl_3sigma_1d_stressed": -83771.99763478969,
     "n_positions": 14,
     "method": "Portfolio variance recomputed with all cross-correlations forced to 1.0, holding individual vols constant. 3\u03c3 1-day P&L uses stressed annualized vol / \u221a252."
   },
