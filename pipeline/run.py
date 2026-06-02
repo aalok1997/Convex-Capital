@@ -20,7 +20,8 @@ from typing import Dict, List
 import numpy as np
 import pandas as pd
 
-from .data_source import YFinanceSource, SampleSource, PriceHistory, TickerInfo, NewsItem
+from .data_source import (YFinanceSource, SampleSource, PriceHistory,
+                          TickerInfo, NewsItem)
 from .portfolio import (load_trades, replay, daily_nav_curve, benchmark_curves,
                         PortfolioState)
 from .signals import compute_signal
@@ -66,11 +67,19 @@ def main(argv=None):
     infos: Dict[str, TickerInfo] = {}
     news: Dict[str, List[NewsItem]] = {}
 
+    filings: Dict[str, List[NewsItem]] = {}
+    analyst: Dict[str, List[NewsItem]] = {}
+    earnings_dates: List[dict] = []
     for tk in tickers:
         print(f"  fetching {tk}...")
         histories[tk] = src.history(tk, period="2y")
         infos[tk] = src.info(tk)
-        news[tk] = src.news(tk, limit=5)
+        news[tk] = src.news(tk, limit=8)
+        filings[tk] = src.sec_filings(tk, since_days=120, limit=6)
+        analyst[tk] = src.analyst_actions(tk, since_days=90, limit=4)
+        nxt = src.next_earnings(tk)
+        if nxt:
+            earnings_dates.append(nxt)
 
     # Benchmarks
     bench_hist: Dict[str, PriceHistory] = {}
@@ -241,18 +250,34 @@ def main(argv=None):
             "value": float(t["shares"] * t["price"]),
         })
 
-    # News (flatten with ticker tag)
+    # Merged news feed: Yahoo headlines + SEC 8-K material events +
+    # analyst upgrades/downgrades. Each item carries category + priority so
+    # the UI can surface fundamental events (M&A, earnings, leadership)
+    # ahead of general headlines.
+    pri_rank = {"HIGH": 0, "MED": 1, "LOW": 2}
     news_flat = []
+    seen = set()  # dedupe by (ticker, title) — Yahoo sometimes reposts
     for tk in tickers:
-        for n in news.get(tk, []):
+        for n in (list(filings.get(tk, [])) + list(analyst.get(tk, [])) +
+                  list(news.get(tk, []))):
+            key = (n.ticker, (n.title or "").strip().lower())
+            if key in seen:
+                continue
+            seen.add(key)
             news_flat.append({
-                "ticker": tk,
+                "ticker": n.ticker,
                 "title": n.title,
                 "publisher": n.publisher,
                 "link": n.link,
                 "published": n.published,
+                "category": n.category,
+                "priority": n.priority,
+                "source": n.source,
             })
-    news_flat.sort(key=lambda n: n["published"], reverse=True)
+    news_flat.sort(key=lambda n: (pri_rank.get(n["priority"], 9),
+                                  -_published_to_epoch(n["published"])))
+
+    earnings_dates.sort(key=lambda r: r["earnings_date"])
 
     snapshot = {
         "generated_at": dt.datetime.utcnow().isoformat() + "Z",
@@ -291,7 +316,8 @@ def main(argv=None):
         },
         "fundamentals": fundamentals,
         "trade_blotter": blotter,
-        "news": news_flat[:50],
+        "news": news_flat[:80],
+        "upcoming_earnings": earnings_dates[:30],
     }
 
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
@@ -361,6 +387,17 @@ def _none_if_nan(x):
     if isinstance(x, float) and (math.isnan(x) or math.isinf(x)):
         return None
     return x
+
+
+def _published_to_epoch(s: str) -> float:
+    """Parse a published-timestamp (ISO or date-only) into a Unix epoch for
+    sorting; returns 0 if unparseable so undated items sink to the bottom."""
+    if not s:
+        return 0.0
+    try:
+        return pd.Timestamp(s).timestamp()
+    except Exception:
+        return 0.0
 
 
 def _default(o):

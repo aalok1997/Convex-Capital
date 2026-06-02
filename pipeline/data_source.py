@@ -13,12 +13,100 @@ from __future__ import annotations
 
 import datetime as dt
 import math
+import re
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 import numpy as np
 import pandas as pd
+
+
+# ---------------------------------------------------------------------------
+# News categorization
+#
+# The same shape is applied to every news source (Yahoo, SEC 8-K, analyst
+# actions, calendar). HIGH-priority items are surfaced first in the UI.
+# ---------------------------------------------------------------------------
+
+# (category, priority, regex)
+NEWS_KEYWORD_RULES: List[Tuple[str, str, "re.Pattern"]] = [
+    ("M_AND_A",            "HIGH", re.compile(r"\b(acquir(?:es|ed|ing|ition)|merger|merges?|merging|"
+                                              r"takeover|spin[- ]?off|"
+                                              r"divest(?:s|ed|iture)?|joint venture|"
+                                              r"strategic alliance|all[- ]cash deal|"
+                                              r"definitive agreement)\b", re.I)),
+    ("EARNINGS",           "HIGH", re.compile(r"\b(earnings (?:call|report|release|transcript|beat|miss|preview)|"
+                                              r"Q[1-4]\s*\d{2,4}?\s*(?:results|earnings|call|transcript)|"
+                                              r"quarterly results?|beats? (?:Q[1-4]|estimates)|"
+                                              r"misses? (?:Q[1-4]|estimates)|raises? guidance|cuts? guidance|"
+                                              r"lifts? guidance|lowers? guidance|"
+                                              r"reports? Q[1-4]|reports? (?:earnings|results)|"
+                                              r"EPS (?:beat|miss|of))\b", re.I)),
+    ("LEADERSHIP",         "HIGH", re.compile(r"\b(CEO|CFO|COO|chairman|chairperson|resigns?|"
+                                              r"steps? down|appoint(?:s|ed|ment)|hires?|"
+                                              r"new (?:chief|president))\b", re.I)),
+    ("REGULATORY",         "HIGH", re.compile(r"\b(FDA (?:approval|approves|grants|rejects)|"
+                                              r"phase\s*[123]|clinical trial|EU approval|"
+                                              r"DOJ probe|antitrust|investigation|"
+                                              r"recall|halt)\b", re.I)),
+    ("LEGAL",              "MED",  re.compile(r"\b(lawsuit|sued|settle(?:s|d|ment)?|"
+                                              r"SEC charges|fraud|class action|verdict)\b", re.I)),
+    ("ANALYST",            "MED",  re.compile(r"\b(upgrade[ds]?|downgrade[ds]?|"
+                                              r"reiterate[ds]?|initiate[ds]? coverage|"
+                                              r"price target|rating|buy rating|sell rating|"
+                                              r"outperform|underperform|overweight|underweight)\b", re.I)),
+    ("PRODUCT",            "MED",  re.compile(r"\b(launch(?:es|ed|ing)?|unveil(?:s|ed)?|"
+                                              r"introduces?|announces? (?:new |a )?(?:product|service)|"
+                                              r"rollout|partnership with)\b", re.I)),
+    ("BUYBACK_DIVIDEND",   "MED",  re.compile(r"\b(buyback|share repurchase|dividend (?:hike|increase|cut)|"
+                                              r"special dividend|stock split)\b", re.I)),
+]
+
+
+def categorize_headline(title: str) -> Tuple[str, str]:
+    """Return (category, priority) by matching the title against rules in order.
+    First matching rule wins; falls back to ('OTHER', 'LOW')."""
+    if not title:
+        return ("OTHER", "LOW")
+    for cat, pri, pat in NEWS_KEYWORD_RULES:
+        if pat.search(title):
+            return (cat, pri)
+    return ("OTHER", "LOW")
+
+
+# ---------------------------------------------------------------------------
+# SEC 8-K item code → (human label, category, priority)
+#
+# A current 8-K is the SEC's mandated "material event" filing. Each filing
+# tags one or more Item numbers indicating the nature of the event. We map
+# the high-signal items to our news categories so the headline carries the
+# correct badge in the UI.
+# ---------------------------------------------------------------------------
+
+SEC_8K_ITEMS: Dict[str, Tuple[str, str, str]] = {
+    "1.01": ("Material definitive agreement signed", "MATERIAL_AGREEMENT", "HIGH"),
+    "1.02": ("Material agreement terminated",         "MATERIAL_AGREEMENT", "HIGH"),
+    "1.03": ("Bankruptcy or receivership",            "LEGAL",              "HIGH"),
+    "2.01": ("Completion of acquisition or disposition", "M_AND_A",         "HIGH"),
+    "2.02": ("Earnings release / results announced",  "EARNINGS",           "HIGH"),
+    "2.03": ("Material financial obligation incurred","MATERIAL_AGREEMENT", "MED"),
+    "2.05": ("Costs from exit or disposal activity",  "MATERIAL_AGREEMENT", "MED"),
+    "2.06": ("Material impairment recognized",        "EARNINGS",           "HIGH"),
+    "3.01": ("Notice of delisting / non-compliance",  "REGULATORY",         "HIGH"),
+    "3.02": ("Unregistered equity sale",              "MATERIAL_AGREEMENT", "MED"),
+    "3.03": ("Material modification to security rights","MATERIAL_AGREEMENT","MED"),
+    "4.01": ("Auditor change",                        "REGULATORY",         "MED"),
+    "4.02": ("Non-reliance on prior financials",      "REGULATORY",         "HIGH"),
+    "5.01": ("Change in control",                     "M_AND_A",            "HIGH"),
+    "5.02": ("Officer / director change",             "LEADERSHIP",         "HIGH"),
+    "5.03": ("Amendments to bylaws / charter",        "MATERIAL_AGREEMENT", "MED"),
+    "5.07": ("Shareholder vote results",              "DISCLOSURE",         "MED"),
+    "5.08": ("Shareholder director nominations",      "DISCLOSURE",         "LOW"),
+    "7.01": ("Regulation FD disclosure",              "DISCLOSURE",         "MED"),
+    "8.01": ("Other material event",                  "FILING",             "MED"),
+    "9.01": ("Financial statements and exhibits",     "FILING",             "LOW"),
+}
 
 
 # ---------------------------------------------------------------------------
@@ -57,6 +145,11 @@ class NewsItem:
     publisher: str
     link: str
     published: str  # ISO timestamp
+    category: str = "OTHER"   # EARNINGS | M_AND_A | ANALYST | LEADERSHIP |
+                              # MATERIAL_AGREEMENT | REGULATORY | PRODUCT |
+                              # LEGAL | DISCLOSURE | FILING | OTHER
+    priority: str = "LOW"     # HIGH | MED | LOW
+    source: str = "yahoo"     # yahoo | sec | analyst | calendar
 
 
 @dataclass
@@ -75,15 +168,186 @@ class PriceHistory:
 # ---------------------------------------------------------------------------
 
 class YFinanceSource:
-    """Live data via yfinance."""
+    """Live data via yfinance.
+
+    News pipeline is multi-source: Yahoo news + SEC 8-K filings + analyst
+    upgrade/downgrade actions + earnings calendar. Every item is normalized
+    to NewsItem shape with category and priority.
+    """
+
+    # SEC EDGAR's fair-access policy requires a User-Agent identifying the
+    # caller. Email here is the project's builder email.
+    SEC_HEADERS = {"User-Agent": "Convex Capital (aalok.develops@gmail.com)"}
 
     def __init__(self, sleep_seconds: float = 0.0):
         # Tiny pause between calls helps when iterating many tickers.
         self.sleep = sleep_seconds
+        # Lazy-loaded ticker → 10-digit CIK lookup, used for SEC filings.
+        self._cik_map: Optional[Dict[str, str]] = None
 
     def _yf(self):
         import yfinance as yf  # imported lazily so sample mode doesn't need it
         return yf
+
+    # ----------------------------------------------------------------------
+    # SEC EDGAR — 8-K material event filings
+    # ----------------------------------------------------------------------
+
+    def _load_cik_map(self) -> Dict[str, str]:
+        """Fetch and cache the SEC's ticker→CIK mapping (one HTTP call per run)."""
+        if self._cik_map is not None:
+            return self._cik_map
+        import requests
+        try:
+            r = requests.get("https://www.sec.gov/files/company_tickers.json",
+                             headers=self.SEC_HEADERS, timeout=15)
+            r.raise_for_status()
+            data = r.json()
+            self._cik_map = {v["ticker"].upper(): str(v["cik_str"]).zfill(10)
+                             for v in data.values()}
+        except Exception:
+            self._cik_map = {}
+        return self._cik_map
+
+    def sec_filings(self, ticker: str, since_days: int = 120,
+                    limit: int = 5) -> List[NewsItem]:
+        """Return recent 8-K filings as NewsItem records, parsed into our
+        category/priority shape. Empty list if the ticker is foreign-listed
+        (not in EDGAR) or the lookup fails."""
+        cik = self._load_cik_map().get(ticker.upper())
+        if not cik:
+            return []
+        import requests
+        try:
+            url = f"https://data.sec.gov/submissions/CIK{cik}.json"
+            r = requests.get(url, headers=self.SEC_HEADERS, timeout=15)
+            r.raise_for_status()
+            data = r.json()
+        except Exception:
+            return []
+        if self.sleep:
+            time.sleep(self.sleep)
+        recent = data.get("filings", {}).get("recent", {}) or {}
+        forms = recent.get("form", [])
+        dates = recent.get("filingDate", [])
+        accs = recent.get("accessionNumber", [])
+        prims = recent.get("primaryDocument", [])
+        items_all = recent.get("items", [])
+        cutoff = (dt.date.today() - dt.timedelta(days=since_days)).isoformat()
+        out: List[NewsItem] = []
+        for i, form in enumerate(forms):
+            if form != "8-K":
+                continue
+            filing_date = dates[i] if i < len(dates) else ""
+            if filing_date < cutoff:
+                continue
+            items_raw = items_all[i] if i < len(items_all) else ""
+            items = [s.strip() for s in re.split(r"[,\s]+", items_raw) if s.strip()]
+            # Convert "5.02" -> human label + classify as the highest-priority item
+            labels: List[str] = []
+            best = ("FILING", "LOW")
+            for code in items:
+                meta = SEC_8K_ITEMS.get(code)
+                if not meta:
+                    continue
+                label, cat, pri = meta
+                labels.append(f"{code} {label}")
+                if _priority_rank(pri) < _priority_rank(best[1]):
+                    best = (cat, pri)
+            if not labels:
+                continue
+            title = "8-K · " + " · ".join(labels)
+            acc = accs[i].replace("-", "") if i < len(accs) else ""
+            doc = prims[i] if i < len(prims) else ""
+            link = (f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/"
+                    f"{acc}/{doc}") if acc and doc else ""
+            out.append(NewsItem(
+                ticker=ticker, title=title, publisher="SEC EDGAR",
+                link=link, published=filing_date,
+                category=best[0], priority=best[1], source="sec",
+            ))
+            if len(out) >= limit:
+                break
+        return out
+
+    # ----------------------------------------------------------------------
+    # Analyst upgrades / downgrades (via yfinance)
+    # ----------------------------------------------------------------------
+
+    def analyst_actions(self, ticker: str, since_days: int = 60,
+                        limit: int = 5) -> List[NewsItem]:
+        yf = self._yf()
+        try:
+            df = yf.Ticker(ticker).upgrades_downgrades
+        except Exception:
+            df = None
+        if self.sleep:
+            time.sleep(self.sleep)
+        if df is None or df.empty:
+            return []
+        df = df.copy()
+        df.index = pd.to_datetime(df.index).tz_localize(None)
+        cutoff = pd.Timestamp.today().normalize() - pd.Timedelta(days=since_days)
+        df = df[df.index >= cutoff].sort_index(ascending=False)
+        out: List[NewsItem] = []
+        for ts, row in df.iterrows():
+            firm = str(row.get("Firm", "") or "")
+            to_g = str(row.get("ToGrade", "") or "")
+            from_g = str(row.get("FromGrade", "") or "")
+            action = str(row.get("Action", "") or "").lower()
+            if action == "up":
+                verb = "Upgrade"; pri = "MED"
+            elif action == "down":
+                verb = "Downgrade"; pri = "MED"
+            elif action == "init":
+                verb = "Coverage initiated"; pri = "MED"
+            elif action == "reit":
+                verb = "Reiterated"; pri = "LOW"
+            else:
+                verb = action.title() or "Rating change"; pri = "LOW"
+            title = f"{firm}: {verb} — {from_g} → {to_g}" if from_g else f"{firm}: {verb} {to_g}".strip()
+            out.append(NewsItem(
+                ticker=ticker, title=title.strip(" —"),
+                publisher=firm or "Analyst", link="",
+                published=ts.isoformat(),
+                category="ANALYST", priority=pri, source="analyst",
+            ))
+            if len(out) >= limit:
+                break
+        return out
+
+    # ----------------------------------------------------------------------
+    # Earnings calendar (next-scheduled date per ticker)
+    # ----------------------------------------------------------------------
+
+    def next_earnings(self, ticker: str) -> Optional[dict]:
+        yf = self._yf()
+        try:
+            cal = yf.Ticker(ticker).calendar
+        except Exception:
+            return None
+        if self.sleep:
+            time.sleep(self.sleep)
+        if not cal:
+            return None
+        # yfinance returns a dict in newer versions, DataFrame in older.
+        if isinstance(cal, dict):
+            edt = cal.get("Earnings Date")
+            if not edt:
+                return None
+            if isinstance(edt, (list, tuple)) and edt:
+                edt = edt[0]
+            try:
+                d = pd.Timestamp(edt).date().isoformat()
+            except Exception:
+                return None
+            return {"ticker": ticker, "earnings_date": d}
+        try:
+            edt = cal.loc["Earnings Date"].iloc[0]
+            d = pd.Timestamp(edt).date().isoformat()
+            return {"ticker": ticker, "earnings_date": d}
+        except Exception:
+            return None
 
     def history(self, ticker: str, period: str = "2y") -> PriceHistory:
         yf = self._yf()
@@ -168,11 +432,19 @@ class YFinanceSource:
                 link = item.get("link", "")
                 pt = item.get("providerPublishTime")
                 published = dt.datetime.utcfromtimestamp(pt).isoformat() if pt else ""
+            cat, pri = categorize_headline(title)
             out.append(NewsItem(
                 ticker=ticker, title=title, publisher=publisher,
                 link=link, published=published,
+                category=cat, priority=pri, source="yahoo",
             ))
         return out
+
+
+def _priority_rank(p: str) -> int:
+    """Lower rank = higher priority (used to pick the most-important item code
+    when a single 8-K covers multiple items)."""
+    return {"HIGH": 0, "MED": 1, "LOW": 2}.get(p, 3)
 
 
 def _safe_float(x) -> Optional[float]:
@@ -281,11 +553,25 @@ class SampleSource:
         out = []
         now = dt.datetime.utcnow()
         for i, (tmpl, pub) in enumerate(templates[:limit]):
+            title = tmpl.format(t=ticker)
+            cat, pri = categorize_headline(title)
             out.append(NewsItem(
                 ticker=ticker,
-                title=tmpl.format(t=ticker),
+                title=title,
                 publisher=pub,
                 link=f"https://example.com/{ticker.lower()}/{i}",
                 published=(now - dt.timedelta(hours=i * 6)).isoformat() + "Z",
+                category=cat, priority=pri, source="yahoo",
             ))
         return out
+
+    def sec_filings(self, ticker: str, since_days: int = 120,
+                    limit: int = 5) -> List[NewsItem]:
+        return []
+
+    def analyst_actions(self, ticker: str, since_days: int = 60,
+                        limit: int = 5) -> List[NewsItem]:
+        return []
+
+    def next_earnings(self, ticker: str) -> Optional[dict]:
+        return None

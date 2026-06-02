@@ -127,6 +127,35 @@
     padding: 8px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 16px;
     display: none; }
   .stale-banner.show { display: block; }
+  .cat-badge { display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-size: 9px; font-weight: 700; letter-spacing: 0.06em; margin-right: 6px;
+    vertical-align: middle; }
+  .cat-EARNINGS           { background: #1e3a8a; color: #bfdbfe; }
+  .cat-M_AND_A            { background: #4c1d95; color: #ddd6fe; }
+  .cat-LEADERSHIP         { background: #064e3b; color: #a7f3d0; }
+  .cat-MATERIAL_AGREEMENT { background: #134e4a; color: #99f6e4; }
+  .cat-REGULATORY         { background: #7c2d12; color: #fed7aa; }
+  .cat-LEGAL              { background: #7f1d1d; color: #fecaca; }
+  .cat-ANALYST            { background: #365314; color: #d9f99d; }
+  .cat-PRODUCT            { background: #155e75; color: #a5f3fc; }
+  .cat-BUYBACK_DIVIDEND   { background: #14532d; color: #86efac; }
+  .cat-DISCLOSURE         { background: #2b3344; color: #94a3b8; }
+  .cat-FILING             { background: #2b3344; color: #94a3b8; }
+  .cat-OTHER              { background: #1f2632; color: var(--muted); }
+  .news-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .news-row:last-child { border-bottom: none; }
+  .news-prio-HIGH { border-left: 3px solid var(--accent); padding-left: 10px; margin-left: -10px; }
+  .news-prio-MED  { border-left: 3px solid var(--info);   padding-left: 10px; margin-left: -10px; }
+  .news-prio-LOW  { border-left: 3px solid transparent;   padding-left: 10px; margin-left: -10px; }
+  .news-meta { color: var(--muted); font-size: 10px; margin-top: 4px; }
+  .src-sec { color: var(--warn); font-weight: 600; }
+  .src-analyst { color: #d9f99d; font-weight: 600; }
+  .news-tabs { display: flex; gap: 4px; margin-bottom: 8px; flex-wrap: wrap; }
+  .news-filter { background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 3px 10px; border-radius: 3px; font-family: var(--mono); font-size: 10px;
+    cursor: pointer; }
+  .news-filter:hover { color: var(--text); border-color: var(--accent); }
+  .news-filter.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 </style>
 </head>
 <body>
@@ -223,10 +252,17 @@
     <div id="blotter"></div>
   </div>
 
+  <!-- Upcoming Earnings -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Upcoming Earnings</h2>
+    <div id="earnings-calendar"></div>
+  </div>
+
   <!-- News + Income/Dividends -->
   <div class="grid grid-2" style="margin-bottom: 16px;">
     <div class="panel">
-      <h2>News</h2>
+      <h2>News &amp; Material Events</h2>
+      <div class="news-tabs" id="news-tabs"></div>
       <div id="news"></div>
     </div>
     <div class="panel">
@@ -309,6 +345,7 @@ async function load() {
   renderLiquidity(d.liquidity);
   renderCorrelation(d.correlation);
   renderBlotter(d.trade_blotter);
+  renderEarnings(d.upcoming_earnings);
   renderNews(d.news);
   renderIncome(d.income);
   renderValuation(d.fundamentals);
@@ -639,19 +676,108 @@ function renderBlotter(rows) {
   document.getElementById("blotter").innerHTML = html;
 }
 
+// Tracks the currently-selected news filter ("ALL" | "HIGH" | a category)
+let _newsAll = [];
+let _newsFilter = "ALL";
+
+const CAT_LABELS = {
+  EARNINGS: "Earnings", M_AND_A: "M&A", LEADERSHIP: "Leadership",
+  MATERIAL_AGREEMENT: "Mat. Agreement", REGULATORY: "Regulatory",
+  LEGAL: "Legal", ANALYST: "Analyst", PRODUCT: "Product",
+  BUYBACK_DIVIDEND: "Buyback/Div", DISCLOSURE: "Disclosure",
+  FILING: "Filing", OTHER: "Other"
+};
+
 function renderNews(items) {
-  if (!items || items.length === 0) {
+  _newsAll = items || [];
+  if (_newsAll.length === 0) {
     document.getElementById("news").innerHTML =
       `<div class="empty">No news yet</div>`;
+    document.getElementById("news-tabs").innerHTML = "";
     return;
   }
-  const html = items.slice(0, 12).map(n => `
-    <div class="news-item">
-      <span class="ticker-tag">${n.ticker}</span>
-      ${n.link ? `<a href="${n.link}" target="_blank" rel="noopener">${escape(n.title)}</a>` : escape(n.title)}
-      <div class="meta">${escape(n.publisher || "")} &middot; ${(n.published||"").slice(0,10)}</div>
-    </div>`).join("");
+  // Build filter chips: ALL · HIGH · each category that has at least 1 item
+  const cats = {};
+  for (const n of _newsAll) cats[n.category || "OTHER"] = (cats[n.category || "OTHER"] || 0) + 1;
+  const highCount = _newsAll.filter(n => n.priority === "HIGH").length;
+  const filters = [
+    {key: "ALL",  label: `All (${_newsAll.length})`},
+    {key: "HIGH", label: `High Priority (${highCount})`},
+    ...Object.entries(cats).sort((a,b) => b[1]-a[1]).map(([k,v]) =>
+      ({key: k, label: `${CAT_LABELS[k] || k} (${v})`})),
+  ];
+  document.getElementById("news-tabs").innerHTML = filters.map(f =>
+    `<button class="news-filter ${f.key === _newsFilter ? "active" : ""}"
+             data-filter="${f.key}">${f.label}</button>`).join("");
+  document.querySelectorAll("#news-tabs .news-filter").forEach(btn => {
+    btn.addEventListener("click", () => {
+      _newsFilter = btn.dataset.filter;
+      renderNews(_newsAll);
+    });
+  });
+  renderNewsList();
+}
+
+function renderNewsList() {
+  let items = _newsAll;
+  if (_newsFilter === "HIGH") items = items.filter(n => n.priority === "HIGH");
+  else if (_newsFilter !== "ALL") items = items.filter(n => (n.category || "OTHER") === _newsFilter);
+  if (items.length === 0) {
+    document.getElementById("news").innerHTML =
+      `<div class="empty">No items match this filter</div>`;
+    return;
+  }
+  const srcTag = n => {
+    if (n.source === "sec")     return `<span class="src-sec">SEC</span>`;
+    if (n.source === "analyst") return `<span class="src-analyst">ANALYST</span>`;
+    return escape(n.publisher || "");
+  };
+  const html = items.slice(0, 25).map(n => {
+    const cat = n.category || "OTHER";
+    const pri = n.priority || "LOW";
+    const titleHtml = n.link
+      ? `<a href="${n.link}" target="_blank" rel="noopener">${escape(n.title)}</a>`
+      : escape(n.title);
+    return `
+      <div class="news-row news-prio-${pri}">
+        <span class="ticker-tag">${n.ticker}</span>
+        <span class="cat-badge cat-${cat}">${CAT_LABELS[cat] || cat}</span>
+        ${titleHtml}
+        <div class="news-meta">${srcTag(n)} &middot; ${(n.published||"").slice(0,10)}</div>
+      </div>`;
+  }).join("");
   document.getElementById("news").innerHTML = html;
+}
+
+function renderEarnings(rows) {
+  const el = document.getElementById("earnings-calendar");
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<div class="empty">No upcoming earnings dates</div>`;
+    return;
+  }
+  const today = new Date().toISOString().slice(0,10);
+  const future = rows.filter(r => r.earnings_date >= today);
+  if (future.length === 0) {
+    el.innerHTML = `<div class="empty">No upcoming earnings dates</div>`;
+    return;
+  }
+  const dayDelta = d => {
+    const ms = new Date(d).getTime() - new Date(today).getTime();
+    return Math.round(ms / 86_400_000);
+  };
+  const html = `<table>
+    <thead><tr><th>Ticker</th><th>Earnings Date</th><th class="num">Days Away</th></tr></thead>
+    <tbody>${future.slice(0, 20).map(r => {
+      const days = dayDelta(r.earnings_date);
+      const cls = days <= 7 ? "pos" : days <= 30 ? "" : "muted";
+      return `<tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td>${r.earnings_date}</td>
+        <td class="num ${cls}">${days === 0 ? "TODAY" : days + "d"}</td>
+      </tr>`;
+    }).join("")}
+    </tbody></table>`;
+  el.innerHTML = html;
 }
 
 function renderIncome(inc) {

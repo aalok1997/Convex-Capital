@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-02T04:37:54.320873Z",
+  "generated_at": "2026-06-02T04:46:55.514621Z",
   "fund_name": "Convex Capital",
   "tagline": "Lose small. Win big. \u2014 Paper-traded portfolio. Hypothetical performance for educational purposes only.",
   "summary": {
@@ -12,7 +12,7 @@
     "open_positions": 15
   },
   "metrics": {
-    "beta_spy": 1.5641564331672067
+    "beta_spy": 1.564157737993598
   },
   "nav_curve": [
     {
@@ -495,24 +495,24 @@
     {
       "ticker": "BABA",
       "hv20": 0.49260375646991433,
-      "garch": 0.42155203808695546,
-      "expansion": -0.14423706163373187,
+      "garch": 0.42155204198938784,
+      "expansion": -0.14423705371168025,
       "regime": "HIGH",
       "signal": "WEAK"
     },
     {
       "ticker": "CEG",
       "hv20": 0.5721449721653423,
-      "garch": 0.5866508174866434,
-      "expansion": 0.025353443667261766,
+      "garch": 0.5866360811589241,
+      "expansion": 0.02532768738443796,
       "regime": "EXTREME",
       "signal": "WEAK"
     },
     {
       "ticker": "CMI",
       "hv20": 0.45557244356433735,
-      "garch": 0.3256136481432271,
-      "expansion": -0.2852648294623138,
+      "garch": 0.32561360566217407,
+      "expansion": -0.28526492270994896,
       "regime": "HIGH",
       "signal": "WEAK"
     },
@@ -543,8 +543,8 @@
     {
       "ticker": "JAKK",
       "hv20": 0.30118730331886995,
-      "garch": 0.46580110893451154,
-      "expansion": 0.5465496181336812,
+      "garch": 0.4658012468071304,
+      "expansion": 0.5465500758973962,
       "regime": "NORMAL",
       "signal": "SIGNAL"
     },
@@ -567,8 +567,8 @@
     {
       "ticker": "PYPL",
       "hv20": 0.3131728825562993,
-      "garch": 0.39057692169368907,
-      "expansion": 0.24716073277345385,
+      "garch": 0.3905771467170308,
+      "expansion": 0.24716145130099654,
       "regime": "NORMAL",
       "signal": "SIGNAL"
     },
@@ -583,8 +583,8 @@
     {
       "ticker": "VST",
       "hv20": 0.5180903069007724,
-      "garch": 0.58006191265333,
-      "expansion": 0.11961545106541958,
+      "garch": 0.5800618815010394,
+      "expansion": 0.11961539093634535,
       "regime": "HIGH",
       "signal": "BASE"
     },
@@ -885,49 +885,49 @@
     {
       "scenario": "COVID Crash (Feb-Mar 2020)",
       "market_move": -0.339,
-      "portfolio_impact": -0.5302490308436831,
-      "stressed_nav": 469750.9701076852,
-      "pnl": -530249.0319175759,
+      "portfolio_impact": -0.5302494731798297,
+      "stressed_nav": 469750.5277715377,
+      "pnl": -530249.4742537234,
       "description": "Rapid 33.9% selloff in SPY over 23 trading days as COVID-19 spread."
     },
     {
       "scenario": "2022 Rate Shock (Jan-Oct)",
       "market_move": -0.252,
-      "portfolio_impact": -0.3941674211581361,
-      "stressed_nav": 605832.5800688331,
-      "pnl": -394167.421956428,
+      "portfolio_impact": -0.3941677499743867,
+      "stressed_nav": 605832.2512525817,
+      "pnl": -394167.75077267934,
       "description": "Grinding 9-month decline as the Fed hiked rates aggressively."
     },
     {
       "scenario": "GFC 2008-09",
       "market_move": -0.565,
-      "portfolio_impact": -0.8837483847394717,
-      "stressed_nav": 116251.61549596816,
-      "pnl": -883748.3865292929,
+      "portfolio_impact": -0.8837491219663828,
+      "stressed_nav": 116250.8782690556,
+      "pnl": -883749.1237562054,
       "description": "Credit crisis bear market; SPY drew down 56.5% from Oct 2007 peak."
     },
     {
       "scenario": "Dot-Com Bust (2000-02)",
       "market_move": -0.491,
-      "portfolio_impact": -0.7680008086850985,
-      "stressed_nav": 231999.19178476048,
-      "pnl": -768000.8102405006,
+      "portfolio_impact": -0.7680014493548566,
+      "stressed_nav": 231998.55111500103,
+      "pnl": -768001.45091026,
       "description": "Tech bubble burst; SPY -49.1% peak-to-trough over 30 months."
     },
     {
       "scenario": "Black Monday (Oct 1987)",
       "market_move": -0.204,
-      "portfolio_impact": -0.3190879123661101,
-      "stressed_nav": 680912.0890129146,
-      "pnl": -319087.9130123465,
+      "portfolio_impact": -0.319088178550694,
+      "stressed_nav": 680911.8228283301,
+      "pnl": -319088.17919693096,
       "description": "Flash crash; -20.4% on a single trading day."
     },
     {
       "scenario": "Aug 2024 Yen Carry Unwind",
       "market_move": -0.084,
-      "portfolio_impact": -0.13138914038604538,
-      "stressed_nav": 868610.8613731184,
-      "pnl": -131389.1406521427,
+      "portfolio_impact": -0.13138924999146223,
+      "stressed_nav": 868610.7517677014,
+      "pnl": -131389.2502575597,
       "description": "Yen carry unwind shock; SPY -8.4% in one week."
     }
   ],
@@ -1026,12 +1026,12 @@
     }
   ],
   "correlation_tail_risk": {
-    "current_correlation_avg": 0.17044326938157978,
-    "port_vol_annual_current": 0.2408575377376201,
-    "port_vol_annual_stressed_corr1": 0.47021675994349227,
-    "vol_expansion_pct": 0.9522609271864529,
-    "pnl_3sigma_1d_current": -36990.9297461202,
-    "pnl_3sigma_1d_stressed": -72215.94680364957,
+    "current_correlation_avg": 0.1704432664811247,
+    "port_vol_annual_current": 0.24085753318246536,
+    "port_vol_annual_stressed_corr1": 0.4702167603622207,
+    "vol_expansion_pct": 0.9522609658465642,
+    "pnl_3sigma_1d_current": -36990.929046538986,
+    "pnl_3sigma_1d_stressed": -72215.94686795794,
     "n_positions": 15,
     "method": "Portfolio variance recomputed with all cross-correlations forced to 1.0, holding individual vols constant. 3\u03c3 1-day P&L uses stressed annualized vol / \u221a252."
   },
@@ -1601,354 +1601,866 @@
   ],
   "news": [
     {
-      "ticker": "ZS",
-      "title": "Why Is Zscaler (ZS) Stock Soaring Today",
-      "publisher": "StockStory",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/why-zscaler-zs-stock-soaring-010451951.html",
-      "published": "2026-06-02T01:04:51Z"
-    },
-    {
-      "ticker": "CEG",
-      "title": "Vistra vs. Constellation Energy: The Big Revenue Face-Off",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/coverage/charts/2026/06/01/vistra-vs-constellation-energy-the-big-revenue-face-off/",
-      "published": "2026-06-01T21:36:49Z"
-    },
-    {
-      "ticker": "VST",
-      "title": "Vistra vs. Constellation Energy: The Big Revenue Face-Off",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/coverage/charts/2026/06/01/vistra-vs-constellation-energy-the-big-revenue-face-off/",
-      "published": "2026-06-01T21:36:49Z"
-    },
-    {
-      "ticker": "CRWV",
-      "title": "Stock Market Today, June 1: CoreWeave Surges on Nvidia Vera Rubin NVL72 Deployment",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/coverage/stock-market-today/2026/06/01/stock-market-today-june-1-coreweave-surges-on-nvidia-vera-rubin-nvl72-deployment/",
-      "published": "2026-06-01T21:23:15Z"
-    },
-    {
-      "ticker": "CRWV",
-      "title": "CoreWeave-Tied Data Center Seeks $850 Million Junk Bond Sale",
-      "publisher": "Bloomberg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/coreweave-tied-data-center-seeks-182851007.html",
-      "published": "2026-06-01T20:51:12Z"
-    },
-    {
-      "ticker": "ZS",
-      "title": "Stock Market Today: Dow Up As Trump Says This On Iran; AI Stocks Pop On Anthropic IPO Move (Live Coverage)",
-      "publisher": "Investor's Business Daily",
-      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-us-iran-deal-nvidia-stock-nvda/?src=A00220&yptr=yahoo",
-      "published": "2026-06-01T20:37:46Z"
-    },
-    {
-      "ticker": "AVAV",
-      "title": "1 Mid-Cap Stock to Target This Week and 2 We Avoid",
-      "publisher": "StockStory",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/1-mid-cap-stock-target-202451850.html",
-      "published": "2026-06-01T20:24:51Z"
-    },
-    {
-      "ticker": "CEG",
-      "title": "US Equity Markets Higher After Trump Says Israel, Hezbollah to Cease Fighting",
-      "publisher": "MT Newswires",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/us-equity-markets-higher-trump-201615560.html",
-      "published": "2026-06-01T20:16:15Z"
-    },
-    {
-      "ticker": "BABA",
-      "title": "Is It Too Late To Consider Alibaba Group Holding (NYSE:BABA) After Recent Share Price Weakness",
-      "publisher": "Simply Wall St.",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/too-consider-alibaba-group-holding-200746895.html",
-      "published": "2026-06-01T20:07:46Z"
-    },
-    {
-      "ticker": "CEG",
-      "title": "Why Constellation Energy Stock Slumped on Monday",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/investing/2026/06/01/why-constellation-energy-stock-slumped-on-monday/",
-      "published": "2026-06-01T19:14:33Z"
-    },
-    {
-      "ticker": "CEG",
-      "title": "Top Midday Decliners",
-      "publisher": "MT Newswires",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/top-midday-decliners-175530810.html",
-      "published": "2026-06-01T17:55:30Z"
-    },
-    {
-      "ticker": "ZS",
-      "title": "Top 3 High Growth Tech Stocks in the US Market",
-      "publisher": "Simply Wall St.",
-      "link": "https://finance.yahoo.com/sectors/technology/articles/top-3-high-growth-tech-173846277.html",
-      "published": "2026-06-01T17:38:46Z"
-    },
-    {
-      "ticker": "CRWV",
-      "title": "Why CoreWeave Stock Is Up on Monday",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/investing/2026/06/01/why-coreweave-stock-is-up-on-monday/",
-      "published": "2026-06-01T17:37:41Z"
-    },
-    {
-      "ticker": "CRWV",
-      "title": "CoreWeave Just Launched a Shiny New Product. Don\u2019t Expect It to Move the Needle for CRWV Stock.",
-      "publisher": "Barchart",
-      "link": "https://www.barchart.com/story/news/2239693/coreweave-just-launched-a-shiny-new-product-dont-expect-it-to-move-the-needle-for-crwv-stock",
-      "published": "2026-06-01T17:31:55Z"
-    },
-    {
       "ticker": "GRPN",
       "title": "Groupon (GRPN) Q4 2025 Earnings Transcript",
       "publisher": "Motley Fool",
       "link": "https://www.fool.com/earnings/call-transcripts/2026/06/01/groupon-grpn-q4-2025-earnings-transcript/",
-      "published": "2026-06-01T17:27:23Z"
+      "published": "2026-06-01T17:27:23Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
     },
     {
       "ticker": "GRPN",
       "title": "Groupon (GRPN) Q1 2026 Earnings Transcript",
       "publisher": "Motley Fool",
       "link": "https://www.fool.com/earnings/call-transcripts/2026/06/01/groupon-grpn-q1-2026-earnings-transcript/",
-      "published": "2026-06-01T17:26:31Z"
-    },
-    {
-      "ticker": "BABA",
-      "title": "China Luxury Demand Rebound Sends Fresh Signal To Investors",
-      "publisher": "GuruFocus.com",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/china-luxury-demand-rebound-sends-171856652.html",
-      "published": "2026-06-01T17:18:56Z"
-    },
-    {
-      "ticker": "BABA",
-      "title": "Meituan Loss Shrinks To 6.5 Billion Yuan As Subsidy War Cools",
-      "publisher": "GuruFocus.com",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/meituan-loss-shrinks-6-5-163357239.html",
-      "published": "2026-06-01T16:33:57Z"
-    },
-    {
-      "ticker": "ZS",
-      "title": "Zscaler Stock Surges. Wall Street Is Buying the Company\u2019s \u2018Trust Me Story\u2019 on AI.",
-      "publisher": "Barrons.com",
-      "link": "https://www.barrons.com/articles/zscaler-stock-ai-cybersecurity-e5f2695a?siteid=yhoof2&yptr=yahoo",
-      "published": "2026-06-01T16:25:00Z"
-    },
-    {
-      "ticker": "CMI",
-      "title": "\u201cDemand for Data Center Power Continues to Outpace Expectations\u201d \u2014 Josh Brown\u2019s Case for Heavy Assets Over AI Hype",
-      "publisher": "24/7 Wall St.",
-      "link": "https://247wallst.com/investing/2026/06/01/demand-for-data-center-power-continues-to-outpace-expectations-josh-browns-case-for-heavy-assets-over-ai-hype/",
-      "published": "2026-06-01T16:07:33Z"
-    },
-    {
-      "ticker": "AVAV",
-      "title": "A Look At AeroVironment (AVAV) Valuation After Major New US Government Contracts And Expansion Plans",
-      "publisher": "Simply Wall St.",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/look-aerovironment-avav-valuation-major-160641033.html",
-      "published": "2026-06-01T16:06:41Z"
+      "published": "2026-06-01T17:26:31Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
     },
     {
       "ticker": "CRWV",
-      "title": "CoreWeave Is First to Offer Nvidia\u2019s Newest AI System. The Stock Rises.",
-      "publisher": "Barrons.com",
-      "link": "https://www.barrons.com/articles/coreweave-stock-nvidia-vera-rubin-systems-adf80bd7?siteid=yhoof2&yptr=yahoo",
-      "published": "2026-06-01T15:53:00Z"
-    },
-    {
-      "ticker": "CEG",
-      "title": "Top Midday Stories: Oil Rises After Iran Reportedly Says It's Halting Messages With US; Nvidia Launches New AI Chip for Laptops",
-      "publisher": "MT Newswires",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/top-midday-stories-oil-rises-153500955.html",
-      "published": "2026-06-01T15:35:00Z"
-    },
-    {
-      "ticker": "BABA",
-      "title": "SpaceX IPO Could Rewrite the Record Books for Public Listings",
-      "publisher": "InvestorsHub",
-      "link": "https://investorshub.advfn.com/market-news/article/29469/spacex-ipo-could-rewrite-the-record-books-for-public-listings",
-      "published": "2026-06-01T15:23:28Z"
-    },
-    {
-      "ticker": "PYPL",
-      "title": "House of Doge and Paxos Partner to Expand Regulated Access to Dogecoin",
-      "publisher": "CryptoProwl",
-      "link": "https://www.cryptoprowl.com/releases/house-of-doge-and-paxos-partner-to-expand-regulated-access-to-dogecoin-5728",
-      "published": "2026-06-01T15:22:00Z"
-    },
-    {
-      "ticker": "PYPL",
-      "title": "TBH Stock Climbs On House Of Doge-Paxos Dogecoin Deal, But Reverse Split Muddies The Retail Sentiment",
+      "title": "NVDA Stock Set For Strong Open Today: CEO Unveils First PC Chips At Computex 2026",
       "publisher": "Stocktwits",
-      "link": "https://stocktwits.com/news-articles/markets/equity/tbh-stock-house-of-doge-paxos-dogecoin-reverse-split/cZ0gvMKReHM",
-      "published": "2026-06-01T15:01:01Z"
+      "link": "https://stocktwits.com/news-articles/markets/equity/nvda-stock-set-for-strong-open-today-ceo-unveils-first-pc-chips-at-computex-2026/cZ0gkChReux",
+      "published": "2026-06-01T07:38:37Z",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "yahoo"
     },
     {
-      "ticker": "VST",
-      "title": "From Bond Proxy to Battleground: Why Utilities Are the Worst Hiding Spot in 2026",
-      "publisher": "24/7 Wall St.",
-      "link": "https://247wallst.com/investing/2026/06/01/from-bond-proxy-to-battleground-why-utilities-are-the-worst-hiding-spot-in-2026/",
-      "published": "2026-06-01T14:05:42Z"
-    },
-    {
-      "ticker": "CMI",
-      "title": "Bernstein Maintains Market Perform Rating on Cummins (CMI) Following Updated 2030 Guidance",
-      "publisher": "Insider Monkey",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/bernstein-maintains-market-perform-rating-140317459.html",
-      "published": "2026-06-01T14:03:17Z"
-    },
-    {
-      "ticker": "ZS",
-      "title": "Microsoft initiated, Dell upgraded: Wall Street's top analyst calls",
-      "publisher": "The Fly",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/best-buy-downgrade-dell-upgraded-134023510.html",
-      "published": "2026-06-01T13:42:04Z"
-    },
-    {
-      "ticker": "PYPL",
-      "title": "This Week In Digital Payment - Unlocking Opportunities In The Evolving Payment Ecosystem",
-      "publisher": "Simply Wall St.",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/week-digital-payment-unlocking-opportunities-123747948.html",
-      "published": "2026-06-01T12:37:47Z"
-    },
-    {
-      "ticker": "PYPL",
-      "title": "Is Affirm outgrowing credit cards? Max Levchin explains",
-      "publisher": "Yahoo Finance Video",
-      "link": "https://finance.yahoo.com/video/affirm-outgrowing-credit-cards-max-100000077.html",
-      "published": "2026-06-01T10:00:00Z"
-    },
-    {
-      "ticker": "AVAV",
-      "title": "ONDS Stock Could Have Made You A Millionaire If You Invested $100,000 A Year Ago, Thanks To Drone Defense Boom",
-      "publisher": "Stocktwits",
-      "link": "https://stocktwits.com/news-articles/markets/equity/onds-stock-millionaire-100-000-investment-a-year-ago-drone-defense-boom/cZ0gZ7XReuz",
-      "published": "2026-06-01T08:25:14Z"
-    },
-    {
-      "ticker": "AVAV",
-      "title": "Aevex (AVEX) Climbs 43% as Govt Unveils Defense, Drone Funding Deals",
-      "publisher": "Insider Monkey",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/aevex-avex-climbs-43-govt-031157896.html",
-      "published": "2026-06-01T03:11:57Z"
-    },
-    {
-      "ticker": "BABA",
-      "title": "Gen-Z Gamer\u2019s 3D-Model Startup Becomes China\u2019s Latest AI Unicorn",
-      "publisher": "Bloomberg",
-      "link": "https://finance.yahoo.com/sectors/technology/articles/gen-z-gamer-3d-model-004234636.html",
-      "published": "2026-06-01T00:42:34Z"
-    },
-    {
-      "ticker": "PYPL",
-      "title": "Is AI unique or just the latest tech to 'terraform' financial systems?",
-      "publisher": "Yahoo Finance Video",
-      "link": "https://finance.yahoo.com/video/ai-unique-just-latest-tech-180000712.html",
-      "published": "2026-05-31T18:00:00Z"
-    },
-    {
-      "ticker": "CMI",
-      "title": "Raymond James Raises its Price Target on Cummins (CMI)",
-      "publisher": "Insider Monkey",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/raymond-james-raises-price-target-113250313.html",
-      "published": "2026-05-31T11:32:50Z"
-    },
-    {
-      "ticker": "VST",
-      "title": "Analyst Raises Vistra (VST) Price Target by $4",
-      "publisher": "Insider Monkey",
-      "link": "https://finance.yahoo.com/sectors/energy/articles/analyst-raises-vistra-vst-price-005100355.html",
-      "published": "2026-05-31T00:51:00Z"
-    },
-    {
-      "ticker": "VST",
-      "title": "XLU Investors: Watch PJM\u2019s March 2027 Data Center Framework Decision",
-      "publisher": "24/7 Wall St.",
-      "link": "https://247wallst.com/investing/2026/05/30/xlu-investors-watch-pjms-march-2027-data-center-framework-decision/",
-      "published": "2026-05-30T23:18:28Z"
-    },
-    {
-      "ticker": "VST",
-      "title": "XPLR Infrastructure Is Up 42%. Here's Why One Investor Added $4.5 Million More",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/coverage/filings/2026/05/30/xplr-infrastructure-is-up-42-here-s-why-one-investor-added-usd4-5-million-more/",
-      "published": "2026-05-30T17:05:43Z"
-    },
-    {
-      "ticker": "AVAV",
-      "title": "AeroVironment (AVAV) Stock Slides as Market Rises: Facts to Know Before You Trade",
-      "publisher": "Zacks",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/aerovironment-avav-stock-slides-market-221502699.html",
-      "published": "2026-05-29T22:15:02Z"
-    },
-    {
-      "ticker": "GRPN",
-      "title": "Pale Fire Capital Adds to Ziff Davis Stake Valued at $117 Million, According to Recent SEC Filing",
-      "publisher": "Motley Fool",
-      "link": "https://www.fool.com/coverage/filings/2026/05/29/pale-fire-capital-adds-to-ziff-davis-stake-valued-at-usd117-million-according-to-recent-sec-filing/",
-      "published": "2026-05-29T19:00:23Z"
-    },
-    {
-      "ticker": "KSPI",
-      "title": "Are Business Services Stocks Lagging  GDS Holdings (GDS) This Year?",
-      "publisher": "Zacks",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/business-services-stocks-lagging-gds-134005817.html",
-      "published": "2026-05-29T13:40:05Z"
-    },
-    {
-      "ticker": "GRPN",
-      "title": "Another tech company says it will cut hundreds of jobs amid pivot to AI",
-      "publisher": "LA Times",
-      "link": "https://finance.yahoo.com/sectors/technology/articles/another-tech-company-says-cut-100000830.html",
-      "published": "2026-05-29T10:00:00Z"
-    },
-    {
-      "ticker": "PRGS",
-      "title": "Zacks Industry Outlook Highlights Oracle, Intuit and Progress Software",
-      "publisher": "Zacks",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/zacks-industry-outlook-highlights-oracle-090400440.html",
-      "published": "2026-05-29T09:04:00Z"
+      "ticker": "GENC",
+      "title": "8-K \u00b7 3.01 Notice of delisting / non-compliance \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/64472/000119312526251421/d135716d8k.htm",
+      "published": "2026-06-01",
+      "category": "REGULATORY",
+      "priority": "HIGH",
+      "source": "sec"
     },
     {
       "ticker": "XNET",
       "title": "Xunlei Ltd (XNET) Q1 2026 Earnings Call Highlights: Surging Revenues Amid Strategic Expansion",
       "publisher": "GuruFocus.com",
       "link": "https://finance.yahoo.com/markets/stocks/articles/xunlei-ltd-xnet-q1-2026-230211717.html",
-      "published": "2026-05-28T23:02:11Z"
-    },
-    {
-      "ticker": "CMI",
-      "title": "Car Sales Stink. Why GM and Ford Are Soaring.",
-      "publisher": "Barrons.com",
-      "link": "https://www.barrons.com/articles/gm-ford-stock-ai-new-car-sales-a8bd0fb2?siteid=yhoof2&yptr=yahoo",
-      "published": "2026-05-28T20:15:00Z"
-    },
-    {
-      "ticker": "CMI",
-      "title": "1 S&P 500 Stock to Target This Week and 2 Facing Headwinds",
-      "publisher": "StockStory",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/1-p-500-stock-target-175827417.html",
-      "published": "2026-05-28T17:58:27Z"
-    },
-    {
-      "ticker": "GRPN",
-      "title": "Wix layoffs today: Tech developer is the latest to cut 20% of jobs while citing AI",
-      "publisher": "FastCompany",
-      "link": "https://www.fastcompany.com/91549928/wix-layoffs-today-job-cuts-latest-tech-company-to-cite-ai-israel",
-      "published": "2026-05-28T17:45:00Z"
-    },
-    {
-      "ticker": "XNET",
-      "title": "Asian Equities Traded in the US as American Depositary Receipts Decline in Thursday Trading",
-      "publisher": "MT Newswires",
-      "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-144615336.html",
-      "published": "2026-05-28T14:46:15Z"
+      "published": "2026-05-28T23:02:11Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
     },
     {
       "ticker": "XNET",
       "title": "Xunlei Q1 Earnings Call Highlights",
       "publisher": "MarketBeat",
       "link": "https://www.marketbeat.com/instant-alerts/xunlei-q1-earnings-call-highlights-2026-05-28/?utm_source=yahoofinance&utm_medium=yahoofinance",
-      "published": "2026-05-28T14:10:37Z"
+      "published": "2026-05-28T14:10:37Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "8-K \u00b7 2.05 Costs from exit or disposal activity \u00b7 5.02 Officer / director change \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1490281/000149028126000013/grpn-20260521.htm",
+      "published": "2026-05-26",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "ZS",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1713683/000171368326000095/zs-20260526.htm",
+      "published": "2026-05-26",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "8-K \u00b7 5.02 Officer / director change \u00b7 5.07 Shareholder vote results \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1633917/000163391726000076/pypl-20260519.htm",
+      "published": "2026-05-21",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "GENC",
+      "title": "8-K \u00b7 5.02 Officer / director change",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/64472/000119312526232121/d77849d8k.htm",
+      "published": "2026-05-20",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "8-K \u00b7 1.01 Material definitive agreement signed \u00b7 2.03 Material financial obligation incurred \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000236/crwv-20260515.htm",
+      "published": "2026-05-18",
+      "category": "MATERIAL_AGREEMENT",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "VIA",
+      "title": "Via Transportation Q1 Earnings Call Highlights",
+      "publisher": "MarketBeat",
+      "link": "https://www.marketbeat.com/instant-alerts/via-transportation-q1-earnings-call-highlights-2026-05-15/?utm_source=yahoofinance&utm_medium=yahoofinance",
+      "published": "2026-05-15T18:08:59Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "KSPI",
+      "title": "Kaspi.kz JSC (KSPI) Q1 2026 Earnings Call Highlights: Strong E-commerce Growth and Strategic ...",
+      "publisher": "GuruFocus.com",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/kaspi-kz-jsc-kspi-q1-010231207.html",
+      "published": "2026-05-14T01:02:31Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VIA",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1603015/000160301526000013/via-20260512.htm",
+      "published": "2026-05-12",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "KSPI",
+      "title": "Joint Stock Company Kaspi.kz Q1 Earnings Call Highlights",
+      "publisher": "MarketBeat",
+      "link": "https://www.marketbeat.com/instant-alerts/joint-stock-company-kaspikz-q1-earnings-call-highlights-2026-05-11/?utm_source=yahoofinance&utm_medium=yahoofinance",
+      "published": "2026-05-11T15:07:19Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CEG",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000063/ceg-20260511.htm",
+      "published": "2026-05-11",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "PRGS",
+      "title": "Progress Software AGM: Shareholders Approve Directors, Pay Plan and Equity Increase as CEO Touts Growth",
+      "publisher": "MarketBeat",
+      "link": "https://www.marketbeat.com/instant-alerts/progress-software-agm-shareholders-approve-directors-pay-plan-and-equity-increase-as-ceo-touts-growth-2026-05-08/?utm_source=yahoofinance&utm_medium=yahoofinance",
+      "published": "2026-05-08T08:23:30Z",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000220/crwv-20260507.htm",
+      "published": "2026-05-07",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "GENC",
+      "title": "8-K \u00b7 5.01 Change in control",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/64472/000119312526212435/d143818d8k.htm",
+      "published": "2026-05-07",
+      "category": "M_AND_A",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1490281/000162828026032154/grpn-20260507.htm",
+      "published": "2026-05-07",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "VST",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1692819/000169281926000011/vistra-20260507.htm",
+      "published": "2026-05-07",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "CMI",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/26172/000002617226000013/cmi-20260505.htm",
+      "published": "2026-05-05",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1633917/000163391726000065/pypl-20260505.htm",
+      "published": "2026-05-05",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "JAKKS Pacific, Inc. Q1 2026 Earnings Call Summary",
+      "publisher": "Moby",
+      "link": "https://app.moby.co/home/research/tools/earningsCalendar/earnings-jakks-pacific-inc-q1-2026-earnings-call-summary?utm_source=yahoo_finance&utm_medium=rss",
+      "published": "2026-05-01T12:30:00Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "Jakks Pacific Inc (JAKK) Q1 2026 Earnings Call Highlights: Navigating Market Challenges with ...",
+      "publisher": "GuruFocus.com",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jakks-pacific-inc-jakk-q1-072007865.html",
+      "published": "2026-05-01T07:20:07Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "JAKKS Pacific Q1 Earnings Call Highlights",
+      "publisher": "MarketBeat",
+      "link": "https://www.marketbeat.com/instant-alerts/jakks-pacific-q1-earnings-call-highlights-2026-04-30/?utm_source=yahoofinance&utm_medium=yahoofinance",
+      "published": "2026-05-01T00:09:39Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 8.01 Other material event \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1009829/000118518526001663/jakk8k043026.htm",
+      "published": "2026-05-01",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "JAKKS Pacific (JAKK) Q1 2026 Earnings Transcript",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/earnings/call-transcripts/2026/04/30/jakks-pacific-jakk-q1-2026-earnings-transcript/",
+      "published": "2026-04-30T22:50:08Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "Jakks Pacific (JAKK) Reports Q1 Loss, Tops Revenue Estimates",
+      "publisher": "Zacks",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jakks-pacific-jakk-reports-q1-222511106.html",
+      "published": "2026-04-30T22:25:11Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "8-K \u00b7 5.02 Officer / director change \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1633917/000119312526197533/d128781d8k.htm",
+      "published": "2026-04-30",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "Mattel (MAT) Reports Q1 Loss, Beats Revenue Estimates",
+      "publisher": "Zacks",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/mattel-mat-reports-q1-loss-224009453.html",
+      "published": "2026-04-29T22:40:09Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VST",
+      "title": "8-K \u00b7 1.01 Material definitive agreement signed \u00b7 2.03 Material financial obligation incurred \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1692819/000114036126017445/ef20071492_8k.htm",
+      "published": "2026-04-28",
+      "category": "MATERIAL_AGREEMENT",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "8-K \u00b7 1.01 Material definitive agreement signed \u00b7 2.03 Material financial obligation incurred \u00b7 8.01 Other material event \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000183/crwv-20260416.htm",
+      "published": "2026-04-21",
+      "category": "MATERIAL_AGREEMENT",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "ZS",
+      "title": "8-K \u00b7 5.02 Officer / director change",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1713683/000171368326000082/zs-20260415.htm",
+      "published": "2026-04-16",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "8-K \u00b7 1.01 Material definitive agreement signed \u00b7 2.03 Material financial obligation incurred \u00b7 3.02 Unregistered equity sale \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000164/crwv-20260409.htm",
+      "published": "2026-04-14",
+      "category": "MATERIAL_AGREEMENT",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "8-K \u00b7 5.02 Officer / director change \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1368622/000110465926042388/tm2611632d1_8k.htm",
+      "published": "2026-04-13",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "PRGS",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/876167/000087616726000050/prgs-20260330.htm",
+      "published": "2026-03-30",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "JAKK",
+      "title": "8-K \u00b7 5.02 Officer / director change",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1009829/000118518526001082/jakk8k032626.htm",
+      "published": "2026-03-27",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "CEG",
+      "title": "8-K \u00b7 5.02 Officer / director change \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000041/ceg-20260323.htm",
+      "published": "2026-03-26",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "8-K \u00b7 5.02 Officer / director change \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1633917/000163391726000059/pypl-20260320.htm",
+      "published": "2026-03-25",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "8-K \u00b7 5.02 Officer / director change \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1368622/000110465926031049/tm268917d3_8k.htm",
+      "published": "2026-03-18",
+      "category": "LEADERSHIP",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 7.01 Regulation FD disclosure \u00b7 8.01 Other material event \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1368622/000110465926025841/avav-20260310x8k.htm",
+      "published": "2026-03-10",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "VIA",
+      "title": "Via Transportation Q4 Earnings Call Highlights",
+      "publisher": "MarketBeat",
+      "link": "https://www.marketbeat.com/instant-alerts/via-transportation-q4-earnings-call-highlights-2026-02-28/?utm_source=yahoofinance&utm_medium=yahoofinance",
+      "published": "2026-03-01T05:06:05Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VIA",
+      "title": "Via Transportation, Inc. Q4 2025 Earnings Call Summary",
+      "publisher": "Moby",
+      "link": "https://app.moby.co/home/research/tools/earningsCalendar/earnings-via-transportation-inc-q4-2025-earnings-call-summary?utm_source=yahoo_finance&utm_medium=rss",
+      "published": "2026-02-27T13:30:00Z",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VIA",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1603015/000160301526000002/via-20260227.htm",
+      "published": "2026-02-27",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "GENC",
+      "title": "8-K \u00b7 2.02 Earnings release / results announced \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/64472/000119312526040311/d915491d8k.htm",
+      "published": "2026-02-06",
+      "category": "EARNINGS",
+      "priority": "HIGH",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "CoreWeave Just Launched a Shiny New Product. Don\u2019t Expect It to Move the Needle for CRWV Stock.",
+      "publisher": "Barchart",
+      "link": "https://www.barchart.com/story/news/2239693/coreweave-just-launched-a-shiny-new-product-dont-expect-it-to-move-the-needle-for-crwv-stock",
+      "published": "2026-06-01T17:31:55Z",
+      "category": "PRODUCT",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Top Midday Stories: Oil Rises After Iran Reportedly Says It's Halting Messages With US; Nvidia Launches New AI Chip for Laptops",
+      "publisher": "MT Newswires",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/top-midday-stories-oil-rises-153500955.html",
+      "published": "2026-06-01T15:35:00Z",
+      "category": "PRODUCT",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CMI",
+      "title": "Bernstein Maintains Market Perform Rating on Cummins (CMI) Following Updated 2030 Guidance",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bernstein-maintains-market-perform-rating-140317459.html",
+      "published": "2026-06-01T14:03:17Z",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Microsoft initiated, Dell upgraded: Wall Street's top analyst calls",
+      "publisher": "The Fly",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/best-buy-downgrade-dell-upgraded-134023510.html",
+      "published": "2026-06-01T13:42:04Z",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Wall Street Just Cut This Tech Stock's Rating. History Says That's When You Buy.",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/investing/2026/06/01/wall-street-cut-tech-stock-rating-history-buy-zs/",
+      "published": "2026-06-01T13:10:00Z",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Guggenheim: Upgrade \u2014 Neutral \u2192 Buy",
+      "publisher": "Guggenheim",
+      "link": "",
+      "published": "2026-06-01T12:11:53",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "analyst"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Constellation Energy Share Offering And Buyback Raise Valuation Questions",
+      "publisher": "Simply Wall St.",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/constellation-energy-share-offering-buyback-120721446.html",
+      "published": "2026-06-01T12:07:21Z",
+      "category": "BUYBACK_DIVIDEND",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "Aevex (AVEX) Climbs 43% as Govt Unveils Defense, Drone Funding Deals",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/aevex-avex-climbs-43-govt-031157896.html",
+      "published": "2026-06-01T03:11:57Z",
+      "category": "PRODUCT",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CMI",
+      "title": "Raymond James Raises its Price Target on Cummins (CMI)",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/raymond-james-raises-price-target-113250313.html",
+      "published": "2026-05-31T11:32:50Z",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Analyst Reaffirms Buy Rating on Constellation Energy (CEG) Following Strong Q1",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/analyst-reaffirms-buy-rating-constellation-005117602.html",
+      "published": "2026-05-31T00:51:17Z",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VST",
+      "title": "Analyst Raises Vistra (VST) Price Target by $4",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/sectors/energy/articles/analyst-raises-vistra-vst-price-005100355.html",
+      "published": "2026-05-31T00:51:00Z",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VIA",
+      "title": "8-K \u00b7 5.07 Shareholder vote results",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1603015/000160301526000017/via-20260518.htm",
+      "published": "2026-05-21",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "DA Davidson: Downgrade \u2014 Buy \u2192 Neutral",
+      "publisher": "DA Davidson",
+      "link": "",
+      "published": "2026-05-18T12:16:47",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "analyst"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "8-K \u00b7 8.01 Other material event \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1633917/000119312526226653/d930458d8k.htm",
+      "published": "2026-05-15",
+      "category": "FILING",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "CMI",
+      "title": "8-K \u00b7 5.07 Shareholder vote results",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/26172/000002617226000018/cmi-20260512.htm",
+      "published": "2026-05-14",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "PRGS",
+      "title": "8-K \u00b7 5.07 Shareholder vote results",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/876167/000155278126000319/e26246_prgs-8k.htm",
+      "published": "2026-05-11",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "Macquarie: Downgrade \u2014 Outperform \u2192 Neutral",
+      "publisher": "Macquarie",
+      "link": "",
+      "published": "2026-05-07T13:15:43",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "analyst"
+    },
+    {
+      "ticker": "VST",
+      "title": "8-K \u00b7 5.07 Shareholder vote results",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1692819/000114036126018872/ef20072328_8k.htm",
+      "published": "2026-05-04",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "CEG",
+      "title": "8-K \u00b7 5.07 Shareholder vote results",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000050/ceg-20260428.htm",
+      "published": "2026-05-01",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "8-K \u00b7 3.02 Unregistered equity sale \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1769628/000176962826000167/crwv-20260415.htm",
+      "published": "2026-04-15",
+      "category": "MATERIAL_AGREEMENT",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "8-K \u00b7 7.01 Regulation FD disclosure \u00b7 8.01 Other material event \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1769628/000119312526148912/d136714d8k.htm",
+      "published": "2026-04-09",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "GENC",
+      "title": "8-K \u00b7 5.07 Shareholder vote results",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/64472/000119312526143463/d117296d8k.htm",
+      "published": "2026-04-06",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "CEG",
+      "title": "8-K \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000045/ceg-20260331.htm",
+      "published": "2026-03-31",
+      "category": "DISCLOSURE",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "Raymond James: Upgrade \u2014 Underperform \u2192 Market Perform",
+      "publisher": "Raymond James",
+      "link": "",
+      "published": "2026-03-23T16:55:36",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "analyst"
+    },
+    {
+      "ticker": "CEG",
+      "title": "8-K \u00b7 8.01 Other material event \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1868275/000186827526000037/ceg-20260320.htm",
+      "published": "2026-03-20",
+      "category": "FILING",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "8-K \u00b7 3.02 Unregistered equity sale \u00b7 7.01 Regulation FD disclosure \u00b7 9.01 Financial statements and exhibits",
+      "publisher": "SEC EDGAR",
+      "link": "https://www.sec.gov/Archives/edgar/data/1368622/000110465926028457/tm268917d1_8k.htm",
+      "published": "2026-03-16",
+      "category": "MATERIAL_AGREEMENT",
+      "priority": "MED",
+      "source": "sec"
+    },
+    {
+      "ticker": "KSPI",
+      "title": "Freedom Broker: Coverage initiated Hold",
+      "publisher": "Freedom Broker",
+      "link": "",
+      "published": "2026-03-06T11:17:53",
+      "category": "ANALYST",
+      "priority": "MED",
+      "source": "analyst"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Why Is Zscaler (ZS) Stock Soaring Today",
+      "publisher": "StockStory",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-zscaler-zs-stock-soaring-010451951.html",
+      "published": "2026-06-02T01:04:51Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Vistra vs. Constellation Energy: The Big Revenue Face-Off",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/charts/2026/06/01/vistra-vs-constellation-energy-the-big-revenue-face-off/",
+      "published": "2026-06-01T21:36:49Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "VST",
+      "title": "Vistra vs. Constellation Energy: The Big Revenue Face-Off",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/charts/2026/06/01/vistra-vs-constellation-energy-the-big-revenue-face-off/",
+      "published": "2026-06-01T21:36:49Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "Stock Market Today, June 1: CoreWeave Surges on Nvidia Vera Rubin NVL72 Deployment",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/stock-market-today/2026/06/01/stock-market-today-june-1-coreweave-surges-on-nvidia-vera-rubin-nvl72-deployment/",
+      "published": "2026-06-01T21:23:15Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "CoreWeave-Tied Data Center Seeks $850 Million Junk Bond Sale",
+      "publisher": "Bloomberg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/coreweave-tied-data-center-seeks-182851007.html",
+      "published": "2026-06-01T20:51:12Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Stock Market Today: Dow Up As Trump Says This On Iran; AI Stocks Pop On Anthropic IPO Move (Live Coverage)",
+      "publisher": "Investor's Business Daily",
+      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-us-iran-deal-nvidia-stock-nvda/?src=A00220&yptr=yahoo",
+      "published": "2026-06-01T20:37:46Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "1 Mid-Cap Stock to Target This Week and 2 We Avoid",
+      "publisher": "StockStory",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/1-mid-cap-stock-target-202451850.html",
+      "published": "2026-06-01T20:24:51Z",
+      "category": "OTHER",
+      "priority": "LOW",
+      "source": "yahoo"
+    }
+  ],
+  "upcoming_earnings": [
+    {
+      "ticker": "CRWV",
+      "earnings_date": "2026-05-07"
+    },
+    {
+      "ticker": "GENC",
+      "earnings_date": "2026-05-08"
+    },
+    {
+      "ticker": "ZS",
+      "earnings_date": "2026-05-26"
+    },
+    {
+      "ticker": "AVAV",
+      "earnings_date": "2026-06-29"
+    },
+    {
+      "ticker": "PRGS",
+      "earnings_date": "2026-06-29"
+    },
+    {
+      "ticker": "JAKK",
+      "earnings_date": "2026-07-23"
+    },
+    {
+      "ticker": "PYPL",
+      "earnings_date": "2026-07-28"
+    },
+    {
+      "ticker": "CMI",
+      "earnings_date": "2026-08-04"
+    },
+    {
+      "ticker": "GRPN",
+      "earnings_date": "2026-08-05"
+    },
+    {
+      "ticker": "VST",
+      "earnings_date": "2026-08-06"
+    },
+    {
+      "ticker": "CEG",
+      "earnings_date": "2026-08-10"
+    },
+    {
+      "ticker": "KSPI",
+      "earnings_date": "2026-08-10"
+    },
+    {
+      "ticker": "VIA",
+      "earnings_date": "2026-08-11"
+    },
+    {
+      "ticker": "XNET",
+      "earnings_date": "2026-08-13"
+    },
+    {
+      "ticker": "BABA",
+      "earnings_date": "2026-08-28"
     }
   ]
 }
