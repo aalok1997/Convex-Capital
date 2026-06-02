@@ -1,23 +1,23 @@
 {
-  "generated_at": "2026-06-02T03:31:55.006571Z",
+  "generated_at": "2026-06-02T04:05:14.921781Z",
   "fund_name": "Convex Capital",
   "tagline": "Lose small. Win big. \u2014 Paper-traded portfolio. Hypothetical performance for educational purposes only.",
   "summary": {
-    "nav": 1000000.0,
-    "cash": 1000000.0,
-    "equity": 0.0,
+    "nav": 1000000.0019763375,
+    "cash": 126090.0900000001,
+    "equity": 873909.9119763374,
     "deposits": 1000000.0,
-    "total_return": 0.0,
+    "total_return": 1.976337538067696e-09,
     "realized_pnl": 0.0,
-    "open_positions": 0
+    "open_positions": 14
   },
   "metrics": {
-    "beta_spy": 0.0
+    "beta_spy": 1.5736626787705739
   },
   "nav_curve": [
     {
       "date": "2026-06-01",
-      "value": 1000000.0
+      "value": 1000000.0019763375
     }
   ],
   "drawdown_curve": [
@@ -40,77 +40,1808 @@
       }
     ]
   },
-  "holdings": [],
-  "sector_exposure": [],
-  "geographic_exposure": [],
-  "signals": [],
-  "volatility": [],
+  "holdings": [
+    {
+      "ticker": "GRPN",
+      "company": "Groupon, Inc.",
+      "sector": "Communication Services",
+      "country": "United States",
+      "shares": 7271.0,
+      "price": 18.90999984741211,
+      "cost_basis": 18.910000000000004,
+      "market_value": 137494.60889053345,
+      "unrealized_pnl": -0.0011094665795994274
+    },
+    {
+      "ticker": "KSPI",
+      "company": "Joint Stock Company Kaspi.kz",
+      "sector": "Technology",
+      "country": "Kazakhstan",
+      "shares": 1247.0,
+      "price": 90.16999816894531,
+      "cost_basis": 90.17,
+      "market_value": 112441.9877166748,
+      "unrealized_pnl": -0.0022833251974390123
+    },
+    {
+      "ticker": "XNET",
+      "company": "Xunlei Limited",
+      "sector": "Technology",
+      "country": "China",
+      "shares": 12541.0,
+      "price": 5.980000019073486,
+      "cost_basis": 5.98,
+      "market_value": 74995.18023920059,
+      "unrealized_pnl": 0.00023920058669446576
+    },
+    {
+      "ticker": "VIA",
+      "company": "Via Transportation, Inc.",
+      "sector": "Technology",
+      "country": "United States",
+      "shares": 4401.0,
+      "price": 17.040000915527344,
+      "cost_basis": 17.04,
+      "market_value": 74993.04402923584,
+      "unrealized_pnl": 0.004029235843596268
+    },
+    {
+      "ticker": "JAKK",
+      "company": "JAKKS Pacific, Inc.",
+      "sector": "Consumer Cyclical",
+      "country": "United States",
+      "shares": 3435.0,
+      "price": 21.829999923706055,
+      "cost_basis": 21.83,
+      "market_value": 74986.0497379303,
+      "unrealized_pnl": -0.0002620696962907232
+    },
+    {
+      "ticker": "ZS",
+      "company": "Zscaler, Inc.",
+      "sector": "Technology",
+      "country": "United States",
+      "shares": 481.0,
+      "price": 155.7100067138672,
+      "cost_basis": 155.71,
+      "market_value": 74896.51322937012,
+      "unrealized_pnl": 0.003229370113359664
+    },
+    {
+      "ticker": "PRGS",
+      "company": "Progress Software Corporation",
+      "sector": "Technology",
+      "country": "United States",
+      "shares": 1415.0,
+      "price": 35.31999969482422,
+      "cost_basis": 35.32,
+      "market_value": 49977.79956817627,
+      "unrealized_pnl": -0.0004318237308709172
+    },
+    {
+      "ticker": "CRWV",
+      "company": "CoreWeave, Inc.",
+      "sector": "Technology",
+      "country": "United States",
+      "shares": 400.0,
+      "price": 124.81999969482422,
+      "cost_basis": 124.82,
+      "market_value": 49927.99987792969,
+      "unrealized_pnl": -0.0001220703097715159
+    },
+    {
+      "ticker": "AVAV",
+      "company": "AeroVironment, Inc.",
+      "sector": "Industrials",
+      "country": "United States",
+      "shares": 244.0,
+      "price": 204.08999633789062,
+      "cost_basis": 204.09,
+      "market_value": 49797.95910644531,
+      "unrealized_pnl": -0.0008935546883321877
+    },
+    {
+      "ticker": "CMI",
+      "company": "Cummins Inc.",
+      "sector": "Industrials",
+      "country": "United States",
+      "shares": 77.0,
+      "price": 643.5,
+      "cost_basis": 643.5,
+      "market_value": 49549.5,
+      "unrealized_pnl": 0.0
+    },
+    {
+      "ticker": "BABA",
+      "company": "Alibaba Group Holding Limited",
+      "sector": "Consumer Cyclical",
+      "country": "Hong Kong",
+      "shares": 299.0,
+      "price": 125.4000015258789,
+      "cost_basis": 125.39999999999999,
+      "market_value": 37494.60045623779,
+      "unrealized_pnl": 0.00045623779551817734
+    },
+    {
+      "ticker": "PYPL",
+      "company": "PayPal Holdings, Inc.",
+      "sector": "Financial Services",
+      "country": "United States",
+      "shares": 829.0,
+      "price": 45.189998626708984,
+      "cost_basis": 45.18999999999999,
+      "market_value": 37462.50886154175,
+      "unrealized_pnl": -0.001138458244177798
+    },
+    {
+      "ticker": "CEG",
+      "company": "Constellation Energy Corporation",
+      "sector": "Utilities",
+      "country": "United States",
+      "shares": 94.0,
+      "price": 265.70001220703125,
+      "cost_basis": 265.7,
+      "market_value": 24975.801147460938,
+      "unrealized_pnl": 0.0011474609385686563
+    },
+    {
+      "ticker": "VST",
+      "company": "Vistra Corp.",
+      "sector": "Utilities",
+      "country": "United States",
+      "shares": 161.0,
+      "price": 154.75999450683594,
+      "cost_basis": 154.76,
+      "market_value": 24916.359115600586,
+      "unrealized_pnl": -0.0008843994125982135
+    }
+  ],
+  "sector_exposure": [
+    {
+      "name": "Technology",
+      "value": 437232.5246605873,
+      "pct": 0.5003176170319328
+    },
+    {
+      "name": "Communication Services",
+      "value": 137494.60889053345,
+      "pct": 0.15733270329843374
+    },
+    {
+      "name": "Consumer Cyclical",
+      "value": 112480.65019416809,
+      "pct": 0.12870966292142672
+    },
+    {
+      "name": "Industrials",
+      "value": 99347.45910644531,
+      "pct": 0.11368157946826825
+    },
+    {
+      "name": "Utilities",
+      "value": 49892.16026306152,
+      "pct": 0.057090736218142854
+    },
+    {
+      "name": "Financial Services",
+      "value": 37462.50886154175,
+      "pct": 0.04286770106179561
+    }
+  ],
+  "geographic_exposure": [
+    {
+      "name": "United States",
+      "value": 648978.1435642242,
+      "pct": 0.7426144670868505
+    },
+    {
+      "name": "Kazakhstan",
+      "value": 112441.9877166748,
+      "pct": 0.12866542211701035
+    },
+    {
+      "name": "China",
+      "value": 74995.18023920059,
+      "pct": 0.08581568787748366
+    },
+    {
+      "name": "Hong Kong",
+      "value": 37494.60045623779,
+      "pct": 0.04290442291865551
+    }
+  ],
+  "signals": [
+    {
+      "ticker": "AVAV",
+      "label": "STRONG BUY",
+      "composite": 2.5,
+      "rsi": 61.3,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": 0.0,
+        "bb": 0.5,
+        "vol": 0.5,
+        "range": 0.5
+      }
+    },
+    {
+      "ticker": "BABA",
+      "label": "STRONG SELL",
+      "composite": -2.0,
+      "rsi": 39.8,
+      "subs": {
+        "rsi": 0.0,
+        "macd": -0.5,
+        "trend": -0.5,
+        "bb": -0.5,
+        "vol": 0.0,
+        "range": -0.5
+      }
+    },
+    {
+      "ticker": "CEG",
+      "label": "SELL",
+      "composite": -1.5,
+      "rsi": 39.3,
+      "subs": {
+        "rsi": 0.0,
+        "macd": -0.5,
+        "trend": -0.5,
+        "bb": -0.5,
+        "vol": 0.5,
+        "range": -0.5
+      }
+    },
+    {
+      "ticker": "CMI",
+      "label": "LEAN BEAR",
+      "composite": -0.5,
+      "rsi": 46.2,
+      "subs": {
+        "rsi": 0.5,
+        "macd": -0.5,
+        "trend": 0.5,
+        "bb": -0.5,
+        "vol": 0.0,
+        "range": -0.5
+      }
+    },
+    {
+      "ticker": "CRWV",
+      "label": "STRONG BUY",
+      "composite": 2.5,
+      "rsi": 62.0,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": 0.5,
+        "bb": 0.5,
+        "vol": 0.0,
+        "range": 0.5
+      }
+    },
+    {
+      "ticker": "GRPN",
+      "label": "BUY",
+      "composite": 1.5,
+      "rsi": 57.3,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": 0.0,
+        "bb": 0.5,
+        "vol": 0.0,
+        "range": 0.0
+      }
+    },
+    {
+      "ticker": "JAKK",
+      "label": "LEAN BEAR",
+      "composite": -0.5,
+      "rsi": 49.5,
+      "subs": {
+        "rsi": 0.5,
+        "macd": -0.5,
+        "trend": 0.5,
+        "bb": -0.5,
+        "vol": 0.0,
+        "range": -0.5
+      }
+    },
+    {
+      "ticker": "KSPI",
+      "label": "BUY",
+      "composite": 1.0,
+      "rsi": 57.3,
+      "subs": {
+        "rsi": 0.5,
+        "macd": -0.5,
+        "trend": 0.5,
+        "bb": 0.5,
+        "vol": 0.0,
+        "range": 0.0
+      }
+    },
+    {
+      "ticker": "PRGS",
+      "label": "BUY",
+      "composite": 1.0,
+      "rsi": 72.6,
+      "subs": {
+        "rsi": 0.0,
+        "macd": 0.5,
+        "trend": 0.0,
+        "bb": 0.0,
+        "vol": 0.0,
+        "range": 0.5
+      }
+    },
+    {
+      "ticker": "PYPL",
+      "label": "LEAN BULL",
+      "composite": 0.5,
+      "rsi": 46.2,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": -0.5,
+        "bb": 0.5,
+        "vol": 0.0,
+        "range": -0.5
+      }
+    },
+    {
+      "ticker": "VIA",
+      "label": "STRONG BUY",
+      "composite": 3.0,
+      "rsi": 59.7,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": 0.5,
+        "bb": 0.5,
+        "vol": 0.5,
+        "range": 0.5
+      }
+    },
+    {
+      "ticker": "VST",
+      "label": "BUY",
+      "composite": 1.5,
+      "rsi": 51.1,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": 0.0,
+        "bb": 0.5,
+        "vol": 0.0,
+        "range": 0.0
+      }
+    },
+    {
+      "ticker": "XNET",
+      "label": "BUY",
+      "composite": 1.5,
+      "rsi": 50.3,
+      "subs": {
+        "rsi": 0.5,
+        "macd": 0.5,
+        "trend": -0.5,
+        "bb": 0.5,
+        "vol": 0.5,
+        "range": 0.0
+      }
+    },
+    {
+      "ticker": "ZS",
+      "label": "BUY",
+      "composite": 1.0,
+      "rsi": 51.7,
+      "subs": {
+        "rsi": 0.5,
+        "macd": -0.5,
+        "trend": 0.0,
+        "bb": 0.5,
+        "vol": 0.5,
+        "range": 0.0
+      }
+    }
+  ],
+  "volatility": [
+    {
+      "ticker": "AVAV",
+      "hv20": 0.830383751423552,
+      "garch": 0.7711018654096098,
+      "expansion": -0.0713909513671402,
+      "regime": "HIGH",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "BABA",
+      "hv20": 0.49260375646991433,
+      "garch": 0.42155204198938784,
+      "expansion": -0.14423705371168025,
+      "regime": "HIGH",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "CEG",
+      "hv20": 0.5721449721653423,
+      "garch": 0.5866498242242193,
+      "expansion": 0.025351707634486145,
+      "regime": "EXTREME",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "CMI",
+      "hv20": 0.45557244356433735,
+      "garch": 0.3256136780439935,
+      "expansion": -0.2852647638289182,
+      "regime": "HIGH",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "CRWV",
+      "hv20": 0.9148695531301893,
+      "garch": 1.0406468979578043,
+      "expansion": 0.137481179035058,
+      "regime": "NORMAL",
+      "signal": "BASE"
+    },
+    {
+      "ticker": "GRPN",
+      "hv20": 0.8606932249411283,
+      "garch": 0.8017453905444721,
+      "expansion": -0.0684887863508955,
+      "regime": "HIGH",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "JAKK",
+      "hv20": 0.30118730331886995,
+      "garch": 0.4658012491966916,
+      "expansion": 0.5465500838312006,
+      "regime": "NORMAL",
+      "signal": "SIGNAL"
+    },
+    {
+      "ticker": "KSPI",
+      "hv20": 0.23664842992146307,
+      "garch": 0.33121643784882426,
+      "expansion": 0.39961392500573806,
+      "regime": "LOW",
+      "signal": "SIGNAL"
+    },
+    {
+      "ticker": "PRGS",
+      "hv20": 0.5537247225520665,
+      "garch": 0.6000613381831843,
+      "expansion": 0.0836816810662825,
+      "regime": "HIGH",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "PYPL",
+      "hv20": 0.3131728825562993,
+      "garch": 0.39057692169368907,
+      "expansion": 0.24716073277345385,
+      "regime": "NORMAL",
+      "signal": "SIGNAL"
+    },
+    {
+      "ticker": "VIA",
+      "hv20": 1.0041945614594996,
+      "garch": null,
+      "expansion": null,
+      "regime": "NORMAL",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "VST",
+      "hv20": 0.5180903069007724,
+      "garch": 0.58006182583705,
+      "expansion": 0.11961528349563728,
+      "regime": "HIGH",
+      "signal": "BASE"
+    },
+    {
+      "ticker": "XNET",
+      "hv20": 0.6088028004890823,
+      "garch": 0.6671574726663161,
+      "expansion": 0.09585151732277594,
+      "regime": "NORMAL",
+      "signal": "WEAK"
+    },
+    {
+      "ticker": "ZS",
+      "hv20": 1.5726719258877884,
+      "garch": 1.97596806193224,
+      "expansion": 0.25644009370663057,
+      "regime": "EXTREME",
+      "signal": "SIGNAL"
+    }
+  ],
   "correlation": {
-    "tickers": [],
-    "matrix": []
+    "tickers": [
+      "AVAV",
+      "BABA",
+      "CEG",
+      "CMI",
+      "CRWV",
+      "GRPN",
+      "JAKK",
+      "KSPI",
+      "PRGS",
+      "PYPL",
+      "VIA",
+      "VST",
+      "XNET",
+      "ZS"
+    ],
+    "matrix": [
+      [
+        1.0,
+        0.114,
+        0.256,
+        0.245,
+        0.298,
+        0.19,
+        0.08,
+        0.08,
+        0.167,
+        0.179,
+        0.022,
+        0.292,
+        0.319,
+        0.16
+      ],
+      [
+        0.114,
+        1.0,
+        0.164,
+        0.32,
+        0.352,
+        0.173,
+        0.117,
+        0.206,
+        0.019,
+        0.237,
+        -0.025,
+        0.213,
+        0.505,
+        0.041
+      ],
+      [
+        0.256,
+        0.164,
+        1.0,
+        0.306,
+        0.214,
+        0.063,
+        0.089,
+        0.041,
+        -0.008,
+        0.117,
+        0.012,
+        0.794,
+        0.256,
+        0.04
+      ],
+      [
+        0.245,
+        0.32,
+        0.306,
+        1.0,
+        0.375,
+        0.181,
+        0.159,
+        0.243,
+        -0.158,
+        0.065,
+        0.02,
+        0.318,
+        0.343,
+        -0.043
+      ],
+      [
+        0.298,
+        0.352,
+        0.214,
+        0.375,
+        1.0,
+        0.147,
+        0.059,
+        0.11,
+        -0.044,
+        0.114,
+        0.215,
+        0.306,
+        0.352,
+        0.165
+      ],
+      [
+        0.19,
+        0.173,
+        0.063,
+        0.181,
+        0.147,
+        1.0,
+        0.147,
+        0.328,
+        0.137,
+        0.238,
+        0.171,
+        0.097,
+        0.192,
+        0.128
+      ],
+      [
+        0.08,
+        0.117,
+        0.089,
+        0.159,
+        0.059,
+        0.147,
+        1.0,
+        0.106,
+        0.352,
+        0.212,
+        0.143,
+        0.059,
+        0.197,
+        -0.057
+      ],
+      [
+        0.08,
+        0.206,
+        0.041,
+        0.243,
+        0.11,
+        0.328,
+        0.106,
+        1.0,
+        0.081,
+        0.241,
+        0.141,
+        0.074,
+        0.163,
+        0.135
+      ],
+      [
+        0.167,
+        0.019,
+        -0.008,
+        -0.158,
+        -0.044,
+        0.137,
+        0.352,
+        0.081,
+        1.0,
+        0.284,
+        0.381,
+        0.016,
+        0.126,
+        0.278
+      ],
+      [
+        0.179,
+        0.237,
+        0.117,
+        0.065,
+        0.114,
+        0.238,
+        0.212,
+        0.241,
+        0.284,
+        1.0,
+        0.15,
+        0.053,
+        0.307,
+        0.189
+      ],
+      [
+        0.022,
+        -0.025,
+        0.012,
+        0.02,
+        0.215,
+        0.171,
+        0.143,
+        0.141,
+        0.381,
+        0.15,
+        1.0,
+        0.065,
+        0.16,
+        0.356
+      ],
+      [
+        0.292,
+        0.213,
+        0.794,
+        0.318,
+        0.306,
+        0.097,
+        0.059,
+        0.074,
+        0.016,
+        0.053,
+        0.065,
+        1.0,
+        0.275,
+        0.067
+      ],
+      [
+        0.319,
+        0.505,
+        0.256,
+        0.343,
+        0.352,
+        0.192,
+        0.197,
+        0.163,
+        0.126,
+        0.307,
+        0.16,
+        0.275,
+        1.0,
+        0.187
+      ],
+      [
+        0.16,
+        0.041,
+        0.04,
+        -0.043,
+        0.165,
+        0.128,
+        -0.057,
+        0.135,
+        0.278,
+        0.189,
+        0.356,
+        0.067,
+        0.187,
+        1.0
+      ]
+    ]
   },
   "stress_tests": [
     {
       "scenario": "COVID Crash (Feb-Mar 2020)",
       "market_move": -0.339,
-      "portfolio_impact": -0.0,
-      "stressed_nav": 1000000.0,
-      "pnl": 0.0,
+      "portfolio_impact": -0.5334716481032246,
+      "stressed_nav": 466528.3528187929,
+      "pnl": -533471.6491575446,
       "description": "Rapid 33.9% selloff in SPY over 23 trading days as COVID-19 spread."
     },
     {
       "scenario": "2022 Rate Shock (Jan-Oct)",
       "market_move": -0.252,
-      "portfolio_impact": -0.0,
-      "stressed_nav": 1000000.0,
-      "pnl": 0.0,
+      "portfolio_impact": -0.3965629950501846,
+      "stressed_nav": 603437.0061424107,
+      "pnl": -396562.99583392683,
       "description": "Grinding 9-month decline as the Fed hiked rates aggressively."
     },
     {
       "scenario": "GFC 2008-09",
       "market_move": -0.565,
-      "portfolio_impact": -0.0,
-      "stressed_nav": 1000000.0,
-      "pnl": 0.0,
+      "portfolio_impact": -0.8891194135053742,
+      "stressed_nav": 110880.5867137633,
+      "pnl": -889119.4152625742,
       "description": "Credit crisis bear market; SPY drew down 56.5% from Oct 2007 peak."
     },
     {
       "scenario": "Dot-Com Bust (2000-02)",
       "market_move": -0.491,
-      "portfolio_impact": -0.0,
-      "stressed_nav": 1000000.0,
-      "pnl": 0.0,
+      "portfolio_impact": -0.7726683752763518,
+      "stressed_nav": 227331.62517293222,
+      "pnl": -772668.3768034054,
       "description": "Tech bubble burst; SPY -49.1% peak-to-trough over 30 months."
     },
     {
       "scenario": "Black Monday (Oct 1987)",
       "market_move": -0.204,
-      "portfolio_impact": -0.0,
-      "stressed_nav": 1000000.0,
-      "pnl": 0.0,
+      "portfolio_impact": -0.32102718646919703,
+      "stressed_nav": 678972.8148726824,
+      "pnl": -321027.1871036551,
       "description": "Flash crash; -20.4% on a single trading day."
     },
     {
       "scenario": "Aug 2024 Yen Carry Unwind",
       "market_move": -0.084,
-      "portfolio_impact": -0.0,
-      "stressed_nav": 1000000.0,
-      "pnl": 0.0,
+      "portfolio_impact": -0.1321876650167282,
+      "stressed_nav": 867812.3366983619,
+      "pnl": -132187.6652779756,
       "description": "Yen carry unwind shock; SPY -8.4% in one week."
     }
   ],
   "monte_carlo": {},
-  "factor_stress": [],
-  "correlation_tail_risk": {},
-  "liquidity": [],
-  "income": {
-    "total_annual_income": 40000.0,
-    "dividend_income": 0.0,
-    "cash_income": 40000.0,
-    "cash_yield": 0.04,
-    "rows": []
+  "factor_stress": [
+    {
+      "scenario": "Tech Selloff -15%",
+      "description": "Concentrated drawdown in Tech and Communication Services.",
+      "shocks": {
+        "sector:Technology": -0.15,
+        "sector:Communication Services": -0.1
+      },
+      "pnl": -79334.33958814145,
+      "stressed_nav": 920665.6623881961,
+      "portfolio_impact": -0.07933433943135001,
+      "equity_at_risk_pct": 0.8739099102491965
+    },
+    {
+      "scenario": "Rate Shock (+100bp)",
+      "description": "Long-duration growth and rate-sensitive sectors hit; banks benefit.",
+      "shocks": {
+        "sector:Technology": -0.08,
+        "sector:Consumer Cyclical": -0.1,
+        "sector:Financial Services": 0.05,
+        "sector:Real Estate": -0.12,
+        "sector:Utilities": -0.06
+      },
+      "pnl": -47347.0711649704,
+      "stressed_nav": 952652.9308113671,
+      "portfolio_impact": -0.04734707107139661,
+      "equity_at_risk_pct": 0.8739099102491965
+    },
+    {
+      "scenario": "Energy Spike (+30%)",
+      "description": "Oil shock \u2014 producers rally, downstream consumers pinched.",
+      "shocks": {
+        "sector:Energy": 0.3,
+        "sector:Industrials": -0.05,
+        "sector:Consumer Cyclical": -0.07,
+        "sector:Consumer Defensive": -0.03
+      },
+      "pnl": -12841.018468914033,
+      "stressed_nav": 987158.9835074234,
+      "portfolio_impact": -0.012841018443535846,
+      "equity_at_risk_pct": 0.8739099102491965
+    },
+    {
+      "scenario": "Recession (broad -20%)",
+      "description": "Cyclicals and credit-sensitive names down hard; defensives flat.",
+      "shocks": {
+        "sector:Technology": -0.15,
+        "sector:Consumer Cyclical": -0.22,
+        "sector:Financial Services": -0.18,
+        "sector:Industrials": -0.18,
+        "sector:Energy": -0.2,
+        "sector:Materials": -0.2,
+        "sector:Communication Services": -0.12,
+        "sector:Healthcare": -0.04,
+        "sector:Consumer Defensive": -0.02,
+        "sector:Utilities": 0.0,
+        "sector:Real Estate": -0.15
+      },
+      "pnl": -131455.76904290676,
+      "stressed_nav": 868544.2329334307,
+      "portfolio_impact": -0.1314557687831058,
+      "equity_at_risk_pct": 0.8739099102491965
+    },
+    {
+      "scenario": "China Decoupling",
+      "description": "China-listed and China-revenue names take a 25% hit.",
+      "shocks": {
+        "country:China": -0.25,
+        "country:Hong Kong": -0.2
+      },
+      "pnl": -26247.715151047705,
+      "stressed_nav": 973752.2868252898,
+      "portfolio_impact": -0.026247715099173362,
+      "equity_at_risk_pct": 0.8739099102491965
+    },
+    {
+      "scenario": "Risk-On Rally",
+      "description": "Growth and cyclicals rip; defensives lag.",
+      "shocks": {
+        "sector:Technology": 0.12,
+        "sector:Consumer Cyclical": 0.1,
+        "sector:Financial Services": 0.06,
+        "sector:Communication Services": 0.08,
+        "sector:Healthcare": 0.02,
+        "sector:Consumer Defensive": 0.01,
+        "sector:Utilities": -0.01
+      },
+      "pnl": 76464.36561899187,
+      "stressed_nav": 1076464.3675953294,
+      "portfolio_impact": 0.07646436546787247,
+      "equity_at_risk_pct": 0.8739099102491965
+    }
+  ],
+  "correlation_tail_risk": {
+    "current_correlation_avg": 0.17312512911526817,
+    "port_vol_annual_current": 0.25469958597203923,
+    "port_vol_annual_stressed_corr1": 0.5056061870228588,
+    "vol_expansion_pct": 0.9851080051553908,
+    "pnl_3sigma_1d_current": -42064.51525250713,
+    "pnl_3sigma_1d_stressed": -83502.60596073292,
+    "n_positions": 14,
+    "method": "Portfolio variance recomputed with all cross-correlations forced to 1.0, holding individual vols constant. 3\u03c3 1-day P&L uses stressed annualized vol / \u221a252."
   },
-  "fundamentals": [],
-  "trade_blotter": [],
-  "news": []
+  "liquidity": [
+    {
+      "ticker": "JAKK",
+      "shares": 3435.0,
+      "position_value": 74986.0497379303,
+      "avg_daily_volume_20d": 53415.0,
+      "avg_daily_dollar_volume": 1166049.445924759,
+      "days_to_exit": 0.6430777871384442,
+      "liquidity_tag": "LIQUID"
+    },
+    {
+      "ticker": "XNET",
+      "shares": 12541.0,
+      "position_value": 74995.18023920059,
+      "avg_daily_volume_20d": 224830.0,
+      "avg_daily_dollar_volume": 1344483.404288292,
+      "days_to_exit": 0.5577992260819286,
+      "liquidity_tag": "LIQUID"
+    },
+    {
+      "ticker": "VIA",
+      "shares": 4401.0,
+      "position_value": 74993.04402923584,
+      "avg_daily_volume_20d": 766025.0,
+      "avg_daily_dollar_volume": 13053066.701316833,
+      "days_to_exit": 0.0574524330145883,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "GRPN",
+      "shares": 7271.0,
+      "position_value": 137494.60889053345,
+      "avg_daily_volume_20d": 2311700.0,
+      "avg_daily_dollar_volume": 43714246.64726257,
+      "days_to_exit": 0.03145304321495004,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "KSPI",
+      "shares": 1247.0,
+      "position_value": 112441.9877166748,
+      "avg_daily_volume_20d": 463390.0,
+      "avg_daily_dollar_volume": 41783875.45150757,
+      "days_to_exit": 0.02691037786745506,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "PRGS",
+      "shares": 1415.0,
+      "position_value": 49977.79956817627,
+      "avg_daily_volume_20d": 606540.0,
+      "avg_daily_dollar_volume": 21422992.61489868,
+      "days_to_exit": 0.023329046724041284,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "AVAV",
+      "shares": 244.0,
+      "position_value": 49797.95910644531,
+      "avg_daily_volume_20d": 1377755.0,
+      "avg_daily_dollar_volume": 281186012.9045105,
+      "days_to_exit": 0.0017709970205152586,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "CMI",
+      "shares": 77.0,
+      "position_value": 49549.5,
+      "avg_daily_volume_20d": 1032120.0,
+      "avg_daily_dollar_volume": 664169220.0,
+      "days_to_exit": 0.0007460372824865326,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "ZS",
+      "shares": 481.0,
+      "position_value": 74896.51322937012,
+      "avg_daily_volume_20d": 6555550.0,
+      "avg_daily_dollar_volume": 1020764734.513092,
+      "days_to_exit": 0.0007337294353639283,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "PYPL",
+      "shares": 829.0,
+      "position_value": 37462.50886154175,
+      "avg_daily_volume_20d": 16132235.0,
+      "avg_daily_dollar_volume": 729015677.4957466,
+      "days_to_exit": 0.000513877959253631,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "VST",
+      "shares": 161.0,
+      "position_value": 24916.359115600586,
+      "avg_daily_volume_20d": 5938560.0,
+      "avg_daily_dollar_volume": 919051512.9785156,
+      "days_to_exit": 0.0002711094945576032,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "CEG",
+      "shares": 94.0,
+      "position_value": 24975.801147460938,
+      "avg_daily_volume_20d": 3876830.0,
+      "avg_daily_dollar_volume": 1030073778.324585,
+      "days_to_exit": 0.00024246613857197762,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "BABA",
+      "shares": 299.0,
+      "position_value": 37494.60045623779,
+      "avg_daily_volume_20d": 12835170.0,
+      "avg_daily_dollar_volume": 1609530337.5849152,
+      "days_to_exit": 0.00023295367338336772,
+      "liquidity_tag": "DEEP"
+    },
+    {
+      "ticker": "CRWV",
+      "shares": 400.0,
+      "position_value": 49927.99987792969,
+      "avg_daily_volume_20d": 30297470.0,
+      "avg_daily_dollar_volume": 3781730196.153946,
+      "days_to_exit": 0.0001320242251250682,
+      "liquidity_tag": "DEEP"
+    }
+  ],
+  "income": {
+    "total_annual_income": 14658.383600000005,
+    "dividend_income": 9614.78,
+    "cash_income": 5043.603600000004,
+    "cash_yield": 0.04,
+    "rows": [
+      {
+        "ticker": "KSPI",
+        "shares": 1247.0,
+        "div_rate": 3.59,
+        "yield": 3.98,
+        "yld_on_cost": 0.039813685261173334,
+        "annual_income": 4476.73,
+        "ex_dividend_date": "2026-06-10",
+        "last_dividend_amount": 1.76
+      },
+      {
+        "ticker": "JAKK",
+        "shares": 3435.0,
+        "div_rate": 1.0,
+        "yield": 4.58,
+        "yld_on_cost": 0.04580852038479157,
+        "annual_income": 3435.0,
+        "ex_dividend_date": "2026-05-29",
+        "last_dividend_amount": 0.25
+      },
+      {
+        "ticker": "CMI",
+        "shares": 77.0,
+        "div_rate": 8.0,
+        "yield": 1.24,
+        "yld_on_cost": 0.012432012432012432,
+        "annual_income": 616.0,
+        "ex_dividend_date": "2026-05-22",
+        "last_dividend_amount": 2.0
+      },
+      {
+        "ticker": "PYPL",
+        "shares": 829.0,
+        "div_rate": 0.56,
+        "yield": 1.24,
+        "yld_on_cost": 0.01239212215091835,
+        "annual_income": 464.24000000000007,
+        "ex_dividend_date": "2026-06-04",
+        "last_dividend_amount": 0.14
+      },
+      {
+        "ticker": "BABA",
+        "shares": 299.0,
+        "div_rate": 1.05,
+        "yield": 0.84,
+        "yld_on_cost": 0.008373205741626795,
+        "annual_income": 313.95,
+        "ex_dividend_date": "2026-06-11",
+        "last_dividend_amount": 2.0
+      },
+      {
+        "ticker": "CEG",
+        "shares": 94.0,
+        "div_rate": 1.71,
+        "yield": 0.64,
+        "yld_on_cost": 0.0064358298833270605,
+        "annual_income": 160.74,
+        "ex_dividend_date": "2026-05-15",
+        "last_dividend_amount": 0.427
+      },
+      {
+        "ticker": "VST",
+        "shares": 161.0,
+        "div_rate": 0.92,
+        "yield": 0.59,
+        "yld_on_cost": 0.005944688550012924,
+        "annual_income": 148.12,
+        "ex_dividend_date": "2026-06-22",
+        "last_dividend_amount": 0.228
+      }
+    ]
+  },
+  "fundamentals": [
+    {
+      "ticker": "AVAV",
+      "market_cap": 10327989248.0,
+      "trailing_pe": null,
+      "forward_pe": 50.603626,
+      "price_to_sales": 6.4137883,
+      "price_to_book": 2.3748794,
+      "ev_to_ebitda": 68.698,
+      "profit_margin": -0.13933,
+      "operating_margin": -0.051149998,
+      "return_on_equity": -0.08741,
+      "return_on_assets": -0.012619999,
+      "revenue_growth": 1.434,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "BABA",
+      "market_cap": 300851396608.0,
+      "trailing_pe": 19.262672,
+      "forward_pe": 13.589732,
+      "price_to_sales": 0.2938949,
+      "price_to_book": 1.8632439,
+      "ev_to_ebitda": 21.539,
+      "profit_margin": 0.1012,
+      "operating_margin": 0.0101499995,
+      "return_on_equity": 0.092159994,
+      "return_on_assets": 0.0212,
+      "revenue_growth": 0.029,
+      "earnings_growth": 1.041
+    },
+    {
+      "ticker": "CEG",
+      "market_cap": 95968198656.0,
+      "trailing_pe": 23.10435,
+      "forward_pe": 19.502321,
+      "price_to_sales": 3.213185,
+      "price_to_book": 2.875448,
+      "ev_to_ebitda": 14.818,
+      "profit_margin": 0.12693,
+      "operating_margin": 0.21858,
+      "return_on_equity": 0.16104999,
+      "return_on_assets": 0.04196,
+      "revenue_growth": 0.638,
+      "earnings_growth": 10.91
+    },
+    {
+      "ticker": "CMI",
+      "market_cap": 88795971584.0,
+      "trailing_pe": 33.445946,
+      "forward_pe": 19.272423,
+      "price_to_sales": 2.619814,
+      "price_to_book": 7.1893816,
+      "ev_to_ebitda": 18.96,
+      "profit_margin": 0.07886,
+      "operating_margin": 0.09764,
+      "return_on_equity": 0.21993999,
+      "return_on_assets": 0.07273,
+      "revenue_growth": 0.027,
+      "earnings_growth": -0.21
+    },
+    {
+      "ticker": "CRWV",
+      "market_cap": 68098093056.0,
+      "trailing_pe": null,
+      "forward_pe": -199.0686,
+      "price_to_sales": 10.93594,
+      "price_to_book": 13.9541645,
+      "ev_to_ebitda": 33.393,
+      "profit_margin": -0.25566,
+      "operating_margin": -0.069299996,
+      "return_on_equity": -0.40673,
+      "return_on_assets": -0.0021600001,
+      "revenue_growth": 1.116,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "GRPN",
+      "market_cap": 718277056.0,
+      "trailing_pe": null,
+      "forward_pe": 9.135266,
+      "price_to_sales": 1.4410646,
+      "price_to_book": -11.738051,
+      "ev_to_ebitda": 96.022,
+      "profit_margin": -0.20775999,
+      "operating_margin": -0.02826,
+      "return_on_equity": null,
+      "return_on_assets": 0.00791,
+      "revenue_growth": 0.0,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "JAKK",
+      "market_cap": 249831488.0,
+      "trailing_pe": 31.185715,
+      "forward_pe": 6.675841,
+      "price_to_sales": 0.4428898,
+      "price_to_book": 1.0324442,
+      "ev_to_ebitda": 10.258,
+      "profit_margin": 0.01413,
+      "operating_margin": -0.052249998,
+      "return_on_equity": 0.03343,
+      "return_on_assets": 0.01922,
+      "revenue_growth": -0.058,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "KSPI",
+      "market_cap": 17134757888.0,
+      "trailing_pe": 7.85453,
+      "forward_pe": 0.013253589,
+      "price_to_sales": null,
+      "price_to_book": 0.0075719105,
+      "ev_to_ebitda": null,
+      "profit_margin": 0.24914,
+      "operating_margin": 0.0,
+      "return_on_equity": 0.46748,
+      "return_on_assets": 0.14297,
+      "revenue_growth": 0.313,
+      "earnings_growth": -0.01
+    },
+    {
+      "ticker": "PRGS",
+      "market_cap": 1486216448.0,
+      "trailing_pe": 18.11282,
+      "forward_pe": 5.8277674,
+      "price_to_sales": 1.5048541,
+      "price_to_book": 2.9793336,
+      "ev_to_ebitda": 8.315,
+      "profit_margin": 0.08607,
+      "operating_margin": 0.19913,
+      "return_on_equity": 0.18267,
+      "return_on_assets": 0.04662,
+      "revenue_growth": 0.041,
+      "earnings_growth": 1.208
+    },
+    {
+      "ticker": "PYPL",
+      "market_cap": 39862345728.0,
+      "trailing_pe": 8.478424,
+      "forward_pe": 7.8492475,
+      "price_to_sales": 1.1816667,
+      "price_to_book": 2.0130968,
+      "ev_to_ebitda": 6.42,
+      "profit_margin": 0.14997,
+      "operating_margin": 0.17969999,
+      "return_on_equity": 0.25120002,
+      "return_on_assets": 0.04738,
+      "revenue_growth": 0.072,
+      "earnings_growth": -0.062
+    },
+    {
+      "ticker": "VIA",
+      "market_cap": 1450820736.0,
+      "trailing_pe": null,
+      "forward_pe": 30.020613,
+      "price_to_sales": 3.1326494,
+      "price_to_book": 2.2021196,
+      "ev_to_ebitda": -14.212,
+      "profit_margin": -0.21634,
+      "operating_margin": -0.18507,
+      "return_on_equity": -0.24162,
+      "return_on_assets": null,
+      "revenue_growth": 0.292,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "VST",
+      "market_cap": 52182355968.0,
+      "trailing_pe": 25.879597,
+      "forward_pe": 14.123981,
+      "price_to_sales": 2.6835873,
+      "price_to_book": 19.961306,
+      "ev_to_ebitda": 10.889,
+      "profit_margin": 0.11525,
+      "operating_margin": 0.26578,
+      "return_on_equity": 0.42898,
+      "return_on_assets": 0.06022,
+      "revenue_growth": 0.434,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "XNET",
+      "market_cap": 380649632.0,
+      "trailing_pe": 0.4426351,
+      "forward_pe": null,
+      "price_to_sales": 0.82672995,
+      "price_to_book": 0.27365917,
+      "ev_to_ebitda": 85.583,
+      "profit_margin": 2.27672,
+      "operating_margin": 0.05047,
+      "return_on_equity": 1.23955,
+      "return_on_assets": 0.00543,
+      "revenue_growth": 0.697,
+      "earnings_growth": null
+    },
+    {
+      "ticker": "ZS",
+      "market_cap": 25179791360.0,
+      "trailing_pe": null,
+      "forward_pe": 33.86885,
+      "price_to_sales": 7.9342318,
+      "price_to_book": 10.639563,
+      "ev_to_ebitda": -386.684,
+      "profit_margin": -0.024389999,
+      "operating_margin": -0.03276,
+      "return_on_equity": -0.037100002,
+      "return_on_assets": -0.01356,
+      "revenue_growth": 0.254,
+      "earnings_growth": null
+    }
+  ],
+  "trade_blotter": [
+    {
+      "date": "2026-06-01",
+      "ticker": "GRPN",
+      "action": "BUY",
+      "shares": 7271.0,
+      "price": 18.91,
+      "value": 137494.61000000002
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "JAKK",
+      "action": "BUY",
+      "shares": 3435.0,
+      "price": 21.83,
+      "value": 74986.04999999999
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "ZS",
+      "action": "BUY",
+      "shares": 481.0,
+      "price": 155.71,
+      "value": 74896.51000000001
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "CRWV",
+      "action": "BUY",
+      "shares": 400.0,
+      "price": 124.82,
+      "value": 49928.0
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "KSPI",
+      "action": "BUY",
+      "shares": 1247.0,
+      "price": 90.17,
+      "value": 112441.99
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "VIA",
+      "action": "BUY",
+      "shares": 4401.0,
+      "price": 17.04,
+      "value": 74993.04
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "PRGS",
+      "action": "BUY",
+      "shares": 1415.0,
+      "price": 35.32,
+      "value": 49977.8
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "AVAV",
+      "action": "BUY",
+      "shares": 244.0,
+      "price": 204.09,
+      "value": 49797.96
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "CMI",
+      "action": "BUY",
+      "shares": 77.0,
+      "price": 643.5,
+      "value": 49549.5
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "XNET",
+      "action": "BUY",
+      "shares": 12541.0,
+      "price": 5.98,
+      "value": 74995.18000000001
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "PYPL",
+      "action": "BUY",
+      "shares": 829.0,
+      "price": 45.19,
+      "value": 37462.509999999995
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "BABA",
+      "action": "BUY",
+      "shares": 299.0,
+      "price": 125.4,
+      "value": 37494.6
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "VST",
+      "action": "BUY",
+      "shares": 161.0,
+      "price": 154.76,
+      "value": 24916.359999999997
+    },
+    {
+      "date": "2026-06-01",
+      "ticker": "CEG",
+      "action": "BUY",
+      "shares": 94.0,
+      "price": 265.7,
+      "value": 24975.8
+    }
+  ],
+  "news": [
+    {
+      "ticker": "ZS",
+      "title": "Why Is Zscaler (ZS) Stock Soaring Today",
+      "publisher": "StockStory",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-zscaler-zs-stock-soaring-010451951.html",
+      "published": "2026-06-02T01:04:51Z"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Vistra vs. Constellation Energy: The Big Revenue Face-Off",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/charts/2026/06/01/vistra-vs-constellation-energy-the-big-revenue-face-off/",
+      "published": "2026-06-01T21:36:49Z"
+    },
+    {
+      "ticker": "VST",
+      "title": "Vistra vs. Constellation Energy: The Big Revenue Face-Off",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/charts/2026/06/01/vistra-vs-constellation-energy-the-big-revenue-face-off/",
+      "published": "2026-06-01T21:36:49Z"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "Stock Market Today, June 1: CoreWeave Surges on Nvidia Vera Rubin NVL72 Deployment",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/stock-market-today/2026/06/01/stock-market-today-june-1-coreweave-surges-on-nvidia-vera-rubin-nvl72-deployment/",
+      "published": "2026-06-01T21:23:15Z"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "CoreWeave-Tied Data Center Seeks $850 Million Junk Bond Sale",
+      "publisher": "Bloomberg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/coreweave-tied-data-center-seeks-182851007.html",
+      "published": "2026-06-01T20:51:12Z"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Stock Market Today: Dow Up As Trump Says This On Iran; AI Stocks Pop On Anthropic IPO Move (Live Coverage)",
+      "publisher": "Investor's Business Daily",
+      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-us-iran-deal-nvidia-stock-nvda/?src=A00220&yptr=yahoo",
+      "published": "2026-06-01T20:37:46Z"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "1 Mid-Cap Stock to Target This Week and 2 We Avoid",
+      "publisher": "StockStory",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/1-mid-cap-stock-target-202451850.html",
+      "published": "2026-06-01T20:24:51Z"
+    },
+    {
+      "ticker": "CEG",
+      "title": "US Equity Markets Higher After Trump Says Israel, Hezbollah to Cease Fighting",
+      "publisher": "MT Newswires",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/us-equity-markets-higher-trump-201615560.html",
+      "published": "2026-06-01T20:16:15Z"
+    },
+    {
+      "ticker": "BABA",
+      "title": "Is It Too Late To Consider Alibaba Group Holding (NYSE:BABA) After Recent Share Price Weakness",
+      "publisher": "Simply Wall St.",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/too-consider-alibaba-group-holding-200746895.html",
+      "published": "2026-06-01T20:07:46Z"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Why Constellation Energy Stock Slumped on Monday",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/investing/2026/06/01/why-constellation-energy-stock-slumped-on-monday/",
+      "published": "2026-06-01T19:14:33Z"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Top Midday Decliners",
+      "publisher": "MT Newswires",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/top-midday-decliners-175530810.html",
+      "published": "2026-06-01T17:55:30Z"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Top 3 High Growth Tech Stocks in the US Market",
+      "publisher": "Simply Wall St.",
+      "link": "https://finance.yahoo.com/sectors/technology/articles/top-3-high-growth-tech-173846277.html",
+      "published": "2026-06-01T17:38:46Z"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "Why CoreWeave Stock Is Up on Monday",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/investing/2026/06/01/why-coreweave-stock-is-up-on-monday/",
+      "published": "2026-06-01T17:37:41Z"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "CoreWeave Just Launched a Shiny New Product. Don\u2019t Expect It to Move the Needle for CRWV Stock.",
+      "publisher": "Barchart",
+      "link": "https://www.barchart.com/story/news/2239693/coreweave-just-launched-a-shiny-new-product-dont-expect-it-to-move-the-needle-for-crwv-stock",
+      "published": "2026-06-01T17:31:55Z"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "Groupon (GRPN) Q4 2025 Earnings Transcript",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/earnings/call-transcripts/2026/06/01/groupon-grpn-q4-2025-earnings-transcript/",
+      "published": "2026-06-01T17:27:23Z"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "Groupon (GRPN) Q1 2026 Earnings Transcript",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/earnings/call-transcripts/2026/06/01/groupon-grpn-q1-2026-earnings-transcript/",
+      "published": "2026-06-01T17:26:31Z"
+    },
+    {
+      "ticker": "BABA",
+      "title": "China Luxury Demand Rebound Sends Fresh Signal To Investors",
+      "publisher": "GuruFocus.com",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/china-luxury-demand-rebound-sends-171856652.html",
+      "published": "2026-06-01T17:18:56Z"
+    },
+    {
+      "ticker": "BABA",
+      "title": "Meituan Loss Shrinks To 6.5 Billion Yuan As Subsidy War Cools",
+      "publisher": "GuruFocus.com",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/meituan-loss-shrinks-6-5-163357239.html",
+      "published": "2026-06-01T16:33:57Z"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Zscaler Stock Surges. Wall Street Is Buying the Company\u2019s \u2018Trust Me Story\u2019 on AI.",
+      "publisher": "Barrons.com",
+      "link": "https://www.barrons.com/articles/zscaler-stock-ai-cybersecurity-e5f2695a?siteid=yhoof2&yptr=yahoo",
+      "published": "2026-06-01T16:25:00Z"
+    },
+    {
+      "ticker": "CMI",
+      "title": "\u201cDemand for Data Center Power Continues to Outpace Expectations\u201d \u2014 Josh Brown\u2019s Case for Heavy Assets Over AI Hype",
+      "publisher": "24/7 Wall St.",
+      "link": "https://247wallst.com/investing/2026/06/01/demand-for-data-center-power-continues-to-outpace-expectations-josh-browns-case-for-heavy-assets-over-ai-hype/",
+      "published": "2026-06-01T16:07:33Z"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "A Look At AeroVironment (AVAV) Valuation After Major New US Government Contracts And Expansion Plans",
+      "publisher": "Simply Wall St.",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/look-aerovironment-avav-valuation-major-160641033.html",
+      "published": "2026-06-01T16:06:41Z"
+    },
+    {
+      "ticker": "CRWV",
+      "title": "CoreWeave Is First to Offer Nvidia\u2019s Newest AI System. The Stock Rises.",
+      "publisher": "Barrons.com",
+      "link": "https://www.barrons.com/articles/coreweave-stock-nvidia-vera-rubin-systems-adf80bd7?siteid=yhoof2&yptr=yahoo",
+      "published": "2026-06-01T15:53:00Z"
+    },
+    {
+      "ticker": "CEG",
+      "title": "Top Midday Stories: Oil Rises After Iran Reportedly Says It's Halting Messages With US; Nvidia Launches New AI Chip for Laptops",
+      "publisher": "MT Newswires",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/top-midday-stories-oil-rises-153500955.html",
+      "published": "2026-06-01T15:35:00Z"
+    },
+    {
+      "ticker": "BABA",
+      "title": "SpaceX IPO Could Rewrite the Record Books for Public Listings",
+      "publisher": "InvestorsHub",
+      "link": "https://investorshub.advfn.com/market-news/article/29469/spacex-ipo-could-rewrite-the-record-books-for-public-listings",
+      "published": "2026-06-01T15:23:28Z"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "House of Doge and Paxos Partner to Expand Regulated Access to Dogecoin",
+      "publisher": "CryptoProwl",
+      "link": "https://www.cryptoprowl.com/releases/house-of-doge-and-paxos-partner-to-expand-regulated-access-to-dogecoin-5728",
+      "published": "2026-06-01T15:22:00Z"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "TBH Stock Climbs On House Of Doge-Paxos Dogecoin Deal, But Reverse Split Muddies The Retail Sentiment",
+      "publisher": "Stocktwits",
+      "link": "https://stocktwits.com/news-articles/markets/equity/tbh-stock-house-of-doge-paxos-dogecoin-reverse-split/cZ0gvMKReHM",
+      "published": "2026-06-01T15:01:01Z"
+    },
+    {
+      "ticker": "VST",
+      "title": "From Bond Proxy to Battleground: Why Utilities Are the Worst Hiding Spot in 2026",
+      "publisher": "24/7 Wall St.",
+      "link": "https://247wallst.com/investing/2026/06/01/from-bond-proxy-to-battleground-why-utilities-are-the-worst-hiding-spot-in-2026/",
+      "published": "2026-06-01T14:05:42Z"
+    },
+    {
+      "ticker": "CMI",
+      "title": "Bernstein Maintains Market Perform Rating on Cummins (CMI) Following Updated 2030 Guidance",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bernstein-maintains-market-perform-rating-140317459.html",
+      "published": "2026-06-01T14:03:17Z"
+    },
+    {
+      "ticker": "ZS",
+      "title": "Microsoft initiated, Dell upgraded: Wall Street's top analyst calls",
+      "publisher": "The Fly",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/best-buy-downgrade-dell-upgraded-134023510.html",
+      "published": "2026-06-01T13:42:04Z"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "This Week In Digital Payment - Unlocking Opportunities In The Evolving Payment Ecosystem",
+      "publisher": "Simply Wall St.",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/week-digital-payment-unlocking-opportunities-123747948.html",
+      "published": "2026-06-01T12:37:47Z"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "Is Affirm outgrowing credit cards? Max Levchin explains",
+      "publisher": "Yahoo Finance Video",
+      "link": "https://finance.yahoo.com/video/affirm-outgrowing-credit-cards-max-100000077.html",
+      "published": "2026-06-01T10:00:00Z"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "ONDS Stock Could Have Made You A Millionaire If You Invested $100,000 A Year Ago, Thanks To Drone Defense Boom",
+      "publisher": "Stocktwits",
+      "link": "https://stocktwits.com/news-articles/markets/equity/onds-stock-millionaire-100-000-investment-a-year-ago-drone-defense-boom/cZ0gZ7XReuz",
+      "published": "2026-06-01T08:25:14Z"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "Aevex (AVEX) Climbs 43% as Govt Unveils Defense, Drone Funding Deals",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/aevex-avex-climbs-43-govt-031157896.html",
+      "published": "2026-06-01T03:11:57Z"
+    },
+    {
+      "ticker": "BABA",
+      "title": "Gen-Z Gamer\u2019s 3D-Model Startup Becomes China\u2019s Latest AI Unicorn",
+      "publisher": "Bloomberg",
+      "link": "https://finance.yahoo.com/sectors/technology/articles/gen-z-gamer-3d-model-004234636.html",
+      "published": "2026-06-01T00:42:34Z"
+    },
+    {
+      "ticker": "PYPL",
+      "title": "Is AI unique or just the latest tech to 'terraform' financial systems?",
+      "publisher": "Yahoo Finance Video",
+      "link": "https://finance.yahoo.com/video/ai-unique-just-latest-tech-180000712.html",
+      "published": "2026-05-31T18:00:00Z"
+    },
+    {
+      "ticker": "CMI",
+      "title": "Raymond James Raises its Price Target on Cummins (CMI)",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/raymond-james-raises-price-target-113250313.html",
+      "published": "2026-05-31T11:32:50Z"
+    },
+    {
+      "ticker": "VST",
+      "title": "Analyst Raises Vistra (VST) Price Target by $4",
+      "publisher": "Insider Monkey",
+      "link": "https://finance.yahoo.com/sectors/energy/articles/analyst-raises-vistra-vst-price-005100355.html",
+      "published": "2026-05-31T00:51:00Z"
+    },
+    {
+      "ticker": "VST",
+      "title": "XLU Investors: Watch PJM\u2019s March 2027 Data Center Framework Decision",
+      "publisher": "24/7 Wall St.",
+      "link": "https://247wallst.com/investing/2026/05/30/xlu-investors-watch-pjms-march-2027-data-center-framework-decision/",
+      "published": "2026-05-30T23:18:28Z"
+    },
+    {
+      "ticker": "VST",
+      "title": "XPLR Infrastructure Is Up 42%. Here's Why One Investor Added $4.5 Million More",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/filings/2026/05/30/xplr-infrastructure-is-up-42-here-s-why-one-investor-added-usd4-5-million-more/",
+      "published": "2026-05-30T17:05:43Z"
+    },
+    {
+      "ticker": "AVAV",
+      "title": "AeroVironment (AVAV) Stock Slides as Market Rises: Facts to Know Before You Trade",
+      "publisher": "Zacks",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/aerovironment-avav-stock-slides-market-221502699.html",
+      "published": "2026-05-29T22:15:02Z"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "Pale Fire Capital Adds to Ziff Davis Stake Valued at $117 Million, According to Recent SEC Filing",
+      "publisher": "Motley Fool",
+      "link": "https://www.fool.com/coverage/filings/2026/05/29/pale-fire-capital-adds-to-ziff-davis-stake-valued-at-usd117-million-according-to-recent-sec-filing/",
+      "published": "2026-05-29T19:00:23Z"
+    },
+    {
+      "ticker": "KSPI",
+      "title": "Are Business Services Stocks Lagging  GDS Holdings (GDS) This Year?",
+      "publisher": "Zacks",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/business-services-stocks-lagging-gds-134005817.html",
+      "published": "2026-05-29T13:40:05Z"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "Another tech company says it will cut hundreds of jobs amid pivot to AI",
+      "publisher": "LA Times",
+      "link": "https://finance.yahoo.com/sectors/technology/articles/another-tech-company-says-cut-100000830.html",
+      "published": "2026-05-29T10:00:00Z"
+    },
+    {
+      "ticker": "PRGS",
+      "title": "Zacks Industry Outlook Highlights Oracle, Intuit and Progress Software",
+      "publisher": "Zacks",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/zacks-industry-outlook-highlights-oracle-090400440.html",
+      "published": "2026-05-29T09:04:00Z"
+    },
+    {
+      "ticker": "XNET",
+      "title": "Xunlei Ltd (XNET) Q1 2026 Earnings Call Highlights: Surging Revenues Amid Strategic Expansion",
+      "publisher": "GuruFocus.com",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/xunlei-ltd-xnet-q1-2026-230211717.html",
+      "published": "2026-05-28T23:02:11Z"
+    },
+    {
+      "ticker": "CMI",
+      "title": "Car Sales Stink. Why GM and Ford Are Soaring.",
+      "publisher": "Barrons.com",
+      "link": "https://www.barrons.com/articles/gm-ford-stock-ai-new-car-sales-a8bd0fb2?siteid=yhoof2&yptr=yahoo",
+      "published": "2026-05-28T20:15:00Z"
+    },
+    {
+      "ticker": "CMI",
+      "title": "1 S&P 500 Stock to Target This Week and 2 Facing Headwinds",
+      "publisher": "StockStory",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/1-p-500-stock-target-175827417.html",
+      "published": "2026-05-28T17:58:27Z"
+    },
+    {
+      "ticker": "GRPN",
+      "title": "Wix layoffs today: Tech developer is the latest to cut 20% of jobs while citing AI",
+      "publisher": "FastCompany",
+      "link": "https://www.fastcompany.com/91549928/wix-layoffs-today-job-cuts-latest-tech-company-to-cite-ai-israel",
+      "published": "2026-05-28T17:45:00Z"
+    },
+    {
+      "ticker": "XNET",
+      "title": "Asian Equities Traded in the US as American Depositary Receipts Decline in Thursday Trading",
+      "publisher": "MT Newswires",
+      "link": "https://finance.yahoo.com/markets/world-indices/articles/asian-equities-traded-us-american-144615336.html",
+      "published": "2026-05-28T14:46:15Z"
+    },
+    {
+      "ticker": "XNET",
+      "title": "Xunlei Q1 Earnings Call Highlights",
+      "publisher": "MarketBeat",
+      "link": "https://www.marketbeat.com/instant-alerts/xunlei-q1-earnings-call-highlights-2026-05-28/?utm_source=yahoofinance&utm_medium=yahoofinance",
+      "published": "2026-05-28T14:10:37Z"
+    }
+  ]
 }
