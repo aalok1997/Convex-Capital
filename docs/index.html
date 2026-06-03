@@ -336,9 +336,56 @@ function signalPillClass(label) {
   return "pill pill-" + (label || "neutral").toLowerCase().replace(/\s+/g, "-");
 }
 
+// Track the last snapshot we rendered so polling can skip a no-op render
+// when nothing has changed server-side.
+let _lastSnapshotTimestamp = null;
+let _pollHandle = null;
+let _pillHandle = null;
+// Cache Chart.js instances so we can destroy them before re-rendering.
+const _charts = {};
+
 async function load() {
-  const res = await fetch("data/snapshot.json", {cache: "no-store"});
+  await refreshAll();
+  schedulePoll();
+  // The LIVE pill / "age" text refreshes every second purely client-side,
+  // so the seconds counter ticks even between server refreshes.
+  if (_pillHandle) clearInterval(_pillHandle);
+  _pillHandle = setInterval(updateLivePillOnly, 1000);
+}
+
+function schedulePoll() {
+  if (_pollHandle) clearTimeout(_pollHandle);
+  const session = currentEtSession();
+  // Poll cadence: 20s while live, 5 min in pre/after, 30 min when closed.
+  const ms = session === "OPEN" ? 20_000
+           : (session === "PRE" || session === "AFTER") ? 5 * 60_000
+           : 30 * 60_000;
+  _pollHandle = setTimeout(async () => {
+    try { await refreshAll(); } catch (e) { /* swallow transient errors */ }
+    schedulePoll();
+  }, ms);
+}
+
+async function refreshAll() {
+  const res = await fetch("data/snapshot.json?cb=" + Date.now(), {cache: "no-store"});
   const d = await res.json();
+  if (d.generated_at === _lastSnapshotTimestamp) {
+    // Snapshot hasn't changed server-side. Still refresh the pill in case
+    // the market session boundary was crossed (e.g. 4 PM ET).
+    document.getElementById("generated-at").innerHTML =
+      "Snapshot: " + escape(d.generated_at || "") + livePill(d.generated_at, d.market_session);
+    return;
+  }
+  _lastSnapshotTimestamp = d.generated_at;
+  // Destroy any prior Chart instances before rebuilding to prevent leaks.
+  for (const k of Object.keys(_charts)) {
+    try { _charts[k].destroy(); } catch (e) {}
+    delete _charts[k];
+  }
+  renderWith(d);
+}
+
+function renderWith(d) {
 
   document.getElementById("tagline").textContent = d.tagline || "";
   document.getElementById("generated-at").innerHTML =
@@ -391,6 +438,16 @@ function currentEtSession() {
   if (minutes >= 570 && minutes < 960)  return "OPEN";   // 9:30 AM–4:00 PM
   if (minutes >= 960 && minutes < 1200) return "AFTER";  // 4:00 PM–8:00 PM
   return "CLOSED";
+}
+
+// Lightweight per-second tick: refreshes only the LIVE pill (no fetch),
+// so the seconds-ago counter advances smoothly between server polls.
+function updateLivePillOnly() {
+  const el = document.getElementById("generated-at");
+  if (!el || _lastSnapshotTimestamp == null) return;
+  el.innerHTML =
+    "Snapshot: " + escape(_lastSnapshotTimestamp) +
+    livePill(_lastSnapshotTimestamp, null);
 }
 
 function livePill(generatedAt, snapshotSession) {
@@ -480,7 +537,7 @@ function renderNav(d) {
       pointRadius: 0,
     });
   }
-  new Chart(document.getElementById("navChart"), {
+  _charts.nav = new Chart(document.getElementById("navChart"), {
     type: "line",
     data: {datasets},
     options: {
@@ -506,7 +563,7 @@ function renderDonut(id, items) {
     c.parentElement.innerHTML = `<div class="empty">No exposure yet</div>`;
     return;
   }
-  new Chart(document.getElementById(id), {
+  _charts[id] = new Chart(document.getElementById(id), {
     type: "doughnut",
     data: {
       labels: items.map(i => i.name),
@@ -928,7 +985,7 @@ function renderDrawdown(curve) {
     return;
   }
   const data = curve.map(p => ({x: p.date, y: p.value * 100}));
-  new Chart(canvas, {
+  _charts.dd = new Chart(canvas, {
     type: "line",
     data: {datasets: [{
       label: "Drawdown",

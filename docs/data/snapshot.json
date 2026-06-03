@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-03T22:07:57.329480Z",
+  "generated_at": "2026-06-03T22:12:48.401914Z",
   "market_session": "AFTER",
   "fund_name": "Convex Capital",
   "tagline": "Lose small. Win big. \u2014 Paper-traded portfolio. Hypothetical performance for educational purposes only.",
@@ -13,7 +13,7 @@
     "open_positions": 17
   },
   "metrics": {
-    "beta_spy": 1.6451579850977338
+    "beta_spy": 1.6451602481764305
   },
   "nav_curve": [
     {
@@ -596,16 +596,16 @@
     {
       "ticker": "CEG",
       "hv20": 0.5572489467593438,
-      "garch": 0.5772128927148437,
-      "expansion": 0.03582590163983138,
+      "garch": 0.5772128612759336,
+      "expansion": 0.03582584522176148,
       "regime": "HIGH",
       "signal": "WEAK"
     },
     {
       "ticker": "CMI",
       "hv20": 0.4759486804942338,
-      "garch": 0.3490273745027124,
-      "expansion": -0.26667014994079613,
+      "garch": 0.34902742397803227,
+      "expansion": -0.2666700459898411,
       "regime": "EXTREME",
       "signal": "WEAK"
     },
@@ -644,16 +644,16 @@
     {
       "ticker": "JAKK",
       "hv20": 0.26395912018759987,
-      "garch": 0.4620038355690668,
-      "expansion": 0.7502855564934202,
+      "garch": 0.46200354025885176,
+      "expansion": 0.7502844377208813,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
     {
       "ticker": "KSPI",
       "hv20": 0.2687743843765292,
-      "garch": 0.4605432579974009,
-      "expansion": 0.7134938623921113,
+      "garch": 0.460543218007122,
+      "expansion": 0.7134937136045734,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
@@ -676,8 +676,8 @@
     {
       "ticker": "PYPL",
       "hv20": 0.2088217575093579,
-      "garch": 0.3914224044876028,
-      "expansion": 0.8744330531269568,
+      "garch": 0.391422381138961,
+      "expansion": 0.8744329413156108,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
@@ -692,8 +692,8 @@
     {
       "ticker": "VST",
       "hv20": 0.5155157700725985,
-      "garch": 0.5748569438708613,
-      "expansion": 0.11511029777014566,
+      "garch": 0.5748569287429968,
+      "expansion": 0.11511026842504044,
       "regime": "HIGH",
       "signal": "BASE"
     },
@@ -1064,49 +1064,49 @@
     {
       "scenario": "COVID Crash (Feb-Mar 2020)",
       "market_move": -0.339,
-      "portfolio_impact": -0.5577085569481318,
-      "stressed_nav": 417885.59952737886,
-      "pnl": -526933.9444455141,
+      "portfolio_impact": -0.55770932413181,
+      "stressed_nav": 417884.8746772459,
+      "pnl": -526934.669295647,
       "description": "Rapid 33.9% selloff in SPY over 23 trading days as COVID-19 spread."
     },
     {
       "scenario": "2022 Rate Shock (Jan-Oct)",
       "market_move": -0.252,
-      "portfolio_impact": -0.4145798122446289,
-      "stressed_nav": 553116.4348275551,
-      "pnl": -391703.10914533783,
+      "portfolio_impact": -0.4145803825404605,
+      "stressed_nav": 553115.8960009075,
+      "pnl": -391703.6479719854,
       "description": "Grinding 9-month decline as the Fed hiked rates aggressively."
     },
     {
       "scenario": "GFC 2008-09",
       "market_move": -0.565,
-      "portfolio_impact": -0.9295142615802195,
-      "stressed_nav": 66596.30323036958,
-      "pnl": -878223.2407425233,
+      "portfolio_impact": -0.9295155402196831,
+      "stressed_nav": 66595.09514681474,
+      "pnl": -878224.4488260782,
       "description": "Credit crisis bear market; SPY drew down 56.5% from Oct 2007 peak."
     },
     {
       "scenario": "Dot-Com Bust (2000-02)",
       "market_move": -0.491,
-      "portfolio_impact": -0.8077725706829872,
-      "stressed_nav": 181620.2321063815,
-      "pnl": -763199.3118665114,
+      "portfolio_impact": -0.8077736818546274,
+      "stressed_nav": 181619.18224969917,
+      "pnl": -763200.3617231938,
       "description": "Tech bubble burst; SPY -49.1% peak-to-trough over 30 months."
     },
     {
       "scenario": "Black Monday (Oct 1987)",
       "market_move": -0.204,
-      "portfolio_impact": -0.3356122289599377,
-      "stressed_nav": 627726.5508552385,
-      "pnl": -317092.99311765446,
+      "portfolio_impact": -0.3356126906279918,
+      "stressed_nav": 627726.114662238,
+      "pnl": -317093.4293106549,
       "description": "Flash crash; -20.4% on a single trading day."
     },
     {
       "scenario": "Aug 2024 Yen Carry Unwind",
       "market_move": -0.084,
-      "portfolio_impact": -0.13819327074820964,
-      "stressed_nav": 814251.8409244469,
-      "pnl": -130567.70304844598,
+      "portfolio_impact": -0.13819346084682016,
+      "stressed_nav": 814251.6613155644,
+      "pnl": -130567.8826573285,
       "description": "Yen carry unwind shock; SPY -8.4% in one week."
     }
   ],
@@ -1205,12 +1205,12 @@
     }
   ],
   "correlation_tail_risk": {
-    "current_correlation_avg": 0.1896000382583309,
-    "port_vol_annual_current": 0.2669471582706739,
-    "port_vol_annual_stressed_corr1": 0.5167319211443593,
-    "vol_expansion_pct": 0.9357086417095832,
-    "pnl_3sigma_1d_current": -41366.84436102613,
-    "pnl_3sigma_1d_stressed": -80074.15810989361,
+    "current_correlation_avg": 0.18960002072883345,
+    "port_vol_annual_current": 0.2669471517390841,
+    "port_vol_annual_stressed_corr1": 0.5167319189951325,
+    "vol_expansion_pct": 0.9357086810208397,
+    "pnl_3sigma_1d_current": -41366.84334887354,
+    "pnl_3sigma_1d_stressed": -80074.1577768437,
     "n_positions": 17,
     "method": "Portfolio variance recomputed with all cross-correlations forced to 1.0, holding individual vols constant. 3\u03c3 1-day P&L uses stressed annualized vol / \u221a252."
   },
@@ -2681,7 +2681,7 @@
       "ticker": "PYPL",
       "title": "Apple's new feature takes the pain out of splitting the check",
       "publisher": "Yahoo Finance Video",
-      "link": "https://finance.yahoo.com/video/apples-new-feature-takes-the-pain-out-of-splitting-the-check-195914584.html",
+      "link": "https://finance.yahoo.com/video/apples-feature-takes-pain-splitting-195914495.html",
       "published": "2026-06-03T19:59:14Z",
       "category": "OTHER",
       "priority": "LOW",

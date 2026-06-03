@@ -12,10 +12,11 @@ name: Refresh snapshot
 # why minute offsets start at :05.
 on:
   schedule:
-    # Live during regular trading — every 15 min.
+    # Live during regular trading — every 5 minutes (GitHub's cron minimum).
     # 13-20 UTC covers 9:00 AM-4:00 PM ET in EDT.
     # 14-21 UTC covers 9:00 AM-4:00 PM ET in EST. Union: 13-21 UTC.
-    - cron: "5,20,35,50 13-21 * * 1-5"
+    # Offset by 2 to avoid the top-of-hour load spike GitHub warns about.
+    - cron: "2-59/5 13-21 * * 1-5"
     # Single overnight refresh for SEC 8-K / earnings calendar / news.
     - cron: "5 10 * * 1-5"
   workflow_dispatch: {}
