@@ -251,13 +251,15 @@ def main(argv=None):
             "earnings_growth": info.earnings_growth,
         })
 
-    # Trade blotter
+    # Trade blotter — newest first, with execution time when available
     blotter = []
-    for _, t in trades.sort_values("date", ascending=False).iterrows():
+    sort_col = "datetime" if "datetime" in trades.columns else "date"
+    for _, t in trades.sort_values(sort_col, ascending=False).iterrows():
         if t["action"] == "DEPOSIT" or t["action"] == "WITHDRAW":
             continue
         blotter.append({
             "date": t["date"].strftime("%Y-%m-%d"),
+            "time": t["datetime"].strftime("%H:%M") if "datetime" in trades.columns else "",
             "ticker": t["ticker"],
             "action": t["action"],
             "shares": float(t["shares"]),

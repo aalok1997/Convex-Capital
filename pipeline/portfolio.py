@@ -52,8 +52,18 @@ class PortfolioState:
 
 def load_trades(path: str) -> pd.DataFrame:
     df = pd.read_csv(path)
-    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None)
-    df = df.sort_values("date").reset_index(drop=True)
+    # Optional intraday `time` column (HH:MM, market timezone). If present,
+    # it's combined with `date` into a full datetime so replay order matches
+    # actual execution sequence within a day. If absent, all same-day trades
+    # default to 16:00 (market close) and are processed alphabetically by ticker.
+    if "time" in df.columns:
+        df["time"] = df["time"].fillna("16:00").astype(str).str.strip()
+        df["datetime"] = pd.to_datetime(df["date"].astype(str) + " " + df["time"])
+    else:
+        df["datetime"] = pd.to_datetime(df["date"])
+    df["date"] = pd.to_datetime(df["date"]).dt.tz_localize(None).dt.normalize()
+    df["datetime"] = df["datetime"].dt.tz_localize(None)
+    df = df.sort_values(["datetime", "ticker"]).reset_index(drop=True)
     df["ticker"] = df["ticker"].astype(str).str.upper().str.strip()
     df["action"] = df["action"].astype(str).str.upper().str.strip()
     df["shares"] = df["shares"].astype(float)
