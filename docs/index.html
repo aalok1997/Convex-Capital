@@ -356,8 +356,8 @@ async function load() {
 function schedulePoll() {
   if (_pollHandle) clearTimeout(_pollHandle);
   const session = currentEtSession();
-  // Poll cadence: 20s while live, 5 min in pre/after, 30 min when closed.
-  const ms = session === "OPEN" ? 20_000
+  // Poll cadence: 10s while live, 5 min in pre/after, 30 min when closed.
+  const ms = session === "OPEN" ? 10_000
            : (session === "PRE" || session === "AFTER") ? 5 * 60_000
            : 30 * 60_000;
   _pollHandle = setTimeout(async () => {
