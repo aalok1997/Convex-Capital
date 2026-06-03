@@ -93,6 +93,20 @@ def main(argv=None):
     spy_close = bench_hist["SPY"].df["Close"] if not bench_hist["SPY"].df.empty else pd.Series(dtype=float)
     bench_curves = benchmark_curves(start, end, bench_hist)
 
+    # Live intraday quote — only used DURING the regular trading session.
+    #   PRE-market  → keep prior daily close (don't pick up pre-market trades)
+    #   OPEN        → use live_price (intraday tick)
+    #   AFTER-hours → use today's official close (don't pick up after-hours)
+    #   CLOSED      → most recent daily close
+    # In every non-OPEN session we just fall through to the daily close.
+    session_now = _market_session()
+    live_quotes: Dict[str, float] = {}
+    if session_now == "OPEN":
+        for tk in state.positions.keys():
+            lp = src.live_price(tk)
+            if lp is not None:
+                live_quotes[tk] = lp
+
     # Holdings panel
     holdings = []
     sector_value = defaultdict(float)
@@ -100,7 +114,8 @@ def main(argv=None):
     total_equity = 0.0
     for tk, pos in state.positions.items():
         h = histories.get(tk)
-        last = float(h.df["Close"].iloc[-1]) if h and not h.df.empty else 0.0
+        daily_close = float(h.df["Close"].iloc[-1]) if h and not h.df.empty else 0.0
+        last = live_quotes.get(tk, daily_close)
         mkt_value = pos.shares * last
         unrealized = (last - pos.cost_basis) * pos.shares
         info = infos.get(tk)
@@ -281,6 +296,7 @@ def main(argv=None):
 
     snapshot = {
         "generated_at": dt.datetime.utcnow().isoformat() + "Z",
+        "market_session": _market_session(),
         "fund_name": "Convex Capital",
         "tagline": "Lose small. Win big. — Paper-traded portfolio. Hypothetical performance for educational purposes only.",
         "summary": {
@@ -387,6 +403,30 @@ def _none_if_nan(x):
     if isinstance(x, float) and (math.isnan(x) or math.isinf(x)):
         return None
     return x
+
+
+def _market_session() -> str:
+    """Classify the current US Eastern time into a market session tag.
+
+    Returns one of: PRE | OPEN | AFTER | CLOSED. Used by the dashboard to
+    pick the correct freshness-pill color (LIVE vs EXTENDED vs CLOSED).
+    """
+    try:
+        import zoneinfo
+        now_et = dt.datetime.now(zoneinfo.ZoneInfo("America/New_York"))
+    except Exception:
+        # Crude fallback: assume EDT (UTC-4) — close enough for the pill color.
+        now_et = dt.datetime.utcnow() - dt.timedelta(hours=4)
+    if now_et.weekday() >= 5:  # Sat/Sun
+        return "CLOSED"
+    minutes = now_et.hour * 60 + now_et.minute
+    if 240 <= minutes < 570:    # 4:00 AM – 9:30 AM ET
+        return "PRE"
+    if 570 <= minutes < 960:    # 9:30 AM – 4:00 PM ET
+        return "OPEN"
+    if 960 <= minutes < 1200:   # 4:00 PM – 8:00 PM ET
+        return "AFTER"
+    return "CLOSED"
 
 
 def _published_to_epoch(s: str) -> float:

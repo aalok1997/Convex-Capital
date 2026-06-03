@@ -127,6 +127,24 @@
     padding: 8px 14px; border-radius: 6px; font-size: 12px; margin-bottom: 16px;
     display: none; }
   .stale-banner.show { display: block; }
+  .live-pill { display: inline-flex; align-items: center; gap: 6px;
+    padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; vertical-align: middle; margin-left: 8px; }
+  .live-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
+  .live-LIVE     { background: rgba(74,222,128,0.15); color: var(--accent); }
+  .live-LIVE .dot { background: var(--accent); animation: pulse 1.5s ease-in-out infinite; }
+  .live-PRE      { background: rgba(251,191,36,0.15); color: var(--warn); }
+  .live-PRE .dot { background: var(--warn); }
+  .live-AFTER    { background: rgba(251,191,36,0.15); color: var(--warn); }
+  .live-AFTER .dot { background: var(--warn); }
+  .live-CLOSED   { background: rgba(127,138,163,0.15); color: var(--muted); }
+  .live-CLOSED .dot { background: var(--muted); }
+  .live-STALE    { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .live-STALE .dot { background: var(--danger); }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.35; }
+  }
   .cat-badge { display: inline-block; padding: 1px 6px; border-radius: 3px;
     font-size: 9px; font-weight: 700; letter-spacing: 0.06em; margin-right: 6px;
     vertical-align: middle; }
@@ -323,8 +341,8 @@ async function load() {
   const d = await res.json();
 
   document.getElementById("tagline").textContent = d.tagline || "";
-  document.getElementById("generated-at").textContent =
-    "Snapshot: " + (d.generated_at || "");
+  document.getElementById("generated-at").innerHTML =
+    "Snapshot: " + escape(d.generated_at || "") + livePill(d.generated_at, d.market_session);
   document.getElementById("footer-date").textContent =
     (d.generated_at || "").slice(0, 10);
   renderStaleBanner(d.generated_at);
@@ -351,6 +369,42 @@ async function load() {
   renderValuation(d.fundamentals);
   renderProfitability(d.fundamentals);
   wireTabs();
+}
+
+// Determine the current US-Eastern market session via the browser's clock.
+// Used to color the freshness pill — independent of when the snapshot was
+// generated, so the pill is correct even between server refreshes.
+function currentEtSession() {
+  const now = new Date();
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/New_York",
+    hour: "2-digit", minute: "2-digit", weekday: "short", hour12: false,
+  }).formatToParts(now);
+  const lookup = Object.fromEntries(parts.map(p => [p.type, p.value]));
+  const dow = lookup.weekday;
+  if (dow === "Sat" || dow === "Sun") return "CLOSED";
+  const h = parseInt(lookup.hour, 10);
+  const m = parseInt(lookup.minute, 10);
+  // Intl returns "24" for hour 0 in some browsers — normalize.
+  const minutes = (isFinite(h) ? h % 24 : 0) * 60 + (isFinite(m) ? m : 0);
+  if (minutes >= 240 && minutes < 570)  return "PRE";    // 4:00 AM–9:30 AM
+  if (minutes >= 570 && minutes < 960)  return "OPEN";   // 9:30 AM–4:00 PM
+  if (minutes >= 960 && minutes < 1200) return "AFTER";  // 4:00 PM–8:00 PM
+  return "CLOSED";
+}
+
+function livePill(generatedAt, snapshotSession) {
+  const session = currentEtSession();  // recomputed live in the browser
+  const ageMin = generatedAt ? Math.floor((Date.now() - new Date(generatedAt).getTime()) / 60000) : null;
+  const STALE_THRESHOLD = session === "OPEN" ? 30 : 240;  // 30 min during trading; 4h otherwise
+  const stale = ageMin != null && ageMin > STALE_THRESHOLD;
+  let kind, label;
+  if (stale)                  { kind = "STALE";   label = `STALE · ${ageMin}m old`; }
+  else if (session === "OPEN"){ kind = "LIVE";    label = "LIVE"; }
+  else if (session === "PRE") { kind = "PRE";     label = "PRE-MARKET · PRIOR CLOSE"; }
+  else if (session === "AFTER"){ kind = "AFTER";  label = "AFTER-HOURS · TODAY'S CLOSE"; }
+  else                        { kind = "CLOSED";  label = "MARKET CLOSED"; }
+  return ` <span class="live-pill live-${kind}"><span class="dot"></span>${label}</span>`;
 }
 
 function renderStaleBanner(generatedAt) {

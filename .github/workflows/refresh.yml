@@ -1,11 +1,29 @@
 name: Refresh snapshot
 
-# Runs every weekday at 21:30 UTC (~5:30pm ET, after US market close).
-# Adjust the cron if you'd rather refresh more or less often.
+# Pricing rule (per fund design):
+#   - Pre-market   → snapshot keeps prior day's close
+#   - 9:30 AM–4 PM → snapshot updates with live intraday quotes
+#   - After 4 PM   → snapshot locks at today's official close
+#
+# Cron windows reflect that policy. GitHub schedules are UTC and do NOT
+# auto-adjust for daylight savings, so windows are widened by an hour on
+# each side so EST and EDT are both covered. Schedules can be delayed
+# by minutes during load spikes (esp. at :00 of each hour), which is
+# why minute offsets start at :05.
 on:
   schedule:
-    - cron: "30 21 * * 1-5"
+    # Live during regular trading — every 15 min.
+    # 13-20 UTC covers 9:00 AM-4:00 PM ET in EDT.
+    # 14-21 UTC covers 9:00 AM-4:00 PM ET in EST. Union: 13-21 UTC.
+    - cron: "5,20,35,50 13-21 * * 1-5"
+    # Single overnight refresh for SEC 8-K / earnings calendar / news.
+    - cron: "5 10 * * 1-5"
   workflow_dispatch: {}
+
+# Avoid stacking up if a previous run is still in flight.
+concurrency:
+  group: refresh-snapshot
+  cancel-in-progress: false
 
 jobs:
   refresh:
@@ -21,10 +39,16 @@ jobs:
         run: pip install -r requirements.txt
       - name: Run pipeline
         run: python -m pipeline.run
-      - name: Commit snapshot
+      - name: Commit snapshot (only if changed)
         run: |
           git config user.name "convex-bot"
           git config user.email "convex-bot@users.noreply.github.com"
           git add docs/data/snapshot.json
-          git diff --cached --quiet || git commit -m "snapshot: $(date -u +%Y-%m-%d)"
-          git push
+          if ! git diff --cached --quiet; then
+            git commit -m "snapshot: $(date -u +'%Y-%m-%d %H:%MZ')"
+            # Rebase in case another run pushed while we were working
+            git pull --rebase --autostash
+            git push
+          else
+            echo "Snapshot unchanged — skipping commit."
+          fi

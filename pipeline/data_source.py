@@ -360,6 +360,39 @@ class YFinanceSource:
         df.index = pd.to_datetime(df.index).tz_localize(None)
         return PriceHistory(ticker=ticker, df=df[["Open", "High", "Low", "Close", "Volume"]])
 
+    def live_price(self, ticker: str) -> Optional[float]:
+        """Latest available traded price, including pre-market and after-hours.
+
+        Tries `fast_info.last_price` first (Yahoo's normalized intraday quote);
+        falls back to `info['currentPrice']`. Returns None if neither is
+        available — caller should fall back to the most recent daily close.
+        """
+        yf = self._yf()
+        try:
+            t = yf.Ticker(ticker)
+            try:
+                fi = t.fast_info
+                lp = getattr(fi, "last_price", None)
+                if lp is None and isinstance(fi, dict):
+                    lp = fi.get("last_price") or fi.get("lastPrice")
+                if lp is not None and not math.isnan(float(lp)) and float(lp) > 0:
+                    return float(lp)
+            except Exception:
+                pass
+            try:
+                inf = t.info or {}
+                for key in ("currentPrice", "regularMarketPrice",
+                            "postMarketPrice", "preMarketPrice"):
+                    v = inf.get(key)
+                    if v is not None and not math.isnan(float(v)) and float(v) > 0:
+                        return float(v)
+            except Exception:
+                pass
+        finally:
+            if self.sleep:
+                time.sleep(self.sleep)
+        return None
+
     def info(self, ticker: str) -> TickerInfo:
         yf = self._yf()
         t = yf.Ticker(ticker)
@@ -574,4 +607,8 @@ class SampleSource:
         return []
 
     def next_earnings(self, ticker: str) -> Optional[dict]:
+        return None
+
+    def live_price(self, ticker: str) -> Optional[float]:
+        # Sample source returns None so run.py falls back to the daily close.
         return None
