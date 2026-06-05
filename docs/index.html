@@ -241,8 +241,13 @@
       <div id="risk-metrics"></div>
     </div>
     <div class="panel">
-      <h2>Correlation Matrix &middot; 252-day log returns</h2>
-      <div id="corr-matrix"></div>
+      <h2>Correlation Matrix</h2>
+      <div class="tabs" id="corr-tabs">
+        <button class="tab active" data-tab="raw">Raw Returns</button>
+        <button class="tab" data-tab="residual">Residual (after factors)</button>
+      </div>
+      <div class="tab-pane active" data-pane="raw"><div id="corr-matrix"></div></div>
+      <div class="tab-pane" data-pane="residual"><div id="corr-residual"></div></div>
     </div>
   </div>
 
@@ -436,7 +441,7 @@ function renderWith(d) {
   renderFactor(d.factor_stress);
   renderCorrTail(d.correlation_tail_risk);
   renderLiquidity(d.liquidity);
-  renderCorrelation(d.correlation);
+  renderCorrelation(d.correlation, d.residual_correlation);
   renderRiskBudget(d.risk_budget);
   renderPortfolioFactors(d.portfolio_factor_exposure);
   renderTickerFactors(d.factor_exposures);
@@ -947,9 +952,20 @@ function renderFactorCorrelation(fc) {
   el.innerHTML = html;
 }
 
-function renderCorrelation(c) {
+function renderCorrelation(c, residual) {
+  renderCorrMatrix("corr-matrix", c,
+    "Pearson correlation of trailing 252-day log returns. " +
+    "Captures total co-movement including shared factor exposure.");
+  renderCorrMatrix("corr-residual", residual,
+    "Pearson correlation of OLS residuals after stripping the 8-factor model " +
+    "(Market / Size / SMID Value / Momentum / Quality / Profitability / Liquidity / Credit). " +
+    "Low values here = true idiosyncratic diversification. High values = stocks share " +
+    "stock-specific risk the factor model can't capture (paired thematic bet, shared customer, etc).");
+}
+
+function renderCorrMatrix(domId, c, caption) {
   if (!c || !c.tickers || c.tickers.length === 0) {
-    document.getElementById("corr-matrix").innerHTML =
+    document.getElementById(domId).innerHTML =
       `<div class="empty">Need at least 2 positions to compute correlation</div>`;
     return;
   }
@@ -972,7 +988,10 @@ function renderCorrelation(c) {
     html += `</tr>`;
   }
   html += `</tbody></table>`;
-  document.getElementById("corr-matrix").innerHTML = html;
+  if (caption) {
+    html += `<div class="muted" style="margin-top: 8px; font-size: 10px;">${caption}</div>`;
+  }
+  document.getElementById(domId).innerHTML = html;
 }
 
 function renderBlotter(rows) {

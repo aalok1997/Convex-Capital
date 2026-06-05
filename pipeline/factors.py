@@ -152,6 +152,65 @@ def factor_correlation(factor_returns: pd.DataFrame) -> dict:
     return {"factors": factors, "matrix": matrix}
 
 
+def residual_correlation(ticker_returns: Dict[str, pd.Series],
+                         factor_returns: pd.DataFrame,
+                         lookback: int = 252) -> dict:
+    """Correlation matrix of factor-model residuals.
+
+    For each ticker we OLS-regress its returns on the factor returns and
+    keep the residuals (idiosyncratic component). The Pearson correlation
+    of those residuals between every pair of tickers is the "true"
+    diversification view: it strips out common factor risk (market beta,
+    size, value, momentum, quality, profitability, liquidity, credit) and
+    shows what's left.
+
+    Interpretation:
+      - Residual correlation near 0 → genuine diversifier even though the
+        raw return correlation might be high (the co-movement is explained
+        by common factors).
+      - Residual correlation high (>0.4) → stocks share idiosyncratic risk
+        the factor model doesn't capture (e.g. same customer, same supply
+        chain, paired thematic bet). Two such positions don't reduce risk
+        much even if they look diversified on a raw correlation view.
+    """
+    if not ticker_returns or factor_returns is None or factor_returns.empty:
+        return {"tickers": [], "matrix": []}
+    tickers = sorted(ticker_returns.keys())
+    residuals: Dict[str, pd.Series] = {}
+    for tk in tickers:
+        y = ticker_returns[tk]
+        if y is None or y.empty:
+            continue
+        df = pd.concat([y.rename("y"), factor_returns],
+                       axis=1, join="inner").dropna().tail(lookback)
+        if len(df) < 60:
+            continue
+        Y = df["y"].values
+        X = df.drop(columns=["y"]).values
+        X = np.column_stack([np.ones(len(X)), X])
+        try:
+            beta, *_ = np.linalg.lstsq(X, Y, rcond=None)
+        except np.linalg.LinAlgError:
+            continue
+        resid = Y - X @ beta
+        residuals[tk] = pd.Series(resid, index=df.index)
+    if not residuals:
+        return {"tickers": [], "matrix": []}
+    resid_df = pd.DataFrame(residuals).dropna()
+    if resid_df.empty:
+        return {"tickers": [], "matrix": []}
+    corr = resid_df.corr()
+    tk_list = list(corr.columns)
+    matrix = []
+    for i in range(len(tk_list)):
+        row = []
+        for j in range(len(tk_list)):
+            v = corr.iloc[i, j]
+            row.append(None if pd.isna(v) else round(float(v), 3))
+        matrix.append(row)
+    return {"tickers": tk_list, "matrix": matrix}
+
+
 def portfolio_factor_exposure(holdings: List[dict],
                               loadings_by_ticker: Dict[str, dict]) -> dict:
     """Weighted-average factor exposure across the portfolio.

@@ -33,7 +33,7 @@ from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics,
                    monte_carlo_from_returns, risk_budget)
 from .factors import (FACTOR_PROXY_TICKERS, compute_factor_returns,
                       regress_loadings, factor_correlation,
-                      portfolio_factor_exposure)
+                      residual_correlation, portfolio_factor_exposure)
 
 
 BENCHMARKS = ("SPY", "IWM")
@@ -110,17 +110,19 @@ def main(argv=None):
     spy_close = bench_hist["SPY"].df["Close"] if not bench_hist["SPY"].df.empty else pd.Series(dtype=float)
     bench_curves = benchmark_curves(start, end, bench_hist)
 
-    # Live intraday quote — only used DURING the regular trading session.
-    #   PRE-market  → keep prior daily close (don't pick up pre-market trades)
-    #   OPEN        → use live_price (intraday tick)
-    #   AFTER-hours → use today's official close (don't pick up after-hours)
-    #   CLOSED      → most recent daily close
-    # In every non-OPEN session we just fall through to the daily close.
+    # Live quote policy (matches the fund's pricing rule):
+    #   PRE-market  → skip; keep prior daily close
+    #   OPEN        → live intraday tick (fast_info.last_price)
+    #   AFTER-hours → today's official regular-session close (regularMarketPrice)
+    #   CLOSED      → most recent regular-session close
+    # We need to query during AFTER/CLOSED too because yfinance's daily
+    # history endpoint sometimes lags by 24h, returning today's bar as NaN
+    # even after the official close; regularMarketPrice updates faster.
     session_now = _market_session()
     live_quotes: Dict[str, float] = {}
-    if session_now == "OPEN":
+    if session_now != "PRE":
         for tk in state.positions.keys():
-            lp = src.live_price(tk)
+            lp = src.live_price(tk, session=session_now)
             if lp is not None:
                 live_quotes[tk] = lp
 
@@ -263,6 +265,14 @@ def main(argv=None):
         row.update(l["loadings"])
         factor_exposures_table.append(row)
     portfolio_factors = portfolio_factor_exposure(holdings, per_ticker_loadings)
+    # Residual correlation — what's left after stripping the 8-factor exposure
+    ticker_returns_for_resid = {}
+    for tk in tickers:
+        ph = histories.get(tk)
+        if ph is None or ph.df.empty:
+            continue
+        ticker_returns_for_resid[tk] = np.log(ph.df["Close"] / ph.df["Close"].shift(1)).dropna()
+    residual_corr = residual_correlation(ticker_returns_for_resid, factor_rets)
 
     # Income / dividend tracker
     income_rows = []
@@ -380,6 +390,7 @@ def main(argv=None):
         "signals": signals_panel,
         "volatility": vol_rows,
         "correlation": _corr_to_dict(cm),
+        "residual_correlation": residual_corr,
         "factor_correlation": factor_corr,
         "factor_exposures": factor_exposures_table,
         "portfolio_factor_exposure": portfolio_factors,
