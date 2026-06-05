@@ -30,7 +30,7 @@ from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics,
                    monte_carlo, factor_stress, correlation_tail_stress,
                    liquidity_stress, drawdown_curve,
                    synthetic_portfolio_returns, synthetic_portfolio_metrics,
-                   monte_carlo_from_returns)
+                   monte_carlo_from_returns, risk_budget)
 from .factors import (FACTOR_PROXY_TICKERS, compute_factor_returns,
                       regress_loadings, factor_correlation,
                       portfolio_factor_exposure)
@@ -74,6 +74,7 @@ def main(argv=None):
 
     filings: Dict[str, List[NewsItem]] = {}
     analyst: Dict[str, List[NewsItem]] = {}
+    insider: Dict[str, List[NewsItem]] = {}
     earnings_dates: List[dict] = []
     for tk in tickers:
         print(f"  fetching {tk}...")
@@ -82,6 +83,7 @@ def main(argv=None):
         news[tk] = src.news(tk, limit=8)
         filings[tk] = src.sec_filings(tk, since_days=120, limit=6)
         analyst[tk] = src.analyst_actions(tk, since_days=90, limit=4)
+        insider[tk] = src.sec_insider_trades(tk, since_days=60, limit=6)
         nxt = src.next_earnings(tk)
         if nxt:
             earnings_dates.append(nxt)
@@ -153,6 +155,8 @@ def main(argv=None):
             "cost_basis": pos.cost_basis,
             "market_value": mkt_value,
             "unrealized_pnl": unrealized,
+            "short_percent_of_float": info.short_percent_of_float if info else None,
+            "short_ratio": info.short_ratio if info else None,
         })
     holdings.sort(key=lambda h: -h["market_value"])
 
@@ -234,6 +238,7 @@ def main(argv=None):
     factor = factor_stress(holdings, nav_now)
     corr_tail = correlation_tail_stress(holdings, closes_for_corr, nav_now)
     liquidity = liquidity_stress(holdings, histories)
+    risk_budget_rows = risk_budget(holdings, closes_for_corr, nav_now)
     dd_series = drawdown_curve(nav)
 
     # 5-factor risk model — Market / Size / Value / Momentum / Quality
@@ -330,8 +335,8 @@ def main(argv=None):
     news_flat = []
     seen = set()  # dedupe by (ticker, title) — Yahoo sometimes reposts
     for tk in tickers:
-        for n in (list(filings.get(tk, [])) + list(analyst.get(tk, [])) +
-                  list(news.get(tk, []))):
+        for n in (list(insider.get(tk, [])) + list(filings.get(tk, [])) +
+                  list(analyst.get(tk, [])) + list(news.get(tk, []))):
             key = (n.ticker, (n.title or "").strip().lower())
             if key in seen:
                 continue
@@ -383,6 +388,7 @@ def main(argv=None):
         "factor_stress": _scrub(factor),
         "correlation_tail_risk": _scrub(corr_tail),
         "liquidity": liquidity,
+        "risk_budget": risk_budget_rows,
         "income": {
             "total_annual_income": total_income,
             "dividend_income": total_dividend_income,

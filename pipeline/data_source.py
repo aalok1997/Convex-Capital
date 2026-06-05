@@ -136,6 +136,11 @@ class TickerInfo:
     dividend_yield: Optional[float] = None
     ex_dividend_date: Optional[str] = None
     last_dividend_amount: Optional[float] = None
+    # Short-interest snapshot (Yahoo updates semi-monthly from FINRA)
+    short_percent_of_float: Optional[float] = None
+    short_ratio: Optional[float] = None      # days-to-cover at avg volume
+    shares_short: Optional[float] = None
+    float_shares: Optional[float] = None
 
 
 @dataclass
@@ -265,6 +270,58 @@ class YFinanceSource:
                 ticker=ticker, title=title, publisher="SEC EDGAR",
                 link=link, published=filing_date,
                 category=best[0], priority=best[1], source="sec",
+            ))
+            if len(out) >= limit:
+                break
+        return out
+
+    def sec_insider_trades(self, ticker: str, since_days: int = 60,
+                           limit: int = 8) -> List[NewsItem]:
+        """Return recent Form 4 insider transactions as NewsItem records.
+
+        Form 4 is filed by company officers, directors, and 10% owners within
+        2 business days of a transaction. We don't parse the XML transaction
+        details here — we surface the filing with a link to the SEC page so
+        the viewer can see who, what, and at what price. The presence of any
+        Form 4 in the last 60 days is the signal; the details are one click
+        away. HIGH-priority because small-cap insider activity is one of the
+        higher-signal data feeds available.
+        """
+        cik = self._load_cik_map().get(ticker.upper())
+        if not cik:
+            return []
+        import requests
+        try:
+            url = f"https://data.sec.gov/submissions/CIK{cik}.json"
+            r = requests.get(url, headers=self.SEC_HEADERS, timeout=15)
+            r.raise_for_status()
+            data = r.json()
+        except Exception:
+            return []
+        if self.sleep:
+            time.sleep(self.sleep)
+        recent = data.get("filings", {}).get("recent", {}) or {}
+        forms = recent.get("form", [])
+        dates = recent.get("filingDate", [])
+        accs = recent.get("accessionNumber", [])
+        prims = recent.get("primaryDocument", [])
+        cutoff = (dt.date.today() - dt.timedelta(days=since_days)).isoformat()
+        out: List[NewsItem] = []
+        for i, form in enumerate(forms):
+            if form not in ("4", "4/A"):
+                continue
+            filing_date = dates[i] if i < len(dates) else ""
+            if filing_date < cutoff:
+                continue
+            acc = accs[i].replace("-", "") if i < len(accs) else ""
+            doc = prims[i] if i < len(prims) else ""
+            link = (f"https://www.sec.gov/Archives/edgar/data/{int(cik)}/"
+                    f"{acc}/{doc}") if acc and doc else ""
+            label = "Form 4 amendment" if form == "4/A" else "Form 4"
+            out.append(NewsItem(
+                ticker=ticker, title=f"{label} · insider transaction reported",
+                publisher="SEC EDGAR", link=link, published=filing_date,
+                category="INSIDER", priority="HIGH", source="sec",
             ))
             if len(out) >= limit:
                 break
@@ -445,6 +502,10 @@ class YFinanceSource:
             dividend_yield=_safe_float(info.get("dividendYield")),
             ex_dividend_date=ex_div,
             last_dividend_amount=last_div,
+            short_percent_of_float=_safe_float(info.get("shortPercentOfFloat")),
+            short_ratio=_safe_float(info.get("shortRatio")),
+            shares_short=_safe_float(info.get("sharesShort")),
+            float_shares=_safe_float(info.get("floatShares")),
         )
 
     def news(self, ticker: str, limit: int = 10) -> List[NewsItem]:
@@ -610,6 +671,10 @@ class SampleSource:
 
     def analyst_actions(self, ticker: str, since_days: int = 60,
                         limit: int = 5) -> List[NewsItem]:
+        return []
+
+    def sec_insider_trades(self, ticker: str, since_days: int = 60,
+                           limit: int = 8) -> List[NewsItem]:
         return []
 
     def next_earnings(self, ticker: str) -> Optional[dict]:

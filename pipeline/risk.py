@@ -252,6 +252,53 @@ def factor_stress(holdings: List[dict], current_nav: float) -> List[dict]:
 # (the "diversification fails when you need it most" scenario).
 # ---------------------------------------------------------------------------
 
+def risk_budget(holdings: List[dict],
+                closes: Dict[str, pd.Series],
+                current_nav: float,
+                lookback: int = 252) -> List[dict]:
+    """Marginal and total risk contribution per position.
+
+    Decomposes portfolio variance into per-position contributions:
+        TRC_i = w_i × (Σ × w)_i / σ_p
+    where Σ is the asset covariance matrix, w the weight vector, and σ_p
+    portfolio volatility. Sum of TRC across positions = σ_p (by definition).
+    The risk-share column (TRC_i / σ_p) is what tells you which position is
+    driving overall risk — often very different from raw market-value weight
+    when a few high-vol names dominate.
+    """
+    if not holdings or current_nav <= 0:
+        return []
+    weights = {}
+    for h in holdings:
+        weights[h["ticker"]] = h.get("market_value", 0) / current_nav
+    tickers = [t for t in weights if t in closes and not closes[t].empty]
+    if len(tickers) < 2:
+        return []
+    rets_df = pd.DataFrame({t: np.log(closes[t] / closes[t].shift(1))
+                            for t in tickers}).dropna().tail(lookback)
+    if rets_df.empty:
+        return []
+    w = np.array([weights[t] for t in tickers])
+    cov = rets_df.cov().values * 252  # annualize covariance
+    port_var = float(w @ cov @ w)
+    if port_var <= 0:
+        return []
+    port_vol = math.sqrt(port_var)
+    marginal = cov @ w / port_vol         # marginal contribution to vol
+    total_contrib = w * marginal          # total contribution to vol
+    out = []
+    for i, tk in enumerate(tickers):
+        out.append({
+            "ticker": tk,
+            "weight": float(w[i]),
+            "marginal_risk": float(marginal[i]),
+            "total_risk_contribution": float(total_contrib[i]),
+            "risk_share": float(total_contrib[i] / port_vol) if port_vol > 0 else 0.0,
+        })
+    out.sort(key=lambda r: -r["risk_share"])
+    return out
+
+
 def correlation_tail_stress(holdings: List[dict],
                             closes: Dict[str, pd.Series],
                             current_nav: float,

@@ -36,11 +36,24 @@ import pandas as pd
 FACTOR_ETF_INPUTS: Dict[str, List[str]] = {
     # Factor name → [long-leg ETF, short-leg ETF] (long minus short = factor)
     # Single-element list means the factor is just that ETF's return.
-    "Market":   ["SPY"],
-    "Size":     ["IWM", "SPY"],
-    "Value":    ["IWD", "IWF"],
-    "Momentum": ["MTUM", "SPY"],
-    "Quality":  ["QUAL", "SPY"],
+    #
+    # Tuned for a small/mid-cap-focused portfolio:
+    #   - Value uses Russell 2000 small-cap value/growth (IWN/IWO) instead
+    #     of the large-cap IWD/IWF — the right value factor for SMID names.
+    #   - Profitability split out from Quality (small caps are bimodal:
+    #     wildly profitable cash-cows vs cash-burners).
+    #   - Liquidity uses microcap-minus-smallcap (IWC − IWM) — captures the
+    #     illiquidity premium that drives a lot of SMID returns.
+    #   - Credit (HYG − LQD) catches small-cap sensitivity to credit cycles
+    #     even when not directly held on credit.
+    "Market":        ["SPY"],
+    "Size":          ["IWM", "SPY"],
+    "Value (SMID)":  ["IWN", "IWO"],
+    "Momentum":      ["MTUM", "SPY"],
+    "Quality":       ["QUAL", "SPY"],
+    "Profitability": ["COWZ", "SPY"],
+    "Liquidity":     ["IWC", "IWM"],
+    "Credit":        ["HYG", "LQD"],
 }
 
 # All ETFs we need to fetch to build the factor returns. The pipeline pulls

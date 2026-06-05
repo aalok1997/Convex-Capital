@@ -157,6 +157,7 @@
   .cat-BUYBACK_DIVIDEND   { background: #14532d; color: #86efac; }
   .cat-DISCLOSURE         { background: #2b3344; color: #94a3b8; }
   .cat-FILING             { background: #2b3344; color: #94a3b8; }
+  .cat-INSIDER            { background: #581c87; color: #f3e8ff; }
   .cat-OTHER              { background: #1f2632; color: var(--muted); }
   .news-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
   .news-row:last-child { border-bottom: none; }
@@ -245,14 +246,25 @@
     </div>
   </div>
 
-  <!-- Factor Risk Model (5-factor) -->
+  <!-- Risk Budget (marginal risk contribution per position) -->
   <div class="panel" style="margin-bottom: 16px;">
-    <h2>Factor Risk Model &middot; Market / Size / Value / Momentum / Quality</h2>
+    <h2>Risk Budget &middot; Where Risk Actually Lives</h2>
     <div class="muted" style="font-size: 11px; margin-bottom: 12px;">
-      Each holding's 252-day returns OLS-regressed on factor returns from liquid ETF proxies.
-      Loadings are interpretable as betas:
-      Size&gt;0 small-cap tilt &middot; Value&gt;0 value tilt &middot;
-      Momentum&gt;0 momentum-positive &middot; Quality&gt;0 quality tilt.
+      A position's % of NAV ≠ its % of total portfolio risk. High-vol or highly-correlated
+      names contribute disproportionately. <strong>Risk Share</strong> = position's contribution
+      to portfolio volatility / total portfolio volatility (sums to 100%).
+    </div>
+    <div id="risk-budget"></div>
+  </div>
+
+  <!-- Factor Risk Model -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Factor Risk Model &middot; 8-factor SMID-tuned model</h2>
+    <div class="muted" style="font-size: 11px; margin-bottom: 12px;">
+      Each holding's 252-day returns OLS-regressed on 8 factor returns from ETF proxies, tuned
+      for small/mid-cap portfolios: Market (SPY) · Size (IWM−SPY) · Value SMID (IWN−IWO) ·
+      Momentum (MTUM−SPY) · Quality (QUAL−SPY) · Profitability (COWZ−SPY) ·
+      Liquidity (IWC−IWM) · Credit (HYG−LQD). Loadings are interpretable as betas.
     </div>
     <div class="tabs" id="factor-tabs">
       <button class="tab active" data-tab="portfolio">Portfolio Exposure</button>
@@ -425,6 +437,7 @@ function renderWith(d) {
   renderCorrTail(d.correlation_tail_risk);
   renderLiquidity(d.liquidity);
   renderCorrelation(d.correlation);
+  renderRiskBudget(d.risk_budget);
   renderPortfolioFactors(d.portfolio_factor_exposure);
   renderTickerFactors(d.factor_exposures);
   renderFactorCorrelation(d.factor_correlation);
@@ -615,12 +628,24 @@ function renderHoldings(rows, summary) {
     return;
   }
   const nav = (summary && summary.nav) || rows.reduce((a, h) => a + h.market_value, 0);
+  // Short-interest cell formatter with squeeze-risk coloring:
+  //   >25% of float = red flag (potential short squeeze / heavy bear bet)
+  //   10-25%        = yellow flag (notable bear positioning)
+  //   <10%          = muted
+  const fmtShort = (pct, dtc) => {
+    if (pct == null) return `<span class="muted">—</span>`;
+    const p = pct * 100;
+    const cls = p >= 25 ? "neg" : p >= 10 ? "" : "muted";
+    const days = dtc ? ` <span class="muted">(${dtc.toFixed(1)}d)</span>` : "";
+    return `<span class="${cls}">${p.toFixed(1)}%</span>${days}`;
+  };
   const html = `<table>
     <thead><tr>
       <th>Ticker</th><th>Company</th><th>Sector</th>
       <th class="num">Shares</th><th class="num">Price</th>
       <th class="num">Mkt Value</th><th class="num">P&amp;L</th>
       <th class="num">P&amp;L %</th><th class="num">Weight</th>
+      <th class="num">Short % Float</th>
     </tr></thead>
     <tbody>${rows.map(h => {
       const cost = (h.cost_basis || 0) * h.shares;
@@ -637,10 +662,15 @@ function renderHoldings(rows, summary) {
         <td class="num ${pnlClass(h.unrealized_pnl)}">${(h.unrealized_pnl >= 0 ? "+" : "")}${fmtMoney(h.unrealized_pnl)}</td>
         <td class="num ${pnlClass(pnlPct)}">${(pnlPct >= 0 ? "+" : "")}${fmtPct(pnlPct)}</td>
         <td class="num">${fmtPct(weight)}</td>
+        <td class="num">${fmtShort(h.short_percent_of_float, h.short_ratio)}</td>
       </tr>`;
     }).join("")}
     </tbody>
-  </table>`;
+  </table>
+  <div class="muted" style="margin-top: 8px; font-size: 10px;">
+    Short % Float = shares sold short / public float. (parenthetical) = days to cover at avg volume.
+    Yahoo updates this semi-monthly from FINRA. Red = ≥25% (heavy bearish positioning), yellow = ≥10%.
+  </div>`;
   document.getElementById("holdings-table").innerHTML = html;
 }
 
@@ -763,6 +793,60 @@ function renderStress(rows) {
       Beta is regressed on 252 trading days.
     </div>`;
   document.getElementById("stress-table").innerHTML = html;
+}
+
+function renderRiskBudget(rows) {
+  const el = document.getElementById("risk-budget");
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<div class="empty">Need at least 2 positions and 30+ days of overlapping history to compute risk budget</div>`;
+    return;
+  }
+  const maxShare = Math.max(...rows.map(r => r.risk_share || 0));
+  // Visual bar: weight (gray) vs risk share (orange) — when orange overshoots gray,
+  // that position is punching above its weight in risk terms.
+  const dualBar = (weight, risk) => {
+    const w = (weight * 100).toFixed(1);
+    const r = (risk * 100).toFixed(1);
+    const scale = Math.max(maxShare, weight) * 100;
+    const wPct = (parseFloat(w) / scale) * 100;
+    const rPct = (parseFloat(r) / scale) * 100;
+    return `<div style="position:relative; height:18px;">
+      <div style="position:absolute; top:0; left:0; height:7px; width:${wPct}%; background:#374151; border-radius:2px;"
+           title="Weight ${w}%"></div>
+      <div style="position:absolute; top:9px; left:0; height:7px; width:${rPct}%;
+                  background:${parseFloat(r) > parseFloat(w) ? "#f59e0b" : "#60a5fa"}; border-radius:2px;"
+           title="Risk share ${r}%"></div>
+    </div>`;
+  };
+  const html = `<table>
+    <thead><tr>
+      <th>Ticker</th>
+      <th class="num">Weight</th>
+      <th class="num">Risk Share</th>
+      <th class="num">Risk / Weight</th>
+      <th style="width:40%">Weight (gray) vs Risk Share (orange/blue)</th>
+    </tr></thead>
+    <tbody>${rows.map(r => {
+      const ratio = r.weight > 0 ? r.risk_share / r.weight : 0;
+      const ratioCls = ratio > 1.3 ? "neg" : ratio < 0.8 ? "pos" : "";
+      return `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        <td class="num">${(r.weight * 100).toFixed(2)}%</td>
+        <td class="num">${(r.risk_share * 100).toFixed(2)}%</td>
+        <td class="num ${ratioCls}">${ratio.toFixed(2)}×</td>
+        <td>${dualBar(r.weight, r.risk_share)}</td>
+      </tr>`;
+    }).join("")}
+    </tbody></table>
+    <div class="muted" style="margin-top: 10px; font-size: 10px;">
+      Method: covariance-based decomposition. TRC_i = w_i × (Σ × w)_i / σ_p &middot;
+      sum of TRC across positions = σ_p. <strong>Risk / Weight &gt; 1.3×</strong> (red) means
+      the position contributes more to portfolio risk than its dollar weight implies —
+      consider trimming if risk-controlled is the goal. <strong>&lt; 0.8×</strong> (green)
+      means the position is risk-efficient relative to its allocation.
+    </div>`;
+  el.innerHTML = html;
 }
 
 function renderPortfolioFactors(pfe) {
@@ -923,7 +1007,7 @@ const CAT_LABELS = {
   MATERIAL_AGREEMENT: "Mat. Agreement", REGULATORY: "Regulatory",
   LEGAL: "Legal", ANALYST: "Analyst", PRODUCT: "Product",
   BUYBACK_DIVIDEND: "Buyback/Div", DISCLOSURE: "Disclosure",
-  FILING: "Filing", OTHER: "Other"
+  FILING: "Filing", INSIDER: "Insider", OTHER: "Other"
 };
 
 function renderNews(items) {
