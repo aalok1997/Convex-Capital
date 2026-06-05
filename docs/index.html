@@ -131,14 +131,12 @@
     padding: 3px 9px; border-radius: 12px; font-size: 10px; font-weight: 700;
     letter-spacing: 0.08em; vertical-align: middle; margin-left: 8px; }
   .live-pill .dot { width: 6px; height: 6px; border-radius: 50%; }
-  .live-LIVE     { background: rgba(74,222,128,0.15); color: var(--accent); }
-  .live-LIVE .dot { background: var(--accent); animation: pulse 1.5s ease-in-out infinite; }
-  .live-PRE      { background: rgba(251,191,36,0.15); color: var(--warn); }
-  .live-PRE .dot { background: var(--warn); }
-  .live-AFTER    { background: rgba(251,191,36,0.15); color: var(--warn); }
-  .live-AFTER .dot { background: var(--warn); }
-  .live-CLOSED   { background: rgba(127,138,163,0.15); color: var(--muted); }
-  .live-CLOSED .dot { background: var(--muted); }
+  .live-LIVE, .live-PRE, .live-AFTER, .live-CLOSED {
+    background: rgba(74,222,128,0.15); color: var(--accent);
+  }
+  .live-LIVE .dot, .live-PRE .dot, .live-AFTER .dot, .live-CLOSED .dot {
+    background: var(--accent); animation: pulse 1.5s ease-in-out infinite;
+  }
   .live-STALE    { background: rgba(248,113,113,0.15); color: var(--danger); }
   .live-STALE .dot { background: var(--danger); }
   @keyframes pulse {
@@ -356,10 +354,9 @@ async function load() {
 function schedulePoll() {
   if (_pollHandle) clearTimeout(_pollHandle);
   const session = currentEtSession();
-  // Poll cadence: 10s while live, 5 min in pre/after, 30 min when closed.
-  const ms = session === "OPEN" ? 10_000
-           : (session === "PRE" || session === "AFTER") ? 5 * 60_000
-           : 30 * 60_000;
+  // Poll cadence: 10s while live; 60s outside trading so the page always
+  // looks alive (even though server-side data only refreshes once overnight).
+  const ms = session === "OPEN" ? 10_000 : 60_000;
   _pollHandle = setTimeout(async () => {
     try { await refreshAll(); } catch (e) { /* swallow transient errors */ }
     schedulePoll();
@@ -453,14 +450,15 @@ function updateLivePillOnly() {
 function livePill(generatedAt, snapshotSession) {
   const session = currentEtSession();  // recomputed live in the browser
   const ageMin = generatedAt ? Math.floor((Date.now() - new Date(generatedAt).getTime()) / 60000) : null;
-  const STALE_THRESHOLD = session === "OPEN" ? 30 : 240;  // 30 min during trading; 4h otherwise
-  const stale = ageMin != null && ageMin > STALE_THRESHOLD;
+  // STALE only fires during OPEN — outside trading the snapshot is *intentionally*
+  // frozen (prior close / today's close), so age is by design and never "stale".
+  const stale = session === "OPEN" && ageMin != null && ageMin > 30;
   let kind, label;
   if (stale)                  { kind = "STALE";   label = `STALE · ${ageMin}m old`; }
   else if (session === "OPEN"){ kind = "LIVE";    label = "LIVE"; }
-  else if (session === "PRE") { kind = "PRE";     label = "PRE-MARKET · PRIOR CLOSE"; }
-  else if (session === "AFTER"){ kind = "AFTER";  label = "AFTER-HOURS · TODAY'S CLOSE"; }
-  else                        { kind = "CLOSED";  label = "MARKET CLOSED"; }
+  else if (session === "PRE") { kind = "PRE";     label = "PRE-MARKET · LIVE"; }
+  else if (session === "AFTER"){ kind = "AFTER";  label = "AFTER-HOURS · LIVE"; }
+  else                        { kind = "CLOSED";  label = "AFTER-HOURS · LIVE"; }
   return ` <span class="live-pill live-${kind}"><span class="dot"></span>${label}</span>`;
 }
 
@@ -471,10 +469,14 @@ function renderStaleBanner(generatedAt) {
   if (isNaN(gen.getTime())) return;
   const ageMs = Date.now() - gen.getTime();
   const ageDays = Math.floor(ageMs / 86_400_000);
-  if (ageDays >= 1) {
+  // Only show if data is meaningfully old (real refresh-pipeline failure).
+  // Weekend gaps + market holidays would otherwise nuisance-trigger this.
+  if (ageDays >= 5) {
     banner.textContent =
-      `⚠ Data is ${ageDays} day${ageDays === 1 ? "" : "s"} old. Last update: ${generatedAt.slice(0,10)}.`;
+      `⚠ Data is ${ageDays} days old. Last update: ${generatedAt.slice(0,10)}.`;
     banner.classList.add("show");
+  } else {
+    banner.classList.remove("show");
   }
 }
 
