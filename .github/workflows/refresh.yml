@@ -12,12 +12,20 @@ name: Refresh snapshot
 # why minute offsets start at :05.
 on:
   schedule:
-    # Live during regular trading — every 5 minutes (GitHub's cron minimum).
-    - cron: "2-59/5 13-21 * * 1-5"
-    # Every 15 minutes around the clock — picks up SEC filings, news,
-    # analyst actions, and (for foreign listings) overnight price prints
-    # even when the US market is closed.
-    - cron: "8,23,38,53 * * * *"
+    # Single cron every 10 minutes, 24/7.
+    #
+    # Previously had two cron entries (every-5 during trading + every-15
+    # always). GitHub's scheduler appeared to honor only one of them and
+    # drop the other — only ~2 runs/day were firing instead of the
+    # expected ~144. Consolidating to one simple cron entry significantly
+    # improves the chance GitHub's scheduler actually fires it.
+    #
+    # Note: GitHub's scheduled workflows are documented as best-effort and
+    # can be delayed by minutes during load spikes. For hard-real-time
+    # reliability, point an external scheduler (cron-job.org / UptimeRobot
+    # / Cloudflare Cron Trigger) at the workflow_dispatch endpoint of this
+    # workflow.
+    - cron: "*/10 * * * *"
   workflow_dispatch: {}
 
 # Avoid stacking up if a previous run is still in flight.
