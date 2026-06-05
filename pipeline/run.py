@@ -28,7 +28,9 @@ from .signals import compute_signal
 from .volatility import vol_panel
 from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics,
                    monte_carlo, factor_stress, correlation_tail_stress,
-                   liquidity_stress, drawdown_curve)
+                   liquidity_stress, drawdown_curve,
+                   synthetic_portfolio_returns, synthetic_portfolio_metrics,
+                   monte_carlo_from_returns)
 
 
 BENCHMARKS = ("SPY", "IWM")
@@ -114,7 +116,11 @@ def main(argv=None):
     total_equity = 0.0
     for tk, pos in state.positions.items():
         h = histories.get(tk)
-        daily_close = float(h.df["Close"].iloc[-1]) if h and not h.df.empty else 0.0
+        # yfinance sometimes includes today's not-yet-finalized bar with NaN
+        # values during/after the trading day. Skip trailing NaNs so the last
+        # price we use is always a valid float.
+        last_clean = h.df["Close"].dropna() if h and not h.df.empty else None
+        daily_close = float(last_clean.iloc[-1]) if last_clean is not None and not last_clean.empty else 0.0
         last = live_quotes.get(tk, daily_close)
         mkt_value = pos.shares * last
         unrealized = (last - pos.cost_basis) * pos.shares
@@ -176,11 +182,22 @@ def main(argv=None):
     closes = {tk: h.df["Close"] for tk, h in histories.items() if not h.df.empty}
     cm = correlation_matrix(closes)
 
-    # Portfolio metrics + stress tests
-    metrics = portfolio_metrics(nav, spy_close)
+    # Build a one-line ticker → Close-series map used by several risk
+    # calculations downstream (synthetic returns, correlation, tail stress).
+    closes_for_corr = {tk: h.df["Close"] for tk, h in histories.items() if not h.df.empty}
+
+    # Portfolio metrics — prefer realized NAV if we have >= 30 days; fall back
+    # to synthetic-history metrics (current weights × each holding's 252-day
+    # return history) so newly-launched portfolios still show meaningful
+    # vol / Sharpe / Sortino / max DD instead of empty cells.
+    metrics_live = portfolio_metrics(nav, spy_close) if len(nav) >= 30 else {}
+    metrics_synth = synthetic_portfolio_metrics(holdings, closes_for_corr, spy_close)
+    metrics = metrics_live or metrics_synth or {}
+    metrics["data_basis"] = "realized_nav" if metrics_live else "synthetic_252d"
+    metrics["days_of_live_nav"] = int(len(nav))
+
     portfolio_beta = metrics.get("beta_spy", float("nan"))
-    if math.isnan(portfolio_beta):
-        # Fall back to weighted-average ticker beta
+    if math.isnan(portfolio_beta) or portfolio_beta == 0:
         if total_equity > 0:
             wb = 0.0
             for tk, pos in state.positions.items():
@@ -197,9 +214,11 @@ def main(argv=None):
             portfolio_beta = 0.0
     metrics["beta_spy"] = portfolio_beta
     stress = stress_tests(portfolio_beta, nav_now)
-    mc = monte_carlo(nav)
+    # Monte Carlo: same precedence rule — live NAV bootstrap if long enough,
+    # otherwise bootstrap from synthetic portfolio returns.
+    synth_rets = synthetic_portfolio_returns(holdings, closes_for_corr)
+    mc = monte_carlo(nav) if len(nav) >= 30 else monte_carlo_from_returns(synth_rets, nav_now)
     factor = factor_stress(holdings, nav_now)
-    closes_for_corr = {tk: h.df["Close"] for tk, h in histories.items() if not h.df.empty}
     corr_tail = correlation_tail_stress(holdings, closes_for_corr, nav_now)
     liquidity = liquidity_stress(holdings, histories)
     dd_series = drawdown_curve(nav)

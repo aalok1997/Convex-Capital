@@ -708,9 +708,13 @@ function renderRiskMetrics(m, s) {
     ["VaR 95% (1d)", fmtPct(m.var_95_1d), "neg"],
     ["Realized P&L", fmtMoney(s.realized_pnl), s.realized_pnl >= 0 ? "pos" : "neg"],
   ];
+  const basis = m.data_basis === "realized_nav"
+    ? `Based on ${m.days_of_live_nav} days of live NAV`
+    : `Projected from 252d history × current weights (only ${m.days_of_live_nav || 0}d of live NAV so far)`;
   const html = `<table><tbody>${rows.map(r => `
     <tr><td class="muted">${r[0]}</td><td class="num ${r[2]||""}">${r[1]}</td></tr>
-  `).join("")}</tbody></table>`;
+  `).join("")}</tbody></table>
+  <div class="muted" style="margin-top: 10px; font-size: 10px;">${basis}</div>`;
   document.getElementById("risk-metrics").innerHTML = html;
 }
 

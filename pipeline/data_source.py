@@ -358,7 +358,13 @@ class YFinanceSource:
             return PriceHistory(ticker=ticker, df=pd.DataFrame(
                 columns=["Open", "High", "Low", "Close", "Volume"]))
         df.index = pd.to_datetime(df.index).tz_localize(None)
-        return PriceHistory(ticker=ticker, df=df[["Open", "High", "Low", "Close", "Volume"]])
+        df = df[["Open", "High", "Low", "Close", "Volume"]]
+        # yfinance sometimes includes today's not-yet-finalized bar with NaN
+        # values during/after the trading day. Drop any row with a NaN Close so
+        # every downstream consumer (signals, vol, risk, valuation) sees clean
+        # finalized bars only.
+        df = df.dropna(subset=["Close"])
+        return PriceHistory(ticker=ticker, df=df)
 
     def live_price(self, ticker: str) -> Optional[float]:
         """Latest available traded price, including pre-market and after-hours.

@@ -353,6 +353,146 @@ def drawdown_curve(nav: pd.Series) -> pd.Series:
 
 
 # ---------------------------------------------------------------------------
+# Synthetic portfolio history
+#
+# A freshly-launched portfolio doesn't have enough live NAV history for
+# statistical metrics. We backfill by reconstructing daily portfolio returns
+# from each holding's actual price history, weighted by *current* portfolio
+# weights. The interpretation: "if I had held today's exact weights for the
+# last 252 trading days, what would the daily return series have looked like?"
+# This gives meaningful Sharpe, vol, Sortino, max DD, and Monte Carlo inputs
+# from the very first day of the live portfolio.
+# ---------------------------------------------------------------------------
+
+def synthetic_portfolio_returns(holdings: List[dict],
+                                closes: Dict[str, pd.Series],
+                                lookback: int = 252) -> pd.Series:
+    """Daily portfolio log-returns over `lookback` days using current weights.
+
+    Each holding contributes (weight × ticker_log_return). Cash is excluded
+    from the weighting since it contributes ~zero return. The dataframe is
+    forward-filled to a common business-day index so mixed listing calendars
+    (e.g. US + Kazakhstan + HK) don't drop the join to nothing.
+    """
+    if not holdings:
+        return pd.Series(dtype=float)
+    total_equity = sum(h.get("market_value", 0) for h in holdings)
+    if total_equity <= 0:
+        return pd.Series(dtype=float)
+    series = {}
+    for h in holdings:
+        tk = h["ticker"]
+        s = closes.get(tk)
+        if s is None or s.empty:
+            continue
+        r = np.log(s / s.shift(1)).dropna()
+        series[tk] = r.tail(lookback * 2)  # generous tail, we'll align later
+    if not series:
+        return pd.Series(dtype=float)
+    df = pd.DataFrame(series)
+    # Align on a union business-day index, ffill (carry forward last return = 0)
+    # so missing days don't drop the whole row when one ticker doesn't trade.
+    df = df.reindex(pd.date_range(df.index.min(), df.index.max(), freq="B"))
+    df = df.fillna(0.0).tail(lookback)
+    weights = {h["ticker"]: h.get("market_value", 0) / total_equity for h in holdings}
+    cols = [t for t in df.columns if t in weights]
+    if not cols:
+        return pd.Series(dtype=float)
+    w = np.array([weights[t] for t in cols])
+    port_rets = (df[cols].values @ w)
+    return pd.Series(port_rets, index=df.index, name="portfolio_returns")
+
+
+def synthetic_portfolio_metrics(holdings: List[dict],
+                                closes: Dict[str, pd.Series],
+                                spy_close: pd.Series = None,
+                                lookback: int = 252) -> dict:
+    """Annualized vol, Sharpe, Sortino, max DD, VaR computed from a synthetic
+    portfolio return series. Beta vs SPY computed by regressing synthetic
+    portfolio returns on SPY returns over the same window."""
+    rets = synthetic_portfolio_returns(holdings, closes, lookback)
+    if rets is None or len(rets) < 30:
+        return {}
+    rets_clean = rets[rets != 0.0]  # exclude ffilled non-trading days from stats
+    if len(rets_clean) < 30:
+        rets_clean = rets
+    ann_vol = float(rets_clean.std() * math.sqrt(252))
+    mean_daily = float(rets_clean.mean())
+    ann_return = float((1 + mean_daily) ** 252 - 1)
+    sharpe = (ann_return / ann_vol) if ann_vol > 0 else 0.0
+    downside = rets_clean[rets_clean < 0]
+    dd_vol = float(downside.std() * math.sqrt(252)) if not downside.empty else 0.0
+    sortino = (ann_return / dd_vol) if dd_vol > 0 else 0.0
+    synthetic_nav = (1 + rets).cumprod()
+    cummax = synthetic_nav.cummax()
+    max_dd = float(((synthetic_nav - cummax) / cummax).min())
+    var95 = float(np.percentile(rets_clean, 5))
+    out = {
+        "annualized_return": ann_return,
+        "annualized_vol": ann_vol,
+        "sharpe": float(sharpe),
+        "sortino": float(sortino),
+        "max_drawdown": max_dd,
+        "var_95_1d": var95,
+        "method": "Synthetic: current weights × each holding's 252-day return history.",
+    }
+    if spy_close is not None and not spy_close.empty:
+        spy_rets = np.log(spy_close / spy_close.shift(1)).dropna().tail(lookback)
+        aligned = pd.concat([rets, spy_rets], axis=1, join="inner").dropna()
+        aligned = aligned[(aligned.iloc[:, 0] != 0) & (aligned.iloc[:, 1] != 0)]
+        if len(aligned) >= 30:
+            cov = np.cov(aligned.iloc[:, 0], aligned.iloc[:, 1])
+            if cov[1, 1] > 0:
+                out["beta_spy"] = float(cov[0, 1] / cov[1, 1])
+    return out
+
+
+def monte_carlo_from_returns(returns: pd.Series,
+                             current_nav: float,
+                             horizon_days: int = 21,
+                             n_paths: int = 10_000,
+                             seed: int = 42) -> dict:
+    """Same Monte Carlo as monte_carlo() but operating on an arbitrary daily
+    return series (e.g. synthetic portfolio returns)."""
+    if returns is None or len(returns) < 30 or current_nav <= 0:
+        return {}
+    rets = returns[returns != 0.0].values
+    if len(rets) < 30:
+        rets = returns.values
+    rng = np.random.default_rng(seed)
+    sims = rng.choice(rets, size=(n_paths, horizon_days), replace=True)
+    path_mult = np.cumprod(1.0 + sims, axis=1)
+    terminal = path_mult[:, -1] - 1.0
+    running_max = np.maximum.accumulate(path_mult, axis=1)
+    dd = (path_mult - running_max) / running_max
+    max_dd = dd.min(axis=1)
+    pct = lambda a, p: float(np.percentile(a, p))
+    return {
+        "horizon_days": horizon_days,
+        "n_paths": n_paths,
+        "current_nav": current_nav,
+        "terminal_return": {
+            "p5": pct(terminal, 5), "p25": pct(terminal, 25),
+            "p50": pct(terminal, 50), "p75": pct(terminal, 75),
+            "p95": pct(terminal, 95),
+            "prob_negative": float((terminal < 0).mean()),
+        },
+        "terminal_nav": {
+            "p5": current_nav * (1 + pct(terminal, 5)),
+            "p50": current_nav * (1 + pct(terminal, 50)),
+            "p95": current_nav * (1 + pct(terminal, 95)),
+        },
+        "max_drawdown": {
+            "p5": pct(max_dd, 5), "p50": pct(max_dd, 50),
+            "p95": pct(max_dd, 95),
+        },
+        "method": "Bootstrap of synthetic portfolio daily returns "
+                  "(current weights × each holding's 252-day history). "
+                  "10,000 paths, 21-trading-day horizon (~1 month).",
+    }
+
+
+# ---------------------------------------------------------------------------
 # Portfolio metrics
 # ---------------------------------------------------------------------------
 
