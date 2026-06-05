@@ -103,13 +103,6 @@ def main(argv=None):
             print(f"  fetching factor proxy {ftk}...")
             factor_proxy_hist[ftk] = src.history(ftk, period="2y")
 
-    # NAV curve
-    start = trades["date"].iloc[0] if not trades.empty else pd.Timestamp.today().normalize()
-    end = pd.Timestamp.today().normalize()
-    nav = daily_nav_curve(trades, histories, start=start, end=end)
-    spy_close = bench_hist["SPY"].df["Close"] if not bench_hist["SPY"].df.empty else pd.Series(dtype=float)
-    bench_curves = benchmark_curves(start, end, bench_hist)
-
     # Live quote policy (matches the fund's pricing rule):
     #   PRE-market  → skip; keep prior daily close
     #   OPEN        → live intraday tick (fast_info.last_price)
@@ -125,6 +118,71 @@ def main(argv=None):
             lp = src.live_price(tk, session=session_now)
             if lp is not None:
                 live_quotes[tk] = lp
+
+    # Inject the most recent live price as a daily bar where yfinance's
+    # daily-history endpoint is lagging. yfinance often returns the current
+    # bar as NaN and we drop it in data_source.history(), but the live
+    # quote endpoints (regularMarketPrice / fast_info) usually have the
+    # finalized close hours before the daily-history catches up. We bridge
+    # that gap here so the NAV curve, drawdown chart, signals, and vol
+    # panels reflect the most recent close.
+    #
+    # Target date logic: the bar we inject corresponds to the NEXT trading
+    # day after each ticker's last-known close (one trading day at a time;
+    # repeat-call fills weekend / multi-day gaps).
+    try:
+        import zoneinfo as _zi
+        today_et = dt.datetime.now(_zi.ZoneInfo("America/New_York")).date()
+    except Exception:
+        today_et = (dt.datetime.utcnow() - dt.timedelta(hours=4)).date()
+
+    def _next_trading_day(d):
+        nxt = d + dt.timedelta(days=1)
+        while nxt.weekday() >= 5:  # skip Sat/Sun
+            nxt += dt.timedelta(days=1)
+        return nxt
+
+    def _inject(ph, live_p):
+        if ph is None or ph.df.empty or live_p is None:
+            return False
+        last_date = ph.df.index[-1].normalize().date()
+        target = _next_trading_day(last_date)
+        # Only inject if the target trading day is on or before today.
+        if target > today_et:
+            return False
+        target_ts = pd.Timestamp(target)
+        # Open/High/Low echo the close — only Close matters for NAV / curves;
+        # the others keep range / Bollinger from seeing a NaN spike.
+        new_row = pd.DataFrame(
+            {"Open": [live_p], "High": [live_p], "Low": [live_p],
+             "Close": [live_p], "Volume": [0.0]},
+            index=[target_ts])
+        ph.df = pd.concat([ph.df, new_row])
+        return True
+
+    if session_now != "PRE":
+        for tk, lp in live_quotes.items():
+            _inject(histories.get(tk), lp)
+        # Backfill benchmarks too so the NAV-vs-SPY/IWM chart aligns
+        for bench in ("SPY", "IWM"):
+            ph = bench_hist.get(bench)
+            if ph is None or ph.df.empty:
+                continue
+            last_date = ph.df.index[-1].normalize().date()
+            target = _next_trading_day(last_date)
+            if target > today_et:
+                continue
+            blive = src.live_price(bench, session=session_now)
+            if blive is not None:
+                _inject(ph, blive)
+
+    # NAV curve — computed AFTER the live-price injection so the curve
+    # picks up today's close. Benchmarks reuse the same backfilled histories.
+    start = trades["date"].iloc[0] if not trades.empty else pd.Timestamp.today().normalize()
+    end = pd.Timestamp.today().normalize()
+    nav = daily_nav_curve(trades, histories, start=start, end=end)
+    spy_close = bench_hist["SPY"].df["Close"] if not bench_hist["SPY"].df.empty else pd.Series(dtype=float)
+    bench_curves = benchmark_curves(start, end, bench_hist)
 
     # Holdings panel
     holdings = []
