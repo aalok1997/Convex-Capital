@@ -1001,12 +1001,11 @@ function renderBlotter(rows) {
     return;
   }
   const html = `<table>
-    <thead><tr><th>Date</th><th>Time (ET)</th><th>Ticker</th><th>Action</th>
+    <thead><tr><th>Date</th><th>Ticker</th><th>Action</th>
     <th class="num">Shares</th><th class="num">Price</th><th class="num">Value</th></tr></thead>
     <tbody>${rows.slice(0, 50).map(r => `
       <tr>
         <td class="muted">${r.date}</td>
-        <td class="muted">${r.time || "—"}</td>
         <td><span class="ticker-tag">${r.ticker}</span></td>
         <td class="${r.action === "BUY" ? "pos" : "neg"}">${r.action}</td>
         <td class="num">${r.shares.toLocaleString()}</td>
