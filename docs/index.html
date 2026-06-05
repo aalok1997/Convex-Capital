@@ -245,6 +245,25 @@
     </div>
   </div>
 
+  <!-- Factor Risk Model (5-factor) -->
+  <div class="panel" style="margin-bottom: 16px;">
+    <h2>Factor Risk Model &middot; Market / Size / Value / Momentum / Quality</h2>
+    <div class="muted" style="font-size: 11px; margin-bottom: 12px;">
+      Each holding's 252-day returns OLS-regressed on factor returns from liquid ETF proxies.
+      Loadings are interpretable as betas:
+      Size&gt;0 small-cap tilt &middot; Value&gt;0 value tilt &middot;
+      Momentum&gt;0 momentum-positive &middot; Quality&gt;0 quality tilt.
+    </div>
+    <div class="tabs" id="factor-tabs">
+      <button class="tab active" data-tab="portfolio">Portfolio Exposure</button>
+      <button class="tab" data-tab="perticker">Per-Ticker Loadings</button>
+      <button class="tab" data-tab="factorcorr">Factor Correlations</button>
+    </div>
+    <div class="tab-pane active" data-pane="portfolio"><div id="portfolio-factors"></div></div>
+    <div class="tab-pane" data-pane="perticker"><div id="ticker-factors"></div></div>
+    <div class="tab-pane" data-pane="factorcorr"><div id="factor-correlation"></div></div>
+  </div>
+
   <!-- Stress test suite (tabs) -->
   <div class="panel" style="margin-bottom: 16px;">
     <h2>Stress Tests</h2>
@@ -406,6 +425,9 @@ function renderWith(d) {
   renderCorrTail(d.correlation_tail_risk);
   renderLiquidity(d.liquidity);
   renderCorrelation(d.correlation);
+  renderPortfolioFactors(d.portfolio_factor_exposure);
+  renderTickerFactors(d.factor_exposures);
+  renderFactorCorrelation(d.factor_correlation);
   renderBlotter(d.trade_blotter);
   renderEarnings(d.upcoming_earnings);
   renderNews(d.news);
@@ -741,6 +763,104 @@ function renderStress(rows) {
       Beta is regressed on 252 trading days.
     </div>`;
   document.getElementById("stress-table").innerHTML = html;
+}
+
+function renderPortfolioFactors(pfe) {
+  const el = document.getElementById("portfolio-factors");
+  if (!pfe || !pfe.loadings || Object.keys(pfe.loadings).length === 0) {
+    el.innerHTML = `<div class="empty">Factor exposure not available — need at least 60 days of overlap with ETF proxies.</div>`;
+    return;
+  }
+  const loadings = pfe.loadings;
+  // Render each loading as a horizontal bar centered at 0 so direction reads instantly.
+  const max = Math.max(2.0, ...Object.values(loadings).map(v => Math.abs(v)));
+  const bar = (val) => {
+    const pct = (Math.abs(val) / max) * 50;
+    const left = val >= 0 ? 50 : 50 - pct;
+    const color = val >= 0 ? "var(--accent)" : "var(--danger)";
+    return `<div style="position:relative; height:14px; background:#1f2632; border-radius:3px; margin: 4px 0;">
+      <div style="position:absolute; left:50%; top:0; bottom:0; width:1px; background:#7f8aa3;"></div>
+      <div style="position:absolute; left:${left}%; top:0; bottom:0; width:${pct}%; background:${color}; border-radius:3px;"></div>
+    </div>`;
+  };
+  const rows = Object.entries(loadings).map(([f, v]) => `
+    <tr>
+      <td class="muted" style="width:90px">${f}</td>
+      <td style="width:60%">${bar(v)}</td>
+      <td class="num ${v>=0?"pos":"neg"}" style="width:80px">${v>=0?"+":""}${v.toFixed(2)}</td>
+    </tr>`).join("");
+  el.innerHTML = `<table style="border-collapse:separate; border-spacing:0 2px;"><tbody>${rows}</tbody></table>
+    <div class="muted" style="margin-top: 10px; font-size: 10px;">
+      Weighted R²: ${(pfe.r_squared_weighted*100).toFixed(0)}% &middot;
+      Implied annual alpha: <span class="${pfe.alpha_annual>=0?"pos":"neg"}">${(pfe.alpha_annual*100).toFixed(1)}%</span>
+      &middot; A negative alpha means the portfolio underperformed what the factor model predicts.
+    </div>`;
+}
+
+function renderTickerFactors(rows) {
+  const el = document.getElementById("ticker-factors");
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<div class="empty">Per-ticker factor loadings not available yet</div>`;
+    return;
+  }
+  const factors = ["Market", "Size", "Value", "Momentum", "Quality"];
+  const sorted = [...rows].sort((a, b) => (b.Market || 0) - (a.Market || 0));
+  const cell = v => v == null ? "—" :
+    `<span class="${v>=0?"pos":"neg"}">${v>=0?"+":""}${v.toFixed(2)}</span>`;
+  const html = `<table>
+    <thead><tr>
+      <th>Ticker</th>
+      ${factors.map(f => `<th class="num">${f}</th>`).join("")}
+      <th class="num">α (ann)</th>
+      <th class="num">R²</th>
+      <th class="num">Idio Vol</th>
+    </tr></thead>
+    <tbody>${sorted.map(r => `
+      <tr>
+        <td><span class="ticker-tag">${r.ticker}</span></td>
+        ${factors.map(f => `<td class="num">${cell(r[f])}</td>`).join("")}
+        <td class="num ${(r.alpha_annual||0)>=0?"pos":"neg"}">${((r.alpha_annual||0)*100).toFixed(1)}%</td>
+        <td class="num">${((r.r_squared||0)*100).toFixed(0)}%</td>
+        <td class="num">${((r.idio_vol_annual||0)*100).toFixed(0)}%</td>
+      </tr>`).join("")}
+    </tbody></table>
+    <div class="muted" style="margin-top: 8px; font-size: 10px;">
+      Idio Vol = annualized standard deviation of the OLS residuals (volatility NOT explained by factors).
+      Low R² + high Idio Vol = stock-specific risk that won't diversify away.
+    </div>`;
+  el.innerHTML = html;
+}
+
+function renderFactorCorrelation(fc) {
+  const el = document.getElementById("factor-correlation");
+  if (!fc || !fc.factors || fc.factors.length === 0) {
+    el.innerHTML = `<div class="empty">Factor correlation not available</div>`;
+    return;
+  }
+  const colorFor = v => {
+    if (v == null) return "#11151c";
+    const t = Math.max(-1, Math.min(1, v));
+    if (t >= 0) return `rgba(74,222,128,${0.10 + t*0.55})`;
+    return `rgba(248,113,113,${0.10 + (-t)*0.55})`;
+  };
+  let html = `<table class="corr-table"><thead><tr><th></th>` +
+    fc.factors.map(f => `<th>${f}</th>`).join("") + `</tr></thead><tbody>`;
+  for (let i = 0; i < fc.factors.length; i++) {
+    html += `<tr><th>${fc.factors[i]}</th>`;
+    for (let j = 0; j < fc.factors.length; j++) {
+      const v = fc.matrix[i][j];
+      const txt = v == null ? "—" : v.toFixed(2);
+      html += `<td style="background:${colorFor(v)}">${txt}</td>`;
+    }
+    html += `</tr>`;
+  }
+  html += `</tbody></table>
+    <div class="muted" style="margin-top: 8px; font-size: 10px;">
+      Pearson correlations between the factor return series themselves over the last 252 days.
+      Well-constructed factors should have low cross-correlations; high off-diagonals indicate
+      the factors are picking up some of the same risk.
+    </div>`;
+  el.innerHTML = html;
 }
 
 function renderCorrelation(c) {

@@ -31,6 +31,9 @@ from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics,
                    liquidity_stress, drawdown_curve,
                    synthetic_portfolio_returns, synthetic_portfolio_metrics,
                    monte_carlo_from_returns)
+from .factors import (FACTOR_PROXY_TICKERS, compute_factor_returns,
+                      regress_loadings, factor_correlation,
+                      portfolio_factor_exposure)
 
 
 BENCHMARKS = ("SPY", "IWM")
@@ -87,6 +90,16 @@ def main(argv=None):
     bench_hist: Dict[str, PriceHistory] = {}
     for b in BENCHMARKS:
         bench_hist[b] = src.history(b, period="2y")
+
+    # Factor ETF proxies (Market/Size/Value/Momentum/Quality). Reuse what
+    # we already have from BENCHMARKS to skip duplicate API calls.
+    factor_proxy_hist: Dict[str, PriceHistory] = {}
+    for ftk in FACTOR_PROXY_TICKERS:
+        if ftk in bench_hist:
+            factor_proxy_hist[ftk] = bench_hist[ftk]
+        else:
+            print(f"  fetching factor proxy {ftk}...")
+            factor_proxy_hist[ftk] = src.history(ftk, period="2y")
 
     # NAV curve
     start = trades["date"].iloc[0] if not trades.empty else pd.Timestamp.today().normalize()
@@ -223,6 +236,29 @@ def main(argv=None):
     liquidity = liquidity_stress(holdings, histories)
     dd_series = drawdown_curve(nav)
 
+    # 5-factor risk model — Market / Size / Value / Momentum / Quality
+    factor_closes = {tk: ph.df["Close"] for tk, ph in factor_proxy_hist.items()
+                     if not ph.df.empty}
+    factor_rets = compute_factor_returns(factor_closes)
+    factor_corr = factor_correlation(factor_rets)
+    per_ticker_loadings: Dict[str, dict] = {}
+    factor_exposures_table = []
+    for tk in tickers:
+        ph = histories.get(tk)
+        if ph is None or ph.df.empty:
+            continue
+        tk_rets = np.log(ph.df["Close"] / ph.df["Close"].shift(1)).dropna()
+        l = regress_loadings(tk_rets, factor_rets)
+        if l is None:
+            continue
+        per_ticker_loadings[tk] = l
+        row = {"ticker": tk, "r_squared": l["r_squared"],
+               "alpha_annual": l["alpha_annual"],
+               "idio_vol_annual": l["idio_vol_annual"]}
+        row.update(l["loadings"])
+        factor_exposures_table.append(row)
+    portfolio_factors = portfolio_factor_exposure(holdings, per_ticker_loadings)
+
     # Income / dividend tracker
     income_rows = []
     total_dividend_income = 0.0
@@ -339,6 +375,9 @@ def main(argv=None):
         "signals": signals_panel,
         "volatility": vol_rows,
         "correlation": _corr_to_dict(cm),
+        "factor_correlation": factor_corr,
+        "factor_exposures": factor_exposures_table,
+        "portfolio_factor_exposure": portfolio_factors,
         "stress_tests": stress,
         "monte_carlo": _scrub(mc),
         "factor_stress": _scrub(factor),
