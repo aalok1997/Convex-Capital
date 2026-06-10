@@ -104,20 +104,25 @@ def main(argv=None):
             factor_proxy_hist[ftk] = src.history(ftk, period="2y")
 
     # Live quote policy (matches the fund's pricing rule):
-    #   PRE-market  → skip; keep prior daily close
+    #   PRE-market  → backfill any missing PRIOR days; do not advance to today
     #   OPEN        → live intraday tick (fast_info.last_price)
     #   AFTER-hours → today's official regular-session close (regularMarketPrice)
     #   CLOSED      → most recent regular-session close
-    # We need to query during AFTER/CLOSED too because yfinance's daily
-    # history endpoint sometimes lags by 24h, returning today's bar as NaN
-    # even after the official close; regularMarketPrice updates faster.
+    #
+    # In all sessions we query regularMarketPrice (or fast_info during OPEN)
+    # so we can backfill the daily history when yfinance's history endpoint
+    # is lagging. During PRE-market we still call the quote — at that hour
+    # the regularMarketPrice IS yesterday's close — but the injection step
+    # below caps the target date at yesterday so today's bar isn't created.
     session_now = _market_session()
     live_quotes: Dict[str, float] = {}
-    if session_now != "PRE":
-        for tk in state.positions.keys():
-            lp = src.live_price(tk, session=session_now)
-            if lp is not None:
-                live_quotes[tk] = lp
+    # During PRE-market, treat the quote as a "closed-session" lookup so we
+    # get yesterday's close (regularMarketPrice) rather than a pre-market tick.
+    quote_session = "CLOSED" if session_now == "PRE" else session_now
+    for tk in state.positions.keys():
+        lp = src.live_price(tk, session=quote_session)
+        if lp is not None:
+            live_quotes[tk] = lp
 
     # Inject the most recent live price as a daily bar where yfinance's
     # daily-history endpoint is lagging. yfinance often returns the current
@@ -147,8 +152,13 @@ def main(argv=None):
             return False
         last_date = ph.df.index[-1].normalize().date()
         target = _next_trading_day(last_date)
-        # Only inject if the target trading day is on or before today.
+        # Only inject up through today.
         if target > today_et:
+            return False
+        # During PRE-market we backfill PRIOR trading days only — today's
+        # bar must wait until the regular session so the displayed price
+        # stays at the prior close. After 9:30 AM ET, today's bar is fair game.
+        if session_now == "PRE" and target >= today_et:
             return False
         target_ts = pd.Timestamp(target)
         # Open/High/Low echo the close — only Close matters for NAV / curves;
@@ -160,21 +170,18 @@ def main(argv=None):
         ph.df = pd.concat([ph.df, new_row])
         return True
 
-    if session_now != "PRE":
-        for tk, lp in live_quotes.items():
-            _inject(histories.get(tk), lp)
-        # Backfill benchmarks too so the NAV-vs-SPY/IWM chart aligns
-        for bench in ("SPY", "IWM"):
-            ph = bench_hist.get(bench)
-            if ph is None or ph.df.empty:
-                continue
-            last_date = ph.df.index[-1].normalize().date()
-            target = _next_trading_day(last_date)
-            if target > today_et:
-                continue
-            blive = src.live_price(bench, session=session_now)
-            if blive is not None:
-                _inject(ph, blive)
+    # Inject for every session — _inject() itself blocks today's bar
+    # during PRE-market, so the gating doesn't need to repeat that here.
+    for tk, lp in live_quotes.items():
+        _inject(histories.get(tk), lp)
+    # Backfill benchmarks too so the NAV-vs-SPY/IWM chart aligns
+    for bench in ("SPY", "IWM"):
+        ph = bench_hist.get(bench)
+        if ph is None or ph.df.empty:
+            continue
+        blive = src.live_price(bench, session=quote_session)
+        if blive is not None:
+            _inject(ph, blive)
 
     # NAV curve — computed AFTER the live-price injection so the curve
     # picks up today's close. Benchmarks reuse the same backfilled histories.
