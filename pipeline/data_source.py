@@ -493,6 +493,31 @@ class YFinanceSource:
         except Exception:
             pass
 
+        # yfinance returns dividendYield as a percent value (4.31 means 4.31%,
+        # 0.93 means 0.93%) — NOT as the historical 0.0431 fraction. Both
+        # large yields (>1%) and small yields (<1%) come back this way.
+        # Always divide by 100 to convert to a fraction so every downstream
+        # consumer sees the same convention. Sanity-cross-check against
+        # dividendRate/price: if the ratio is wildly off (>5x), the source
+        # field was probably already a fraction — leave it alone.
+        div_yield = _safe_float(info.get("dividendYield"))
+        if div_yield is not None and div_yield > 0:
+            div_rate = _safe_float(info.get("dividendRate"))
+            price = _safe_float(info.get("regularMarketPrice")
+                                or info.get("currentPrice"))
+            expected_fraction = (div_rate / price) if (div_rate and price) else None
+            converted = div_yield / 100.0
+            if expected_fraction is not None and expected_fraction > 0:
+                # Prefer whichever interpretation is closer to dividend/price.
+                # (Handles future API changes where yfinance might revert
+                # to returning the fraction directly.)
+                if abs(converted - expected_fraction) > abs(div_yield - expected_fraction):
+                    pass  # raw yfinance value is already a fraction
+                else:
+                    div_yield = converted
+            else:
+                div_yield = converted
+
         return TickerInfo(
             ticker=ticker,
             name=info.get("longName") or info.get("shortName") or ticker,
@@ -512,7 +537,7 @@ class YFinanceSource:
             earnings_growth=_safe_float(info.get("earningsGrowth")),
             avg_volume_20d=_safe_float(info.get("averageVolume10days") or info.get("averageVolume")),
             dividend_rate=_safe_float(info.get("dividendRate")),
-            dividend_yield=_safe_float(info.get("dividendYield")),
+            dividend_yield=div_yield,
             ex_dividend_date=ex_div,
             last_dividend_amount=last_div,
             short_percent_of_float=_safe_float(info.get("shortPercentOfFloat")),
