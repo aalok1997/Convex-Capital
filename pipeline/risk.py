@@ -453,10 +453,16 @@ def synthetic_portfolio_returns(holdings: List[dict],
 def synthetic_portfolio_metrics(holdings: List[dict],
                                 closes: Dict[str, pd.Series],
                                 spy_close: pd.Series = None,
-                                lookback: int = 252) -> dict:
+                                lookback: int = 252,
+                                risk_free_rate: float = 0.0) -> dict:
     """Annualized vol, Sharpe, Sortino, max DD, VaR computed from a synthetic
     portfolio return series. Beta vs SPY computed by regressing synthetic
-    portfolio returns on SPY returns over the same window."""
+    portfolio returns on SPY returns over the same window.
+
+    risk_free_rate: annualized risk-free rate as a fraction (e.g. 0.045 for
+    4.5%). Sharpe and Sortino use (return - rf) in the numerator. Default 0
+    so callers that don't supply a rate fall back to the simplified formula.
+    """
     rets = synthetic_portfolio_returns(holdings, closes, lookback)
     if rets is None or len(rets) < 30:
         return {}
@@ -466,10 +472,11 @@ def synthetic_portfolio_metrics(holdings: List[dict],
     ann_vol = float(rets_clean.std() * math.sqrt(252))
     mean_daily = float(rets_clean.mean())
     ann_return = float((1 + mean_daily) ** 252 - 1)
-    sharpe = (ann_return / ann_vol) if ann_vol > 0 else 0.0
+    excess_return = ann_return - risk_free_rate
+    sharpe = (excess_return / ann_vol) if ann_vol > 0 else 0.0
     downside = rets_clean[rets_clean < 0]
     dd_vol = float(downside.std() * math.sqrt(252)) if not downside.empty else 0.0
-    sortino = (ann_return / dd_vol) if dd_vol > 0 else 0.0
+    sortino = (excess_return / dd_vol) if dd_vol > 0 else 0.0
     synthetic_nav = (1 + rets).cumprod()
     cummax = synthetic_nav.cummax()
     max_dd = float(((synthetic_nav - cummax) / cummax).min())
@@ -481,6 +488,7 @@ def synthetic_portfolio_metrics(holdings: List[dict],
         "sortino": float(sortino),
         "max_drawdown": max_dd,
         "var_95_1d": var95,
+        "risk_free_rate": float(risk_free_rate),
         "method": "Synthetic: current weights × each holding's 252-day return history.",
     }
     if spy_close is not None and not spy_close.empty:
@@ -543,10 +551,14 @@ def monte_carlo_from_returns(returns: pd.Series,
 # Portfolio metrics
 # ---------------------------------------------------------------------------
 
-def portfolio_metrics(nav: pd.Series, bench: pd.Series = None) -> dict:
+def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
+                      risk_free_rate: float = 0.0) -> dict:
     """
-    Annualized return, vol, Sharpe (rf=0), Sortino, max drawdown,
-    1-day historical VaR at 95%, and beta to bench.
+    Annualized return, vol, Sharpe (excess of risk_free_rate), Sortino,
+    max drawdown, 1-day historical VaR at 95%, and beta to bench.
+
+    risk_free_rate: annualized risk-free rate as a fraction (e.g. 0.045 for
+    4.5%). Default 0 for backwards compatibility.
     """
     if nav is None or len(nav) < 5:
         return {}
@@ -557,10 +569,11 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None) -> dict:
     total_return = nav.iloc[-1] / nav.iloc[0] - 1
     ann_return = (1 + total_return) ** (365.0 / days) - 1 if days > 0 else 0.0
     ann_vol = float(rets.std() * math.sqrt(252))
-    sharpe = (ann_return / ann_vol) if ann_vol > 0 else 0.0
+    excess_return = ann_return - risk_free_rate
+    sharpe = (excess_return / ann_vol) if ann_vol > 0 else 0.0
     downside = rets[rets < 0]
     dd_vol = float(downside.std() * math.sqrt(252)) if not downside.empty else 0.0
-    sortino = (ann_return / dd_vol) if dd_vol > 0 else 0.0
+    sortino = (excess_return / dd_vol) if dd_vol > 0 else 0.0
     cummax = nav.cummax()
     max_dd = float(((nav - cummax) / cummax).min())
     var95 = float(np.percentile(rets, 5))  # left-tail 5%
@@ -571,6 +584,7 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None) -> dict:
         "sortino": float(sortino),
         "max_drawdown": max_dd,
         "var_95_1d": var95,
+        "risk_free_rate": float(risk_free_rate),
     }
     if bench is not None and len(bench) > 5:
         metrics["beta_spy"] = beta_to(nav, bench)

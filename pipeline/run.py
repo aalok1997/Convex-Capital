@@ -37,6 +37,7 @@ from .factors import (FACTOR_PROXY_TICKERS, compute_factor_returns,
 
 
 BENCHMARKS = ("SPY", "IWM")
+RISK_FREE_TICKER = "^TNX"  # CBOE 10-year Treasury yield index
 
 
 def main(argv=None):
@@ -92,6 +93,21 @@ def main(argv=None):
     bench_hist: Dict[str, PriceHistory] = {}
     for b in BENCHMARKS:
         bench_hist[b] = src.history(b, period="2y")
+
+    # Risk-free rate from 10-year Treasury yield (^TNX). Returned by yfinance
+    # as a percent value (4.487 = 4.487%). We use the 10y for two reasons:
+    # (1) duration matches a long-only equity portfolio's intended holding
+    # horizon better than the 3-month bill, (2) it's the convention most
+    # equity-strategy practitioners and CAPM frameworks use. Converted to a
+    # fraction so Sharpe/Sortino can subtract it from annualized return.
+    risk_free_rate = 0.0
+    try:
+        tnx_hist = src.history(RISK_FREE_TICKER, period="10d")
+        if tnx_hist is not None and not tnx_hist.df.empty:
+            last = float(tnx_hist.df["Close"].dropna().iloc[-1])
+            risk_free_rate = last / 100.0  # 4.487 → 0.04487
+    except Exception:
+        pass
 
     # Factor ETF proxies (Market/Size/Value/Momentum/Quality). Reuse what
     # we already have from BENCHMARKS to skip duplicate API calls.
@@ -274,8 +290,10 @@ def main(argv=None):
     # to synthetic-history metrics (current weights × each holding's 252-day
     # return history) so newly-launched portfolios still show meaningful
     # vol / Sharpe / Sortino / max DD instead of empty cells.
-    metrics_live = portfolio_metrics(nav, spy_close) if len(nav) >= 30 else {}
-    metrics_synth = synthetic_portfolio_metrics(holdings, closes_for_corr, spy_close)
+    metrics_live = (portfolio_metrics(nav, spy_close, risk_free_rate=risk_free_rate)
+                    if len(nav) >= 30 else {})
+    metrics_synth = synthetic_portfolio_metrics(holdings, closes_for_corr, spy_close,
+                                                risk_free_rate=risk_free_rate)
     metrics = metrics_live or metrics_synth or {}
     metrics["data_basis"] = "realized_nav" if metrics_live else "synthetic_252d"
     metrics["days_of_live_nav"] = int(len(nav))

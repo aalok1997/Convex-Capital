@@ -758,11 +758,12 @@ function renderVol(rows) {
 
 function renderRiskMetrics(m, s) {
   m = m || {}; s = s || {};
+  const rfPct = m.risk_free_rate ? `<span class="muted" style="font-size:9px"> (RF: 10y ${(m.risk_free_rate*100).toFixed(2)}%)</span>` : "";
   const rows = [
     ["Annualized Return", fmtPct(m.annualized_return), m.annualized_return >= 0 ? "pos" : "neg"],
     ["Annualized Volatility", fmtPct(m.annualized_vol)],
-    ["Sharpe Ratio", fmtNum(m.sharpe, 2)],
-    ["Sortino Ratio", fmtNum(m.sortino, 2)],
+    [`Sharpe Ratio${rfPct}`, fmtNum(m.sharpe, 2)],
+    [`Sortino Ratio${rfPct}`, fmtNum(m.sortino, 2)],
     ["Max Drawdown", fmtPct(m.max_drawdown), "neg"],
     ["Beta (SPY)", fmtNum(m.beta_spy, 2)],
     ["VaR 95% (1d)", fmtPct(m.var_95_1d), "neg"],
