@@ -759,11 +759,38 @@ function renderVol(rows) {
 function renderRiskMetrics(m, s) {
   m = m || {}; s = s || {};
   const rfPct = m.risk_free_rate ? `<span class="muted" style="font-size:9px"> (RF: 10y ${(m.risk_free_rate*100).toFixed(2)}%)</span>` : "";
-  const rows = [
+  // CFA-standard risk metrics, grouped:
+  //   Absolute return: ann return, vol, Sharpe, Sortino, Calmar
+  //   Tail risk:       Max DD, VaR 95
+  //   Benchmark-relative (vs SPY): IR, Tracking Error, Treynor, Jensen's α,
+  //                                Up/Down Capture
+  const benchmarkRows = [];
+  if (m.information_ratio != null)
+    benchmarkRows.push(["Information Ratio (vs SPY)", fmtNum(m.information_ratio, 2),
+      m.information_ratio >= 0 ? "pos" : "neg"]);
+  if (m.tracking_error != null)
+    benchmarkRows.push(["Tracking Error", fmtPct(m.tracking_error)]);
+  if (m.annualized_active_return != null)
+    benchmarkRows.push(["Active Return (vs SPY)", fmtPct(m.annualized_active_return),
+      m.annualized_active_return >= 0 ? "pos" : "neg"]);
+  if (m.treynor != null)
+    benchmarkRows.push([`Treynor Ratio${rfPct}`, fmtNum(m.treynor, 2)]);
+  if (m.jensens_alpha != null)
+    benchmarkRows.push(["Jensen's Alpha (CAPM)", fmtPct(m.jensens_alpha),
+      m.jensens_alpha >= 0 ? "pos" : "neg"]);
+  if (m.up_capture != null)
+    benchmarkRows.push(["Up Capture", fmtNum(m.up_capture, 2),
+      m.up_capture >= 1 ? "pos" : "neg"]);
+  if (m.down_capture != null)
+    benchmarkRows.push(["Down Capture", fmtNum(m.down_capture, 2),
+      m.down_capture <= 1 ? "pos" : "neg"]);
+
+  const absoluteRows = [
     ["Annualized Return", fmtPct(m.annualized_return), m.annualized_return >= 0 ? "pos" : "neg"],
     ["Annualized Volatility", fmtPct(m.annualized_vol)],
     [`Sharpe Ratio${rfPct}`, fmtNum(m.sharpe, 2)],
     [`Sortino Ratio${rfPct}`, fmtNum(m.sortino, 2)],
+    [`Calmar Ratio`, fmtNum(m.calmar, 2)],
     ["Max Drawdown", fmtPct(m.max_drawdown), "neg"],
     ["Beta (SPY)", fmtNum(m.beta_spy, 2)],
     ["VaR 95% (1d)", fmtPct(m.var_95_1d), "neg"],
@@ -772,10 +799,22 @@ function renderRiskMetrics(m, s) {
   const basis = m.data_basis === "realized_nav"
     ? `Based on ${m.days_of_live_nav} days of live NAV`
     : `Projected from 252d history × current weights (only ${m.days_of_live_nav || 0}d of live NAV so far)`;
-  const html = `<table><tbody>${rows.map(r => `
-    <tr><td class="muted">${r[0]}</td><td class="num ${r[2]||""}">${r[1]}</td></tr>
-  `).join("")}</tbody></table>
-  <div class="muted" style="margin-top: 10px; font-size: 10px;">${basis}</div>`;
+  const renderRows = (rows) => rows.map(r =>
+    `<tr><td class="muted">${r[0]}</td><td class="num ${r[2]||""}">${r[1]}</td></tr>`).join("");
+  const benchSection = benchmarkRows.length > 0
+    ? `<h2 style="margin-top: 18px;">Benchmark-Relative (vs SPY)</h2>
+       <table><tbody>${renderRows(benchmarkRows)}</tbody></table>` : "";
+  const html = `<table><tbody>${renderRows(absoluteRows)}</tbody></table>
+  ${benchSection}
+  <div class="muted" style="margin-top: 10px; font-size: 10px;">
+    ${basis}<br>
+    Sortino uses Frank Sortino downside deviation (RMS of shortfalls vs MAR=RF), not std of negative returns.
+    Information Ratio is the CFA-canonical benchmark-relative metric: annualized active return ÷ tracking error.
+    Treynor uses excess return ÷ β (excess vs RF per unit of systematic risk).
+    Jensen's α is CAPM-based: R<sub>p</sub> − [RF + β(R<sub>m</sub> − RF)].
+    Up Capture &gt; 1 = portfolio outperforms SPY in up-months; Down Capture &lt; 1 = portfolio
+    declines less than SPY in down-months.
+  </div>`;
   document.getElementById("risk-metrics").innerHTML = html;
 }
 

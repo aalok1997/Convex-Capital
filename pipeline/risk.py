@@ -450,6 +450,71 @@ def synthetic_portfolio_returns(holdings: List[dict],
     return pd.Series(port_rets, index=df.index, name="portfolio_returns")
 
 
+def _downside_deviation(rets: pd.Series, mar_daily: float = 0.0,
+                        periods_per_year: int = 252) -> float:
+    """Proper Sortino downside deviation per Frank Sortino's original spec.
+
+    DD = sqrt( mean( min(R - MAR, 0)^2 ) ) * sqrt(periods_per_year)
+
+    Crucially, the mean is over ALL observations (not just below-target ones)
+    — that's what distinguishes downside deviation from "std of negatives."
+    Above-target periods contribute zero, but they're still counted in N.
+    """
+    shortfall = (rets - mar_daily).clip(upper=0)
+    if len(shortfall) == 0:
+        return 0.0
+    rms = math.sqrt(float((shortfall ** 2).mean()))
+    return rms * math.sqrt(periods_per_year)
+
+
+def _information_ratio(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
+    """IR = annualized active return / tracking error.
+
+    Tracking error = std(R_p - R_b) annualized.
+    Active return  = mean(R_p - R_b) annualized.
+    The metric tells you risk-adjusted active performance against a benchmark.
+    """
+    aligned = pd.concat([port_rets, bench_rets], axis=1, join="inner").dropna()
+    if len(aligned) < 30:
+        return {}
+    active = aligned.iloc[:, 0] - aligned.iloc[:, 1]
+    mean_active = float(active.mean())
+    ann_active = (1 + mean_active) ** 252 - 1
+    te = float(active.std() * math.sqrt(252))
+    if te <= 0:
+        return {"information_ratio": 0.0, "tracking_error": 0.0,
+                "annualized_active_return": ann_active}
+    return {"information_ratio": ann_active / te,
+            "tracking_error": te,
+            "annualized_active_return": ann_active}
+
+
+def _up_down_capture(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
+    """Capture ratios in up- and down-benchmark periods.
+
+    Up Capture   = (geometric product of port returns when bench up) /
+                   (geometric product of bench returns when bench up)
+    Down Capture = same for bench-down periods.
+    A skilled long-only manager wants Up > 1 and Down < 1.
+    """
+    aligned = pd.concat([port_rets, bench_rets], axis=1, join="inner").dropna()
+    if len(aligned) < 30:
+        return {}
+    p, b = aligned.iloc[:, 0], aligned.iloc[:, 1]
+    up_mask = b > 0
+    down_mask = b < 0
+    out = {}
+    if up_mask.any():
+        bp = float((1 + b[up_mask]).prod() - 1)
+        pp = float((1 + p[up_mask]).prod() - 1)
+        out["up_capture"] = (pp / bp) if bp != 0 else None
+    if down_mask.any():
+        bp = float((1 + b[down_mask]).prod() - 1)
+        pp = float((1 + p[down_mask]).prod() - 1)
+        out["down_capture"] = (pp / bp) if bp != 0 else None
+    return out
+
+
 def synthetic_portfolio_metrics(holdings: List[dict],
                                 closes: Dict[str, pd.Series],
                                 spy_close: pd.Series = None,
@@ -473,24 +538,39 @@ def synthetic_portfolio_metrics(holdings: List[dict],
     mean_daily = float(rets_clean.mean())
     ann_return = float((1 + mean_daily) ** 252 - 1)
     excess_return = ann_return - risk_free_rate
+
+    # Sharpe: classic (R - RF) / sigma
     sharpe = (excess_return / ann_vol) if ann_vol > 0 else 0.0
-    downside = rets_clean[rets_clean < 0]
-    dd_vol = float(downside.std() * math.sqrt(252)) if not downside.empty else 0.0
+
+    # Sortino: PROPER Frank Sortino formula. MAR = daily-equivalent of RF.
+    # (R - MAR) / DD, where DD = RMS-of-shortfalls × √252.
+    mar_daily = (1 + risk_free_rate) ** (1 / 252) - 1
+    dd_vol = _downside_deviation(rets_clean, mar_daily=mar_daily)
     sortino = (excess_return / dd_vol) if dd_vol > 0 else 0.0
+
+    # Drawdown + VaR
     synthetic_nav = (1 + rets).cumprod()
     cummax = synthetic_nav.cummax()
     max_dd = float(((synthetic_nav - cummax) / cummax).min())
     var95 = float(np.percentile(rets_clean, 5))
+
+    # Calmar: annualized return / |max drawdown|.
+    calmar = (ann_return / abs(max_dd)) if max_dd < 0 else 0.0
+
     out = {
         "annualized_return": ann_return,
         "annualized_vol": ann_vol,
         "sharpe": float(sharpe),
         "sortino": float(sortino),
+        "calmar": float(calmar),
         "max_drawdown": max_dd,
         "var_95_1d": var95,
         "risk_free_rate": float(risk_free_rate),
-        "method": "Synthetic: current weights × each holding's 252-day return history.",
+        "method": "Synthetic: current weights × each holding's 252-day return history. "
+                  "Sortino uses Frank Sortino downside deviation (RMS of shortfalls vs MAR=RF).",
     }
+
+    # Benchmark-relative metrics — these require a benchmark (SPY)
     if spy_close is not None and not spy_close.empty:
         spy_rets = np.log(spy_close / spy_close.shift(1)).dropna().tail(lookback)
         aligned = pd.concat([rets, spy_rets], axis=1, join="inner").dropna()
@@ -498,7 +578,31 @@ def synthetic_portfolio_metrics(holdings: List[dict],
         if len(aligned) >= 30:
             cov = np.cov(aligned.iloc[:, 0], aligned.iloc[:, 1])
             if cov[1, 1] > 0:
-                out["beta_spy"] = float(cov[0, 1] / cov[1, 1])
+                beta = float(cov[0, 1] / cov[1, 1])
+                out["beta_spy"] = beta
+
+                # Benchmark annualized return for CAPM and Jensen's Alpha
+                bench_mean = float(aligned.iloc[:, 1].mean())
+                bench_ann_return = (1 + bench_mean) ** 252 - 1
+                out["benchmark_annualized_return"] = bench_ann_return
+
+                # Treynor ratio: (R - RF) / Beta — excess return per unit of
+                # systematic risk. Useful when comparing portfolios with
+                # similar betas, since Sharpe is fooled by stock-specific risk.
+                if beta != 0:
+                    out["treynor"] = excess_return / beta
+
+                # Jensen's Alpha (CAPM-based): R_p - [RF + β(R_m - RF)].
+                # Positive alpha = manager beat what CAPM predicted given beta.
+                expected = risk_free_rate + beta * (bench_ann_return - risk_free_rate)
+                out["jensens_alpha"] = float(ann_return - expected)
+
+        # Information Ratio + Tracking Error
+        ir = _information_ratio(rets, spy_rets)
+        out.update(ir)
+        # Up/Down Capture vs benchmark
+        cap = _up_down_capture(rets, spy_rets)
+        out.update(cap)
     return out
 
 
@@ -571,21 +675,37 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
     ann_vol = float(rets.std() * math.sqrt(252))
     excess_return = ann_return - risk_free_rate
     sharpe = (excess_return / ann_vol) if ann_vol > 0 else 0.0
-    downside = rets[rets < 0]
-    dd_vol = float(downside.std() * math.sqrt(252)) if not downside.empty else 0.0
+    # Proper Sortino downside deviation: RMS of shortfalls against MAR=RF.
+    mar_daily = (1 + risk_free_rate) ** (1 / 252) - 1
+    dd_vol = _downside_deviation(rets, mar_daily=mar_daily)
     sortino = (excess_return / dd_vol) if dd_vol > 0 else 0.0
     cummax = nav.cummax()
     max_dd = float(((nav - cummax) / cummax).min())
     var95 = float(np.percentile(rets, 5))  # left-tail 5%
+    calmar = (ann_return / abs(max_dd)) if max_dd < 0 else 0.0
     metrics = {
         "annualized_return": float(ann_return),
         "annualized_vol": ann_vol,
         "sharpe": float(sharpe),
         "sortino": float(sortino),
+        "calmar": float(calmar),
         "max_drawdown": max_dd,
         "var_95_1d": var95,
         "risk_free_rate": float(risk_free_rate),
     }
     if bench is not None and len(bench) > 5:
-        metrics["beta_spy"] = beta_to(nav, bench)
+        beta = beta_to(nav, bench)
+        metrics["beta_spy"] = beta
+        # Bench-relative metrics
+        bench_rets = bench.pct_change().dropna()
+        bench_ann_return = (1 + float(bench_rets.mean())) ** 252 - 1
+        metrics["benchmark_annualized_return"] = float(bench_ann_return)
+        if beta and not math.isnan(beta) and beta != 0:
+            metrics["treynor"] = float(excess_return / beta)
+            expected = risk_free_rate + beta * (bench_ann_return - risk_free_rate)
+            metrics["jensens_alpha"] = float(ann_return - expected)
+        ir = _information_ratio(rets, bench_rets)
+        metrics.update(ir)
+        cap = _up_down_capture(rets, bench_rets)
+        metrics.update(cap)
     return metrics
