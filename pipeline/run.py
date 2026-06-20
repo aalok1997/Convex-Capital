@@ -65,6 +65,19 @@ def main(argv=None):
     trades = load_trades(trades_path)
     state = replay(trades)
 
+    # Hard safety: refuse to produce a snapshot that has negative cash. The
+    # paper-traded fund can't be overdrawn — if the staged trades.csv would
+    # cause it, the user is supposed to fix the trade ledger, not silently
+    # let the dashboard show negative cash.
+    if state.cash < -1.0:  # tiny tolerance for sub-dollar rounding artifacts
+        print(f"ERROR: Trades would result in NEGATIVE cash (${state.cash:,.2f}).",
+              file=sys.stderr)
+        print(f"  Total deposits: ${state.deposits:,.2f}", file=sys.stderr)
+        print(f"  Open positions: {len(state.positions)}", file=sys.stderr)
+        print(f"  Adjust trades.csv so total purchases <= deposits, then re-run.",
+              file=sys.stderr)
+        return 3
+
     print(f"Loaded {len(trades)} trades, {len(state.positions)} open positions, "
           f"cash=${state.cash:,.2f}")
 
