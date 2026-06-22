@@ -517,7 +517,7 @@ def _up_down_capture(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
 
 def synthetic_portfolio_metrics(holdings: List[dict],
                                 closes: Dict[str, pd.Series],
-                                spy_close: pd.Series = None,
+                                bench_close: pd.Series = None,
                                 lookback: int = 252,
                                 risk_free_rate: float = 0.0) -> dict:
     """Annualized vol, Sharpe, Sortino, max DD, VaR computed from a synthetic
@@ -570,16 +570,17 @@ def synthetic_portfolio_metrics(holdings: List[dict],
                   "Sortino uses Frank Sortino downside deviation (RMS of shortfalls vs MAR=RF).",
     }
 
-    # Benchmark-relative metrics — these require a benchmark (SPY)
-    if spy_close is not None and not spy_close.empty:
-        spy_rets = np.log(spy_close / spy_close.shift(1)).dropna().tail(lookback)
-        aligned = pd.concat([rets, spy_rets], axis=1, join="inner").dropna()
+    # Benchmark-relative metrics — these require a benchmark series.
+    # Caller chooses which benchmark (IWM for SMID funds, SPY for large-cap).
+    if bench_close is not None and not bench_close.empty:
+        bench_rets = np.log(bench_close / bench_close.shift(1)).dropna().tail(lookback)
+        aligned = pd.concat([rets, bench_rets], axis=1, join="inner").dropna()
         aligned = aligned[(aligned.iloc[:, 0] != 0) & (aligned.iloc[:, 1] != 0)]
         if len(aligned) >= 30:
             cov = np.cov(aligned.iloc[:, 0], aligned.iloc[:, 1])
             if cov[1, 1] > 0:
                 beta = float(cov[0, 1] / cov[1, 1])
-                out["beta_spy"] = beta
+                out["beta_benchmark"] = beta
 
                 # Benchmark annualized return for CAPM and Jensen's Alpha
                 bench_mean = float(aligned.iloc[:, 1].mean())
@@ -587,21 +588,18 @@ def synthetic_portfolio_metrics(holdings: List[dict],
                 out["benchmark_annualized_return"] = bench_ann_return
 
                 # Treynor ratio: (R - RF) / Beta — excess return per unit of
-                # systematic risk. Useful when comparing portfolios with
-                # similar betas, since Sharpe is fooled by stock-specific risk.
+                # systematic risk
                 if beta != 0:
                     out["treynor"] = excess_return / beta
 
-                # Jensen's Alpha (CAPM-based): R_p - [RF + β(R_m - RF)].
-                # Positive alpha = manager beat what CAPM predicted given beta.
+                # Jensen's Alpha (CAPM-based): R_p - [RF + β(R_m - RF)]
                 expected = risk_free_rate + beta * (bench_ann_return - risk_free_rate)
                 out["jensens_alpha"] = float(ann_return - expected)
 
         # Information Ratio + Tracking Error
-        ir = _information_ratio(rets, spy_rets)
+        ir = _information_ratio(rets, bench_rets)
         out.update(ir)
-        # Up/Down Capture vs benchmark
-        cap = _up_down_capture(rets, spy_rets)
+        cap = _up_down_capture(rets, bench_rets)
         out.update(cap)
     return out
 
@@ -695,7 +693,7 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
     }
     if bench is not None and len(bench) > 5:
         beta = beta_to(nav, bench)
-        metrics["beta_spy"] = beta
+        metrics["beta_benchmark"] = beta
         # Bench-relative metrics
         bench_rets = bench.pct_change().dropna()
         bench_ann_return = (1 + float(bench_rets.mean())) ** 252 - 1

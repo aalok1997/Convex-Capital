@@ -218,6 +218,12 @@ def main(argv=None):
     end = pd.Timestamp.today().normalize()
     nav = daily_nav_curve(trades, histories, start=start, end=end)
     spy_close = bench_hist["SPY"].df["Close"] if not bench_hist["SPY"].df.empty else pd.Series(dtype=float)
+    iwm_close = bench_hist["IWM"].df["Close"] if not bench_hist["IWM"].df.empty else pd.Series(dtype=float)
+    # Primary fund benchmark: Russell 2000 (IWM) — appropriate for a SMID
+    # focused portfolio. All benchmark-relative metrics (IR, Treynor,
+    # Jensen's alpha, Up/Down Capture, Beta) compute against this index.
+    primary_bench_close = iwm_close if not iwm_close.empty else spy_close
+    primary_bench_name = "IWM" if not iwm_close.empty else "SPY"
     bench_curves = benchmark_curves(start, end, bench_hist)
 
     # Holdings panel
@@ -303,23 +309,26 @@ def main(argv=None):
     # to synthetic-history metrics (current weights × each holding's 252-day
     # return history) so newly-launched portfolios still show meaningful
     # vol / Sharpe / Sortino / max DD instead of empty cells.
-    metrics_live = (portfolio_metrics(nav, spy_close, risk_free_rate=risk_free_rate)
+    metrics_live = (portfolio_metrics(nav, primary_bench_close, risk_free_rate=risk_free_rate)
                     if len(nav) >= 30 else {})
-    metrics_synth = synthetic_portfolio_metrics(holdings, closes_for_corr, spy_close,
+    metrics_synth = synthetic_portfolio_metrics(holdings, closes_for_corr, primary_bench_close,
                                                 risk_free_rate=risk_free_rate)
     metrics = metrics_live or metrics_synth or {}
     metrics["data_basis"] = "realized_nav" if metrics_live else "synthetic_252d"
     metrics["days_of_live_nav"] = int(len(nav))
+    metrics["benchmark_ticker"] = primary_bench_name
+    metrics["benchmark_name"] = "Russell 2000" if primary_bench_name == "IWM" else "S&P 500"
 
-    portfolio_beta = metrics.get("beta_spy", float("nan"))
+    # Beta vs primary benchmark (IWM) — used for IR/Treynor/Jensen/UI display
+    portfolio_beta = metrics.get("beta_benchmark", metrics.get("beta_spy", float("nan")))
     if math.isnan(portfolio_beta) or portfolio_beta == 0:
-        if total_equity > 0:
+        if total_equity > 0 and not primary_bench_close.empty:
             wb = 0.0
             for tk, pos in state.positions.items():
                 h = histories.get(tk)
-                if h is None or h.df.empty or spy_close.empty:
+                if h is None or h.df.empty:
                     continue
-                b = beta_to(h.df["Close"], spy_close)
+                b = beta_to(h.df["Close"], primary_bench_close)
                 if not math.isnan(b):
                     last = float(h.df["Close"].iloc[-1])
                     w = (pos.shares * last) / total_equity
@@ -327,8 +336,29 @@ def main(argv=None):
             portfolio_beta = wb if wb else 1.0
         else:
             portfolio_beta = 0.0
-    metrics["beta_spy"] = portfolio_beta
-    stress = stress_tests(portfolio_beta, nav_now)
+    metrics["beta_benchmark"] = portfolio_beta
+    metrics["beta_spy"] = portfolio_beta  # alias for UI compat
+
+    # Beta vs SPY — separately computed for historical stress tests, where
+    # the crash percentages (COVID -33.9%, GFC -56.5%, etc.) are SPY moves.
+    # Using beta_vs_IWM with SPY moves would mismatch the underlying math.
+    beta_for_stress = float("nan")
+    if total_equity > 0 and not spy_close.empty:
+        wb = 0.0
+        for tk, pos in state.positions.items():
+            h = histories.get(tk)
+            if h is None or h.df.empty:
+                continue
+            b = beta_to(h.df["Close"], spy_close)
+            if not math.isnan(b):
+                last = float(h.df["Close"].iloc[-1])
+                w = (pos.shares * last) / total_equity
+                wb += w * b
+        beta_for_stress = wb if wb else 1.0
+    if math.isnan(beta_for_stress):
+        beta_for_stress = 1.0
+    metrics["beta_spy_stress"] = float(beta_for_stress)
+    stress = stress_tests(beta_for_stress, nav_now)
     # Monte Carlo: same precedence rule — live NAV bootstrap if long enough,
     # otherwise bootstrap from synthetic portfolio returns.
     synth_rets = synthetic_portfolio_returns(holdings, closes_for_corr)
