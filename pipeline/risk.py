@@ -48,7 +48,9 @@ def beta_to(close: pd.Series, bench: pd.Series, lookback: int = 252) -> float:
     r = np.log(close / close.shift(1)).dropna().tail(lookback)
     b = np.log(bench / bench.shift(1)).dropna().tail(lookback)
     aligned = pd.concat([r, b], axis=1, join="inner").dropna()
-    if len(aligned) < 30:
+    # Lowered from 30 → 5 so beta is defined early in a fund's life.
+    # UI labels the sample size; users can judge statistical confidence.
+    if len(aligned) < 5:
         return float("nan")
     cov = np.cov(aligned.iloc[:, 0], aligned.iloc[:, 1])
     if cov[1, 1] == 0:
@@ -481,7 +483,9 @@ def _information_ratio(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
     positive and deflated them when it was negative.
     """
     aligned = pd.concat([port_rets, bench_rets], axis=1, join="inner").dropna()
-    if len(aligned) < 30:
+    # Minimum 5 daily observations for std to be defined. UI labels the
+    # sample size so viewers can judge statistical confidence themselves.
+    if len(aligned) < 5:
         return {}
     active = aligned.iloc[:, 0] - aligned.iloc[:, 1]
     mean_active = float(active.mean())
@@ -510,7 +514,7 @@ def _up_down_capture(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
     A skilled long-only manager wants Up > 1 and Down < 1.
     """
     aligned = pd.concat([port_rets, bench_rets], axis=1, join="inner").dropna()
-    if len(aligned) < 30:
+    if len(aligned) < 5:
         return {}
     p, b = aligned.iloc[:, 0], aligned.iloc[:, 1]
     up_mask = b > 0
@@ -611,7 +615,7 @@ def synthetic_portfolio_metrics(holdings: List[dict],
         bench_rets = np.log(bench_close / bench_close.shift(1)).dropna().tail(lookback)
         aligned = pd.concat([rets, bench_rets], axis=1, join="inner").dropna()
         aligned = aligned[(aligned.iloc[:, 0] != 0) & (aligned.iloc[:, 1] != 0)]
-        if len(aligned) >= 30:
+        if len(aligned) >= 5:
             cov = np.cov(aligned.iloc[:, 0], aligned.iloc[:, 1])
             if cov[1, 1] > 0:
                 beta = float(cov[0, 1] / cov[1, 1])
@@ -709,9 +713,12 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
     if rets.empty:
         return {}
     days = (nav.index[-1] - nav.index[0]).days or 1
-    total_return = nav.iloc[-1] / nav.iloc[0] - 1
-    # Geometric annualized return (CAGR) — for display, intuitive
-    ann_return_geo = (1 + total_return) ** (365.0 / days) - 1 if days > 0 else 0.0
+    trading_days = len(rets)  # number of daily-return observations
+    # Cumulative since-inception return (GIPS-correct for periods < 1 year:
+    # do NOT annualize sub-year periods).
+    period_return = float(nav.iloc[-1] / nav.iloc[0] - 1)
+    # Geometric annualized return (CAGR) — only meaningful for ≥1 year
+    ann_return_geo = (1 + period_return) ** (365.0 / days) - 1 if days > 0 else 0.0
     # Arithmetic annualized return — used in Sharpe / Sortino / Treynor / Jensen
     # so numerator scales the same way as the std-based denominator.
     ann_return_arith = float(rets.mean() * 252)
@@ -734,6 +741,12 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
     # Calmar uses geometric (cumulative-performance) annualized return.
     calmar = (ann_return_geo / abs(max_dd)) if max_dd < 0 else 0.0
     metrics = {
+        # GIPS-correct: cumulative since-inception (NOT annualized for <1y)
+        "period_return": float(period_return),
+        "calendar_days_since_inception": int(days),
+        "trading_days_observed": int(trading_days),
+        # Annualized forms — only meaningful for ≥1 year. Kept for ratio math
+        # and for display once the fund crosses 365 days.
         "annualized_return": float(ann_return_geo),
         "annualized_return_arithmetic": float(ann_return_arith),
         "annualized_vol": ann_vol,
@@ -753,6 +766,13 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
         bench_ann_geo = (1 + bench_mean_daily) ** 252 - 1
         metrics["benchmark_annualized_return"] = float(bench_ann_geo)
         metrics["benchmark_annualized_return_arithmetic"] = float(bench_ann_arith)
+        # Cumulative since-inception benchmark return (GIPS-correct sub-1y)
+        aligned_bench = bench.loc[nav.index.intersection(bench.index)]
+        if len(aligned_bench) >= 2:
+            metrics["benchmark_period_return"] = float(
+                aligned_bench.iloc[-1] / aligned_bench.iloc[0] - 1)
+            metrics["period_active_return"] = float(
+                period_return - metrics["benchmark_period_return"])
         if beta and not math.isnan(beta) and beta != 0:
             # Treynor / Jensen use arithmetic annualized returns
             metrics["treynor"] = float((ann_return_arith - risk_free_rate) / beta)

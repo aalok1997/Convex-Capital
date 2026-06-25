@@ -309,8 +309,12 @@ def main(argv=None):
     # to synthetic-history metrics (current weights × each holding's 252-day
     # return history) so newly-launched portfolios still show meaningful
     # vol / Sharpe / Sortino / max DD instead of empty cells.
+    # Threshold: 5 days of NAV is the minimum for meaningful std-based metrics.
+    # Below that, fall back to synthetic. Above that, prefer realized — even
+    # for short windows, realized is more honest than backcast. The UI shows
+    # the trading-day sample size so viewers can judge statistical confidence.
     metrics_live = (portfolio_metrics(nav, primary_bench_close, risk_free_rate=risk_free_rate)
-                    if len(nav) >= 30 else {})
+                    if len(nav) >= 5 else {})
     metrics_synth = synthetic_portfolio_metrics(holdings, closes_for_corr, primary_bench_close,
                                                 risk_free_rate=risk_free_rate)
     metrics = metrics_live or metrics_synth or {}

@@ -765,13 +765,19 @@ function renderRiskMetrics(m, s) {
   //   Benchmark-relative (vs IWM): IR, Tracking Error, Treynor, Jensen's α,
   //                                Up/Down Capture
   const benchmarkRows = [];
+  // Since-inception (period) active return — GIPS-correct for <1y
+  if (m.period_active_return != null)
+    benchmarkRows.push([`Since-Inception Active Return (${tradingDays}d, vs IWM)`,
+      fmtPct(m.period_active_return),
+      m.period_active_return >= 0 ? "pos" : "neg"]);
   if (m.information_ratio != null)
     benchmarkRows.push(["Information Ratio (vs IWM)", fmtNum(m.information_ratio, 2),
       m.information_ratio >= 0 ? "pos" : "neg"]);
   if (m.tracking_error != null)
     benchmarkRows.push(["Tracking Error", fmtPct(m.tracking_error)]);
   if (m.annualized_active_return != null)
-    benchmarkRows.push(["Active Return (vs IWM)", fmtPct(m.annualized_active_return),
+    benchmarkRows.push([`Annualized Active Return ${lessThanOneYear ? '<span class="muted" style="font-size:9px">(noisy)</span>' : ""}`,
+      fmtPct(m.annualized_active_return),
       m.annualized_active_return >= 0 ? "pos" : "neg"]);
   if (m.treynor != null)
     benchmarkRows.push([`Treynor Ratio${rfPct}`, fmtNum(m.treynor, 2)]);
@@ -785,8 +791,23 @@ function renderRiskMetrics(m, s) {
     benchmarkRows.push(["Down Capture", fmtNum(m.down_capture, 2),
       m.down_capture <= 1 ? "pos" : "neg"]);
 
+  // GIPS-correct: returns for periods < 1 year shown as CUMULATIVE
+  // since-inception, NOT annualized. Once the fund passes 365 days, the
+  // annualized view becomes meaningful and we surface that as the primary.
+  const daysSince = m.calendar_days_since_inception || 0;
+  const tradingDays = m.trading_days_observed || 0;
+  const lessThanOneYear = daysSince < 365;
+  const periodReturnRow = m.period_return != null
+    ? [`Since-Inception Return (${tradingDays}d)`, fmtPct(m.period_return),
+       m.period_return >= 0 ? "pos" : "neg"]
+    : null;
+  const annualizedLabel = lessThanOneYear
+    ? `Annualized Return <span class="muted" style="font-size:9px">(noisy, ${tradingDays}d sample)</span>`
+    : "Annualized Return";
+
   const absoluteRows = [
-    ["Annualized Return", fmtPct(m.annualized_return), m.annualized_return >= 0 ? "pos" : "neg"],
+    periodReturnRow,
+    [annualizedLabel, fmtPct(m.annualized_return), m.annualized_return >= 0 ? "pos" : "neg"],
     ["Annualized Volatility", fmtPct(m.annualized_vol)],
     [`Sharpe Ratio${rfPct}`, fmtNum(m.sharpe, 2)],
     [`Sortino Ratio${rfPct}`, fmtNum(m.sortino, 2)],
@@ -795,7 +816,7 @@ function renderRiskMetrics(m, s) {
     [`Beta (${m.benchmark_ticker || "IWM"})`, fmtNum(m.beta_benchmark || m.beta_spy, 2)],
     ["VaR 95% (1d)", fmtPct(m.var_95_1d), "neg"],
     ["Realized P&L", fmtMoney(s.realized_pnl), s.realized_pnl >= 0 ? "pos" : "neg"],
-  ];
+  ].filter(r => r != null);
   const renderRows = (rows) => rows.map(r =>
     `<tr><td class="muted">${r[0]}</td><td class="num ${r[2]||""}">${r[1]}</td></tr>`).join("");
   const benchSection = benchmarkRows.length > 0
@@ -810,22 +831,19 @@ function renderRiskMetrics(m, s) {
   const banner = isSynthetic ? `
     <div style="background: rgba(251,191,36,0.10); border-left: 3px solid var(--warn);
                 padding: 10px 14px; margin-bottom: 14px; font-size: 11px; line-height: 1.55;">
-      <strong style="color: var(--warn);">&#9888; Metrics below are PROJECTED, not realized.</strong>
-      Sharpe / Sortino / vol / α are computed from a 252-day backcast (current weights &times;
-      each holding's last-year return history) &mdash; NOT from your
-      ${m.days_of_live_nav || 0} days of live NAV. Reason: ${m.days_of_live_nav || 0}-day
-      Sharpe is statistical noise (one bad day flips it negative; CFA / GIPS standards
-      require &ge;36 months). Backcast is negative because the portfolio's underlying
-      stocks lost money over the past year &mdash; that's a vulnerability disclosure,
-      not a performance claim.<br>
-      <strong>Your actual return since launch:
-      <span class="${s.total_return >= 0 ? "pos" : "neg"}">${fmtPct(s.total_return)}</span></strong>
-      over ${m.days_of_live_nav || 0} live NAV days. Will auto-switch to realized basis
-      at 30 days.
+      <strong style="color: var(--warn);">&#9888; Backcast metrics</strong> &mdash; not enough
+      live NAV history yet (${m.days_of_live_nav || 0} days). Metrics use current weights
+      &times; each holding's 252-day return history.
     </div>` : `
     <div style="background: rgba(74,222,128,0.08); border-left: 3px solid var(--accent);
-                padding: 10px 14px; margin-bottom: 14px; font-size: 11px;">
-      &#10003; Metrics computed from <strong>${m.days_of_live_nav} days of live NAV</strong>.
+                padding: 10px 14px; margin-bottom: 14px; font-size: 11px; line-height: 1.55;">
+      <strong style="color: var(--accent);">&#10003; Realized metrics</strong> from
+      <strong>${tradingDays} trading days</strong> of live NAV (${daysSince} calendar days
+      since launch). ${lessThanOneYear ? `
+      Returns shown as <strong>cumulative since-inception</strong> (GIPS-correct: sub-1-year
+      periods should NOT be annualized). Annualized rows are shown for context but are
+      statistically noisy with only ${tradingDays} observations &mdash; treat them as
+      rough estimates until you have ~252+ trading days.` : ""}
     </div>`;
 
   const html = banner +
