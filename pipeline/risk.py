@@ -468,25 +468,37 @@ def _downside_deviation(rets: pd.Series, mar_daily: float = 0.0,
 
 
 def _information_ratio(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
-    """IR = annualized active return / tracking error.
+    """Information Ratio with CFA-clean arithmetic annualization.
 
-    Tracking error = std(R_p - R_b) annualized.
-    Active return  = mean(R_p - R_b) annualized.
-    The metric tells you risk-adjusted active performance against a benchmark.
+    IR = mean(active_daily) × √252 ÷ std(active_daily)
+       = annualized_active_return / annualized_tracking_error
+
+    Both numerator and denominator scale arithmetically with √252, so the
+    ratio is dimensionally consistent regardless of the time aggregation.
+    Earlier versions of this function used (1 + mean)^252 − 1 (geometric)
+    in the numerator while keeping arithmetic std×√252 in the denominator,
+    which produced inflated IR magnitudes when the active return was
+    positive and deflated them when it was negative.
     """
     aligned = pd.concat([port_rets, bench_rets], axis=1, join="inner").dropna()
     if len(aligned) < 30:
         return {}
     active = aligned.iloc[:, 0] - aligned.iloc[:, 1]
     mean_active = float(active.mean())
-    ann_active = (1 + mean_active) ** 252 - 1
-    te = float(active.std() * math.sqrt(252))
+    std_active = float(active.std())
+    ann_active_arith = mean_active * 252
+    ann_active_geo = (1 + mean_active) ** 252 - 1  # for display
+    te = std_active * math.sqrt(252)
     if te <= 0:
         return {"information_ratio": 0.0, "tracking_error": 0.0,
-                "annualized_active_return": ann_active}
-    return {"information_ratio": ann_active / te,
+                "annualized_active_return": ann_active_geo,
+                "annualized_active_return_arithmetic": ann_active_arith}
+    # IR is the SAME formula as Sharpe but on active returns instead of excess.
+    ir = mean_active * math.sqrt(252) / std_active
+    return {"information_ratio": ir,
             "tracking_error": te,
-            "annualized_active_return": ann_active}
+            "annualized_active_return": ann_active_geo,
+            "annualized_active_return_arithmetic": ann_active_arith}
 
 
 def _up_down_capture(port_rets: pd.Series, bench_rets: pd.Series) -> dict:
@@ -534,19 +546,36 @@ def synthetic_portfolio_metrics(holdings: List[dict],
     rets_clean = rets[rets != 0.0]  # exclude ffilled non-trading days from stats
     if len(rets_clean) < 30:
         rets_clean = rets
+    # ---- CFA-clean formulas for risk-adjusted ratios --------------------
+    # The textbook Sharpe formula is (mean - rf) / std for the SAME period.
+    # Annualized Sharpe = mean(daily_excess) × √252 / std(daily_excess) — i.e.
+    # both numerator and denominator scale with arithmetic √252. Computing
+    # mean and std of daily EXCESS returns directly avoids the geometric vs
+    # arithmetic mismatch that earlier versions of this function had (it
+    # used (1+mean)^252−1 in the numerator but std×√252 in the denominator,
+    # which double-applied compounding to one side only).
+    daily_rf = (1 + risk_free_rate) ** (1 / 252) - 1 if risk_free_rate else 0.0
+    excess_daily = rets_clean - daily_rf
+
     ann_vol = float(rets_clean.std() * math.sqrt(252))
-    mean_daily = float(rets_clean.mean())
-    ann_return = float((1 + mean_daily) ** 252 - 1)
-    excess_return = ann_return - risk_free_rate
+    # Sharpe — CFA / Sharpe (1966): annualized excess return ÷ annualized std
+    sharpe = float(
+        (excess_daily.mean() / excess_daily.std()) * math.sqrt(252)
+    ) if excess_daily.std() > 0 else 0.0
 
-    # Sharpe: classic (R - RF) / sigma
-    sharpe = (excess_return / ann_vol) if ann_vol > 0 else 0.0
+    # Sortino — Frank Sortino: annualized excess ÷ annualized downside deviation
+    # DD is computed on raw excess returns (the geometric/arithmetic mismatch
+    # doesn't apply here since shortfall is purely arithmetic).
+    shortfall = excess_daily.clip(upper=0)
+    dd_daily = math.sqrt(float((shortfall ** 2).mean())) if len(shortfall) > 0 else 0.0
+    sortino = float(
+        (excess_daily.mean() / dd_daily) * math.sqrt(252)
+    ) if dd_daily > 0 else 0.0
 
-    # Sortino: PROPER Frank Sortino formula. MAR = daily-equivalent of RF.
-    # (R - MAR) / DD, where DD = RMS-of-shortfalls × √252.
-    mar_daily = (1 + risk_free_rate) ** (1 / 252) - 1
-    dd_vol = _downside_deviation(rets_clean, mar_daily=mar_daily)
-    sortino = (excess_return / dd_vol) if dd_vol > 0 else 0.0
+    # For display: also expose annualized return and excess in TWO forms so
+    # viewers see what's being used in the ratios.
+    ann_return_arith = float(rets_clean.mean() * 252)           # used in ratios
+    ann_return_geo = float((1 + rets_clean.mean()) ** 252 - 1)  # compound, for display
 
     # Drawdown + VaR
     synthetic_nav = (1 + rets).cumprod()
@@ -554,11 +583,16 @@ def synthetic_portfolio_metrics(holdings: List[dict],
     max_dd = float(((synthetic_nav - cummax) / cummax).min())
     var95 = float(np.percentile(rets_clean, 5))
 
-    # Calmar: annualized return / |max drawdown|.
-    calmar = (ann_return / abs(max_dd)) if max_dd < 0 else 0.0
+    # Calmar: annualized GEOMETRIC return / |max drawdown|. Calmar measures
+    # cumulative performance vs worst drawdown, so geometric is correct here.
+    calmar = (ann_return_geo / abs(max_dd)) if max_dd < 0 else 0.0
 
     out = {
-        "annualized_return": ann_return,
+        # Reported as the geometric (compound) annualized return for intuition;
+        # the ratios above internally use arithmetic ann mean for dimensional
+        # consistency with the std-based denominators.
+        "annualized_return": ann_return_geo,
+        "annualized_return_arithmetic": ann_return_arith,
         "annualized_vol": ann_vol,
         "sharpe": float(sharpe),
         "sortino": float(sortino),
@@ -567,7 +601,8 @@ def synthetic_portfolio_metrics(holdings: List[dict],
         "var_95_1d": var95,
         "risk_free_rate": float(risk_free_rate),
         "method": "Synthetic: current weights × each holding's 252-day return history. "
-                  "Sortino uses Frank Sortino downside deviation (RMS of shortfalls vs MAR=RF).",
+                  "Sharpe = mean(daily excess) × √252 ÷ std(daily excess). "
+                  "Sortino uses downside deviation (RMS of shortfalls vs MAR=RF) × √252.",
     }
 
     # Benchmark-relative metrics — these require a benchmark series.
@@ -582,19 +617,25 @@ def synthetic_portfolio_metrics(holdings: List[dict],
                 beta = float(cov[0, 1] / cov[1, 1])
                 out["beta_benchmark"] = beta
 
-                # Benchmark annualized return for CAPM and Jensen's Alpha
+                # Use ARITHMETIC annualization (× 252) for benchmark return
+                # too, so Treynor and Jensen's α are dimensionally consistent
+                # with the Sharpe formulation above. Display also keeps a
+                # geometric version for intuition.
                 bench_mean = float(aligned.iloc[:, 1].mean())
-                bench_ann_return = (1 + bench_mean) ** 252 - 1
-                out["benchmark_annualized_return"] = bench_ann_return
+                bench_ann_arith = bench_mean * 252
+                bench_ann_geo = (1 + bench_mean) ** 252 - 1
+                out["benchmark_annualized_return"] = bench_ann_geo
+                out["benchmark_annualized_return_arithmetic"] = bench_ann_arith
 
-                # Treynor ratio: (R - RF) / Beta — excess return per unit of
-                # systematic risk
+                # Treynor: arithmetic annualized excess ÷ beta. Excess uses
+                # the same arithmetic ann ret of port as Sharpe.
+                port_ann_arith = float(aligned.iloc[:, 0].mean() * 252)
                 if beta != 0:
-                    out["treynor"] = excess_return / beta
+                    out["treynor"] = (port_ann_arith - risk_free_rate) / beta
 
-                # Jensen's Alpha (CAPM-based): R_p - [RF + β(R_m - RF)]
-                expected = risk_free_rate + beta * (bench_ann_return - risk_free_rate)
-                out["jensens_alpha"] = float(ann_return - expected)
+                # Jensen's α (CAPM): R_p − [R_f + β(R_m − R_f)], all arithmetic.
+                expected = risk_free_rate + beta * (bench_ann_arith - risk_free_rate)
+                out["jensens_alpha"] = float(port_ann_arith - expected)
 
         # Information Ratio + Tracking Error
         ir = _information_ratio(rets, bench_rets)
@@ -669,20 +710,32 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
         return {}
     days = (nav.index[-1] - nav.index[0]).days or 1
     total_return = nav.iloc[-1] / nav.iloc[0] - 1
-    ann_return = (1 + total_return) ** (365.0 / days) - 1 if days > 0 else 0.0
+    # Geometric annualized return (CAGR) — for display, intuitive
+    ann_return_geo = (1 + total_return) ** (365.0 / days) - 1 if days > 0 else 0.0
+    # Arithmetic annualized return — used in Sharpe / Sortino / Treynor / Jensen
+    # so numerator scales the same way as the std-based denominator.
+    ann_return_arith = float(rets.mean() * 252)
     ann_vol = float(rets.std() * math.sqrt(252))
-    excess_return = ann_return - risk_free_rate
-    sharpe = (excess_return / ann_vol) if ann_vol > 0 else 0.0
-    # Proper Sortino downside deviation: RMS of shortfalls against MAR=RF.
-    mar_daily = (1 + risk_free_rate) ** (1 / 252) - 1
-    dd_vol = _downside_deviation(rets, mar_daily=mar_daily)
-    sortino = (excess_return / dd_vol) if dd_vol > 0 else 0.0
+
+    # CFA-clean Sharpe: mean(daily_excess) × √252 ÷ std(daily_excess)
+    daily_rf = (1 + risk_free_rate) ** (1 / 252) - 1 if risk_free_rate else 0.0
+    excess_daily = rets - daily_rf
+    sharpe = float((excess_daily.mean() / excess_daily.std()) * math.sqrt(252)) \
+        if excess_daily.std() > 0 else 0.0
+    # Sortino: mean(daily_excess) × √252 ÷ downside_dev_daily × √252
+    shortfall = excess_daily.clip(upper=0)
+    dd_daily = math.sqrt(float((shortfall ** 2).mean())) if len(shortfall) > 0 else 0.0
+    sortino = float((excess_daily.mean() / dd_daily) * math.sqrt(252)) \
+        if dd_daily > 0 else 0.0
+
     cummax = nav.cummax()
     max_dd = float(((nav - cummax) / cummax).min())
     var95 = float(np.percentile(rets, 5))  # left-tail 5%
-    calmar = (ann_return / abs(max_dd)) if max_dd < 0 else 0.0
+    # Calmar uses geometric (cumulative-performance) annualized return.
+    calmar = (ann_return_geo / abs(max_dd)) if max_dd < 0 else 0.0
     metrics = {
-        "annualized_return": float(ann_return),
+        "annualized_return": float(ann_return_geo),
+        "annualized_return_arithmetic": float(ann_return_arith),
         "annualized_vol": ann_vol,
         "sharpe": float(sharpe),
         "sortino": float(sortino),
@@ -694,14 +747,17 @@ def portfolio_metrics(nav: pd.Series, bench: pd.Series = None,
     if bench is not None and len(bench) > 5:
         beta = beta_to(nav, bench)
         metrics["beta_benchmark"] = beta
-        # Bench-relative metrics
         bench_rets = bench.pct_change().dropna()
-        bench_ann_return = (1 + float(bench_rets.mean())) ** 252 - 1
-        metrics["benchmark_annualized_return"] = float(bench_ann_return)
+        bench_mean_daily = float(bench_rets.mean())
+        bench_ann_arith = bench_mean_daily * 252
+        bench_ann_geo = (1 + bench_mean_daily) ** 252 - 1
+        metrics["benchmark_annualized_return"] = float(bench_ann_geo)
+        metrics["benchmark_annualized_return_arithmetic"] = float(bench_ann_arith)
         if beta and not math.isnan(beta) and beta != 0:
-            metrics["treynor"] = float(excess_return / beta)
-            expected = risk_free_rate + beta * (bench_ann_return - risk_free_rate)
-            metrics["jensens_alpha"] = float(ann_return - expected)
+            # Treynor / Jensen use arithmetic annualized returns
+            metrics["treynor"] = float((ann_return_arith - risk_free_rate) / beta)
+            expected = risk_free_rate + beta * (bench_ann_arith - risk_free_rate)
+            metrics["jensens_alpha"] = float(ann_return_arith - expected)
         ir = _information_ratio(rets, bench_rets)
         metrics.update(ir)
         cap = _up_down_capture(rets, bench_rets)
