@@ -796,27 +796,50 @@ function renderRiskMetrics(m, s) {
     ["VaR 95% (1d)", fmtPct(m.var_95_1d), "neg"],
     ["Realized P&L", fmtMoney(s.realized_pnl), s.realized_pnl >= 0 ? "pos" : "neg"],
   ];
-  const basis = m.data_basis === "realized_nav"
-    ? `Based on ${m.days_of_live_nav} days of live NAV`
-    : `Projected from 252d history × current weights (only ${m.days_of_live_nav || 0}d of live NAV so far)`;
   const renderRows = (rows) => rows.map(r =>
     `<tr><td class="muted">${r[0]}</td><td class="num ${r[2]||""}">${r[1]}</td></tr>`).join("");
   const benchSection = benchmarkRows.length > 0
     ? `<h2 style="margin-top: 18px;">Benchmark-Relative (vs IWM)</h2>
        <table><tbody>${renderRows(benchmarkRows)}</tbody></table>` : "";
-  const html = `<table><tbody>${renderRows(absoluteRows)}</tbody></table>
-  ${benchSection}
-  <div class="muted" style="margin-top: 10px; font-size: 10px;">
-    ${basis}<br>
-    Sortino uses Frank Sortino downside deviation (RMS of shortfalls vs MAR=RF), not std of negative returns.
-    Information Ratio is the CFA-canonical benchmark-relative metric: annualized active return ÷ tracking error.
-    Treynor uses excess return ÷ β (excess vs RF per unit of systematic risk).
-    Jensen's α is CAPM-based: R<sub>p</sub> − [RF + β(R<sub>m</sub> − RF)].
-    Up Capture &gt; 1 = portfolio outperforms IWM in up-months; Down Capture &lt; 1 = portfolio
-    declines less than IWM in down-months. Benchmark is Russell 2000 (IWM) — chosen
-    because this fund focuses on small/mid-cap names and IWM is the industry-standard
-    SMID benchmark.
-  </div>`;
+
+  // PROMINENT methodology banner at the TOP. Without it, people see negative
+  // Sharpe next to positive total return and assume the dashboard is buggy.
+  // Synthetic basis is honest but unintuitive; realized basis would be
+  // statistical noise before ~30 days of live NAV.
+  const isSynthetic = m.data_basis !== "realized_nav";
+  const banner = isSynthetic ? `
+    <div style="background: rgba(251,191,36,0.10); border-left: 3px solid var(--warn);
+                padding: 10px 14px; margin-bottom: 14px; font-size: 11px; line-height: 1.55;">
+      <strong style="color: var(--warn);">&#9888; Metrics below are PROJECTED, not realized.</strong>
+      Sharpe / Sortino / vol / α are computed from a 252-day backcast (current weights &times;
+      each holding's last-year return history) &mdash; NOT from your
+      ${m.days_of_live_nav || 0} days of live NAV. Reason: ${m.days_of_live_nav || 0}-day
+      Sharpe is statistical noise (one bad day flips it negative; CFA / GIPS standards
+      require &ge;36 months). Backcast is negative because the portfolio's underlying
+      stocks lost money over the past year &mdash; that's a vulnerability disclosure,
+      not a performance claim.<br>
+      <strong>Your actual return since launch:
+      <span class="${s.total_return >= 0 ? "pos" : "neg"}">${fmtPct(s.total_return)}</span></strong>
+      over ${m.days_of_live_nav || 0} live NAV days. Will auto-switch to realized basis
+      at 30 days.
+    </div>` : `
+    <div style="background: rgba(74,222,128,0.08); border-left: 3px solid var(--accent);
+                padding: 10px 14px; margin-bottom: 14px; font-size: 11px;">
+      &#10003; Metrics computed from <strong>${m.days_of_live_nav} days of live NAV</strong>.
+    </div>`;
+
+  const html = banner +
+    `<table><tbody>${renderRows(absoluteRows)}</tbody></table>
+    ${benchSection}
+    <div class="muted" style="margin-top: 10px; font-size: 10px;">
+      Sortino uses Frank Sortino downside deviation (RMS of shortfalls vs MAR=RF), not std of negative returns.
+      Information Ratio is the CFA-canonical benchmark-relative metric: annualized active return &divide; tracking error.
+      Treynor uses excess return &divide; &beta; (excess vs RF per unit of systematic risk).
+      Jensen's &alpha; is CAPM-based: R<sub>p</sub> &minus; [RF + &beta;(R<sub>m</sub> &minus; RF)].
+      Up Capture &gt; 1 = portfolio outperforms IWM in up-months; Down Capture &lt; 1 = portfolio
+      declines less than IWM in down-months. Benchmark is Russell 2000 (IWM) &mdash; chosen
+      because this fund focuses on small/mid-cap names and IWM is the industry-standard SMID benchmark.
+    </div>`;
   document.getElementById("risk-metrics").innerHTML = html;
 }
 
