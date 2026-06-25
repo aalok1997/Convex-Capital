@@ -759,6 +759,11 @@ function renderVol(rows) {
 function renderRiskMetrics(m, s) {
   m = m || {}; s = s || {};
   const rfPct = m.risk_free_rate ? `<span class="muted" style="font-size:9px"> (RF: 10y ${(m.risk_free_rate*100).toFixed(2)}%)</span>` : "";
+  // GIPS / since-inception scaffolding — declared FIRST because both the
+  // benchmark rows and the methodology banner below reference these constants.
+  const daysSince = m.calendar_days_since_inception || 0;
+  const tradingDays = m.trading_days_observed || 0;
+  const lessThanOneYear = daysSince < 365;
   // CFA-standard risk metrics, grouped:
   //   Absolute return: ann return, vol, Sharpe, Sortino, Calmar
   //   Tail risk:       Max DD, VaR 95
@@ -792,11 +797,8 @@ function renderRiskMetrics(m, s) {
       m.down_capture <= 1 ? "pos" : "neg"]);
 
   // GIPS-correct: returns for periods < 1 year shown as CUMULATIVE
-  // since-inception, NOT annualized. Once the fund passes 365 days, the
-  // annualized view becomes meaningful and we surface that as the primary.
-  const daysSince = m.calendar_days_since_inception || 0;
-  const tradingDays = m.trading_days_observed || 0;
-  const lessThanOneYear = daysSince < 365;
+  // since-inception, NOT annualized. (daysSince/tradingDays/lessThanOneYear
+  // declared above so the benchmarkRows block can reference them.)
   const periodReturnRow = m.period_return != null
     ? [`Since-Inception Return (${tradingDays}d)`, fmtPct(m.period_return),
        m.period_return >= 0 ? "pos" : "neg"]
