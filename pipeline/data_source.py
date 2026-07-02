@@ -407,21 +407,51 @@ class YFinanceSource:
             return None
 
     def history(self, ticker: str, period: str = "2y") -> PriceHistory:
+        """Daily history carrying BOTH price conventions:
+
+          - Open/High/Low/Close = dividend/split-ADJUSTED (total-return series).
+            Used by signals, volatility, correlation, beta, factor model —
+            these need a continuous total-return series to be statistically
+            correct (a raw price gaps down on ex-dividend, creating a spurious
+            'down day' that would distort RSI / vol / correlation).
+          - RawClose = the actual unadjusted closing price. Used for NAV /
+            holdings marking so the dashboard matches a real brokerage
+            statement: day-1 NAV equals the exact deposit, buy/sell fills match
+            the marks on their trade day, and past NAV values never shift when
+            a holding later declares a dividend.
+          - Dividends = per-share cash dividend on each ex-date, credited to
+            fund cash in the NAV reconstruction (true total return via actual
+            cash flows rather than baked-into-price adjustment).
+        """
         yf = self._yf()
-        df = yf.Ticker(ticker).history(period=period, auto_adjust=True)
+        df = yf.Ticker(ticker).history(period=period, auto_adjust=False,
+                                       actions=True)
         if self.sleep:
             time.sleep(self.sleep)
         if df.empty:
             return PriceHistory(ticker=ticker, df=pd.DataFrame(
-                columns=["Open", "High", "Low", "Close", "Volume"]))
+                columns=["Open", "High", "Low", "Close", "Volume",
+                         "RawClose", "Dividends"]))
         df.index = pd.to_datetime(df.index).tz_localize(None)
-        df = df[["Open", "High", "Low", "Close", "Volume"]]
+        raw_close = df["Close"].astype(float)
+        adj_close = (df["Adj Close"].astype(float)
+                     if "Adj Close" in df.columns else raw_close)
+        # Convert raw OHLC → adjusted by the Close adjustment ratio (this is
+        # exactly what yfinance's auto_adjust=True does internally).
+        factor = (adj_close / raw_close).replace([np.inf, -np.inf], np.nan).fillna(1.0)
+        out = pd.DataFrame(index=df.index)
+        out["Open"] = df["Open"].astype(float) * factor
+        out["High"] = df["High"].astype(float) * factor
+        out["Low"] = df["Low"].astype(float) * factor
+        out["Close"] = adj_close              # adjusted — for stats
+        out["Volume"] = df["Volume"].astype(float)
+        out["RawClose"] = raw_close           # raw — for NAV / marking
+        out["Dividends"] = (df["Dividends"].astype(float)
+                            if "Dividends" in df.columns else 0.0)
         # yfinance sometimes includes today's not-yet-finalized bar with NaN
-        # values during/after the trading day. Drop any row with a NaN Close so
-        # every downstream consumer (signals, vol, risk, valuation) sees clean
-        # finalized bars only.
-        df = df.dropna(subset=["Close"])
-        return PriceHistory(ticker=ticker, df=df)
+        # values during/after the trading day. Drop any row with a NaN Close.
+        out = out.dropna(subset=["Close"])
+        return PriceHistory(ticker=ticker, df=out)
 
     def live_price(self, ticker: str, session: str = "OPEN") -> Optional[float]:
         """Latest available traded price, session-aware.
@@ -649,7 +679,9 @@ class SampleSource:
         open_ = close.shift(1).fillna(close.iloc[0])
         vol = (rng.integers(1_000_000, 20_000_000, self.days)).astype(float)
         df = pd.DataFrame({"Open": open_, "High": high, "Low": low,
-                           "Close": close, "Volume": vol})
+                           "Close": close, "Volume": vol,
+                           # Sample mode: raw == adjusted, no dividends.
+                           "RawClose": close, "Dividends": 0.0})
         self._cache[ticker] = PriceHistory(ticker=ticker, df=df)
         return self._cache[ticker]
 

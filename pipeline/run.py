@@ -23,7 +23,7 @@ import pandas as pd
 from .data_source import (YFinanceSource, SampleSource, PriceHistory,
                           TickerInfo, NewsItem)
 from .portfolio import (load_trades, replay, daily_nav_curve, benchmark_curves,
-                        PortfolioState)
+                        dividends_received, PortfolioState)
 from .signals import compute_signal
 from .volatility import vol_panel
 from .risk import (correlation_matrix, beta_to, stress_tests, portfolio_metrics,
@@ -81,7 +81,15 @@ def main(argv=None):
     print(f"Loaded {len(trades)} trades, {len(state.positions)} open positions, "
           f"cash=${state.cash:,.2f}")
 
-    tickers = sorted(state.positions.keys())
+    tickers = sorted(state.positions.keys())  # currently-held positions
+    # Tickers that were traded but are now fully sold. We still need their
+    # price history so the daily NAV curve can correctly mark them DURING the
+    # period they were held — otherwise a sold position silently drops to $0
+    # in the historical NAV, understating the fund's value over that window.
+    traded_tickers = sorted(set(
+        trades.loc[trades["action"].isin(["BUY", "SELL"]), "ticker"]))
+    closed_tickers = [t for t in traded_tickers if t not in state.positions]
+
     histories: Dict[str, PriceHistory] = {}
     infos: Dict[str, TickerInfo] = {}
     news: Dict[str, List[NewsItem]] = {}
@@ -101,6 +109,12 @@ def main(argv=None):
         nxt = src.next_earnings(tk)
         if nxt:
             earnings_dates.append(nxt)
+
+    # Price history only (no info/news) for closed positions — used solely by
+    # the NAV curve + dividend reconstruction over their holding period.
+    for tk in closed_tickers:
+        print(f"  fetching {tk} (closed position, for NAV history)...")
+        histories[tk] = src.history(tk, period="2y")
 
     # Benchmarks
     bench_hist: Dict[str, PriceHistory] = {}
@@ -191,11 +205,17 @@ def main(argv=None):
             return False
         target_ts = pd.Timestamp(target)
         # Open/High/Low echo the close — only Close matters for NAV / curves;
-        # the others keep range / Bollinger from seeing a NaN spike.
-        new_row = pd.DataFrame(
-            {"Open": [live_p], "High": [live_p], "Low": [live_p],
-             "Close": [live_p], "Volume": [0.0]},
-            index=[target_ts])
+        # the others keep range / Bollinger from seeing a NaN spike. Populate
+        # BOTH Close (adjusted, for stats) and RawClose (for NAV marking) with
+        # the live price — during the current session there's no dividend
+        # adjustment gap, so raw == adjusted. Dividends = 0 (no ex-date today).
+        row = {"Open": [live_p], "High": [live_p], "Low": [live_p],
+               "Close": [live_p], "Volume": [0.0]}
+        if "RawClose" in ph.df.columns:
+            row["RawClose"] = [live_p]
+        if "Dividends" in ph.df.columns:
+            row["Dividends"] = [0.0]
+        new_row = pd.DataFrame(row, index=[target_ts])
         ph.df = pd.concat([ph.df, new_row])
         return True
 
@@ -211,6 +231,12 @@ def main(argv=None):
         blive = src.live_price(bench, session=quote_session)
         if blive is not None:
             _inject(ph, blive)
+
+    # Cash dividends received to date (shares held × per-share dividend on
+    # each ex-date). Added to the fund's cash so the summary matches the NAV
+    # curve, which credits the same dividends day-by-day internally.
+    total_dividends_received = dividends_received(trades, histories, end=pd.Timestamp.today().normalize())
+    state.cash += total_dividends_received
 
     # NAV curve — computed AFTER the live-price injection so the curve
     # picks up today's close. Benchmarks reuse the same backfilled histories.
@@ -233,10 +259,11 @@ def main(argv=None):
     total_equity = 0.0
     for tk, pos in state.positions.items():
         h = histories.get(tk)
-        # yfinance sometimes includes today's not-yet-finalized bar with NaN
-        # values during/after the trading day. Skip trailing NaNs so the last
-        # price we use is always a valid float.
-        last_clean = h.df["Close"].dropna() if h and not h.df.empty else None
+        # Mark at the RAW (unadjusted) close so holdings match a brokerage
+        # statement. Skip trailing NaNs so the last price is always valid.
+        # live_quotes (regularMarketPrice / last_price) are already raw prices.
+        mark_col = "RawClose" if (h and not h.df.empty and "RawClose" in h.df.columns) else "Close"
+        last_clean = h.df[mark_col].dropna() if h and not h.df.empty else None
         daily_close = float(last_clean.iloc[-1]) if last_clean is not None and not last_clean.empty else 0.0
         last = live_quotes.get(tk, daily_close)
         mkt_value = pos.shares * last
@@ -297,13 +324,15 @@ def main(argv=None):
             "signal": v["signal"],
         })
 
-    # Correlation matrix (only for tickers with non-empty history)
-    closes = {tk: h.df["Close"] for tk, h in histories.items() if not h.df.empty}
+    # Correlation matrix + risk inputs use CURRENT holdings only (exclude
+    # closed positions that were fetched purely for NAV-curve marking).
+    closes = {tk: histories[tk].df["Close"] for tk in tickers
+              if tk in histories and not histories[tk].df.empty}
     cm = correlation_matrix(closes)
 
     # Build a one-line ticker → Close-series map used by several risk
     # calculations downstream (synthetic returns, correlation, tail stress).
-    closes_for_corr = {tk: h.df["Close"] for tk, h in histories.items() if not h.df.empty}
+    closes_for_corr = dict(closes)
 
     # Portfolio metrics — prefer realized NAV if we have >= 30 days; fall back
     # to synthetic-history metrics (current weights × each holding's 252-day
@@ -508,6 +537,7 @@ def main(argv=None):
             "deposits": state.deposits,
             "total_return": (nav_now / state.deposits - 1) if state.deposits > 0 else 0.0,
             "realized_pnl": state.realized_pnl,
+            "dividends_received": total_dividends_received,
             "open_positions": len(state.positions),
         },
         "metrics": _scrub(metrics),

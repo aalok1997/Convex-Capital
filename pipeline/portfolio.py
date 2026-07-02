@@ -148,13 +148,20 @@ def daily_nav_curve(trades: pd.DataFrame,
     if len(idx) == 0:
         idx = pd.bdate_range(start=start, end=end)
 
-    # Pre-index closes per ticker forward-filled to idx
+    # Pre-index closes per ticker forward-filled to idx. Mark at the RAW
+    # (unadjusted) close so NAV matches a brokerage statement exactly; fall
+    # back to adjusted Close only if RawClose isn't present (sample mode).
     closes = {}
+    divs = {}
     for tk, ph in price_histories.items():
         if ph.df.empty:
             continue
-        s = ph.df["Close"].reindex(idx, method="ffill")
-        closes[tk] = s
+        price_col = "RawClose" if "RawClose" in ph.df.columns else "Close"
+        closes[tk] = ph.df[price_col].reindex(idx, method="ffill")
+        if "Dividends" in ph.df.columns:
+            # Reindex WITHOUT ffill — a dividend is a one-day cash event, not
+            # a level to carry forward.
+            divs[tk] = ph.df["Dividends"].reindex(idx).fillna(0.0)
 
     cash = 0.0
     positions: Dict[str, float] = {}
@@ -179,6 +186,15 @@ def daily_nav_curve(trades: pd.DataFrame,
                 cash += sh * px
                 positions[t["ticker"]] = positions.get(t["ticker"], 0.0) - sh
             trade_idx += 1
+        # Credit cash dividends for any position held on this ex-dividend date.
+        for tk, sh in positions.items():
+            if sh <= 0:
+                continue
+            dser = divs.get(tk)
+            if dser is not None and d in dser.index:
+                dv = float(dser.loc[d])
+                if dv > 0:
+                    cash += sh * dv
         equity = 0.0
         for tk, sh in positions.items():
             if sh == 0:
@@ -194,6 +210,40 @@ def daily_nav_curve(trades: pd.DataFrame,
         nav.loc[d] = cash + equity
 
     return nav.dropna()
+
+
+def dividends_received(trades: pd.DataFrame,
+                       price_histories: Dict[str, PriceHistory],
+                       end: pd.Timestamp = None) -> float:
+    """Total cash dividends the fund has received to date: sum over every
+    ex-dividend date of (shares held that date × per-share dividend). Kept
+    consistent with the daily crediting in daily_nav_curve so the summary
+    cash and the final NAV-curve point agree."""
+    if trades.empty:
+        return 0.0
+    end = end or pd.Timestamp.today().normalize()
+    trades_sorted = trades.sort_values("date").reset_index(drop=True)
+    total = 0.0
+    for tk, ph in price_histories.items():
+        if ph.df.empty or "Dividends" not in ph.df.columns:
+            continue
+        div_series = ph.df["Dividends"]
+        div_dates = div_series[div_series > 0]
+        for ex_date, dv in div_dates.items():
+            if ex_date > end:
+                continue
+            # shares held on the ex-date = net BUY-SELL of this ticker up to it
+            held = 0.0
+            for _, t in trades_sorted.iterrows():
+                if t["ticker"] != tk or t["date"] > ex_date:
+                    continue
+                if t["action"] == "BUY":
+                    held += float(t["shares"])
+                elif t["action"] == "SELL":
+                    held -= float(t["shares"])
+            if held > 1e-9:
+                total += held * float(dv)
+    return total
 
 
 def benchmark_curves(start: pd.Timestamp,
