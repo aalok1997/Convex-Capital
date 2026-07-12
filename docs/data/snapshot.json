@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-12T18:32:33.977489Z",
+  "generated_at": "2026-07-12T19:46:34.010810Z",
   "market_session": "CLOSED",
   "fund_name": "Convex Capital",
   "tagline": "Lose small. Win big. \u2014 Paper-traded portfolio. Hypothetical performance for educational purposes only.",
@@ -27,12 +27,12 @@
     "var_95_1d": -0.019018151711248543,
     "risk_free_rate": 0.045689997673034666,
     "beta_benchmark": 0.9492744840730257,
-    "benchmark_annualized_return": 0.22953990025188498,
-    "benchmark_annualized_return_arithmetic": 0.2067247801593462,
+    "benchmark_annualized_return": 0.22953995150679907,
+    "benchmark_annualized_return_arithmetic": 0.20672482187975208,
     "benchmark_period_return": 0.02669339308669838,
     "period_active_return": 0.168723312317838,
     "treynor": 1.760418428019721,
-    "jensens_alpha": 1.5182540849485624,
+    "jensens_alpha": 1.5182540453444457,
     "information_ratio": 5.9802474863311135,
     "tracking_error": 0.2426829114011513,
     "annualized_active_return": 3.2509424639915503,
@@ -44,7 +44,7 @@
     "benchmark_ticker": "IWM",
     "benchmark_name": "Russell 2000",
     "beta_spy": 0.9492744840730257,
-    "beta_spy_stress": 1.5270047704081329
+    "beta_spy_stress": 1.5270045010920423
   },
   "nav_curve": [
     {
@@ -927,72 +927,72 @@
     {
       "ticker": "CEG",
       "hv20": 0.3853680593703529,
-      "garch": 0.5052608716384215,
-      "expansion": 0.31111247897389227,
+      "garch": 0.5052608576677793,
+      "expansion": 0.3111124427211675,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
     {
       "ticker": "CMI",
       "hv20": 0.4655922620003845,
-      "garch": 0.323180715459291,
-      "expansion": -0.3058718070812266,
+      "garch": 0.3231810762329637,
+      "expansion": -0.3058710322108042,
       "regime": "HIGH",
       "signal": "WEAK"
     },
     {
       "ticker": "GENC",
       "hv20": 0.18601917109798197,
-      "garch": 0.3370805974743721,
-      "expansion": 0.8120745054649311,
+      "garch": 0.3370805194164752,
+      "expansion": 0.8120740858420696,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
     {
       "ticker": "GRPN",
       "hv20": 0.9345948289530469,
-      "garch": 0.7986194201808645,
-      "expansion": -0.14549129158408136,
+      "garch": 0.7986180045859812,
+      "expansion": -0.1454928062456646,
       "regime": "HIGH",
       "signal": "WEAK"
     },
     {
       "ticker": "JAKK",
       "hv20": 0.3034158161969757,
-      "garch": 0.47358993942096306,
-      "expansion": 0.560861082843194,
+      "garch": 0.47359019875207825,
+      "expansion": 0.5608619375485236,
       "regime": "NORMAL",
       "signal": "SIGNAL"
     },
     {
       "ticker": "KSPI",
       "hv20": 0.32009083422338097,
-      "garch": 0.3524180794011337,
-      "expansion": 0.10099397333943207,
+      "garch": 0.35241812444861914,
+      "expansion": 0.10099411407287598,
       "regime": "NORMAL",
       "signal": "BASE"
     },
     {
       "ticker": "OPEN",
       "hv20": 0.7571451503794647,
-      "garch": 0.9514476345363442,
-      "expansion": 0.25662514520432345,
+      "garch": 0.9514475863879751,
+      "expansion": 0.2566250816123305,
       "regime": "NORMAL",
       "signal": "SIGNAL"
     },
     {
       "ticker": "PYPL",
       "hv20": 0.333676973359957,
-      "garch": 0.3938820867784756,
-      "expansion": 0.18042933203416403,
+      "garch": 0.39388284884139263,
+      "expansion": 0.18043161586846454,
       "regime": "NORMAL",
       "signal": "BASE"
     },
     {
       "ticker": "TENB",
       "hv20": 0.6915582893522132,
-      "garch": 0.7103693939990021,
-      "expansion": 0.027201039936068726,
+      "garch": 0.7103693556362461,
+      "expansion": 0.027200984463151168,
       "regime": "HIGH",
       "signal": "WEAK"
     },
@@ -1007,24 +1007,24 @@
     {
       "ticker": "VST",
       "hv20": 0.4095837691032802,
-      "garch": 0.5216097618379014,
-      "expansion": 0.2735117970614037,
+      "garch": 0.5216097473940864,
+      "expansion": 0.27351176179678605,
       "regime": "LOW",
       "signal": "SIGNAL"
     },
     {
       "ticker": "XNET",
       "hv20": 0.5981629435884173,
-      "garch": 0.5883852851736968,
-      "expansion": -0.01634614534304592,
+      "garch": 0.588386361912182,
+      "expansion": -0.016344345267503477,
       "regime": "NORMAL",
       "signal": "WEAK"
     },
     {
       "ticker": "ZS",
       "hv20": 0.4647572192508374,
-      "garch": 0.7849025259424853,
-      "expansion": 0.6888441823619312,
+      "garch": 0.7849023613384445,
+      "expansion": 0.6888438281898301,
       "regime": "NORMAL",
       "signal": "SIGNAL"
     }
@@ -1554,248 +1554,248 @@
   "factor_exposures": [
     {
       "ticker": "CEG",
-      "r_squared": 0.2302679948329751,
-      "alpha_annual": -0.42934333329254953,
-      "idio_vol_annual": 0.4121443196836577,
-      "Market": 0.7777207752485717,
-      "Size": 0.47818886258403376,
-      "Value (SMID)": -0.4533076738555583,
-      "Momentum": 0.3837772070554103,
-      "Quality": -1.112620493776262,
-      "Profitability": -0.43538923133669927,
-      "Liquidity": -0.4987745297904252,
-      "Credit": -1.1843694914955152
+      "r_squared": 0.23026848528167776,
+      "alpha_annual": -0.4293428095995174,
+      "idio_vol_annual": 0.4121441976578781,
+      "Market": 0.7777226724333178,
+      "Size": 0.4781862203337123,
+      "Value (SMID)": -0.45331122303795635,
+      "Momentum": 0.3837784652758978,
+      "Quality": -1.1126121010925696,
+      "Profitability": -0.4353872263795655,
+      "Liquidity": -0.4987763288226886,
+      "Credit": -1.1843989222187272
     },
     {
       "ticker": "CMI",
-      "r_squared": 0.5096110174430631,
-      "alpha_annual": 0.3377524642209934,
-      "idio_vol_annual": 0.2482752306270672,
-      "Market": 1.094871033442222,
-      "Size": 0.7962609083803194,
-      "Value (SMID)": 0.3947708918596848,
-      "Momentum": 0.8286857160394819,
-      "Quality": -0.20877619331843167,
-      "Profitability": -0.22565104346989556,
-      "Liquidity": -0.4341581101612073,
-      "Credit": 0.921939789043522
+      "r_squared": 0.509610176746295,
+      "alpha_annual": 0.3377528832451871,
+      "idio_vol_annual": 0.24827547088465377,
+      "Market": 1.0948742613980162,
+      "Size": 0.7962570744613716,
+      "Value (SMID)": 0.3947681233086475,
+      "Momentum": 0.8286871984310655,
+      "Quality": -0.20879627821163638,
+      "Profitability": -0.22564285668808343,
+      "Liquidity": -0.43415721642200594,
+      "Credit": 0.9219082728056683
     },
     {
       "ticker": "GENC",
-      "r_squared": 0.3358848437034734,
-      "alpha_annual": -0.3852605225445215,
-      "idio_vol_annual": 0.3079401636724409,
-      "Market": 1.3121980983596049,
-      "Size": 1.1644030017522164,
-      "Value (SMID)": 1.1993257674516442,
-      "Momentum": -0.03749241192665309,
-      "Quality": -0.4084324045383926,
-      "Profitability": 0.09590313476503948,
-      "Liquidity": -0.07577927015002384,
-      "Credit": 0.6321192588086827
+      "r_squared": 0.33588591224254416,
+      "alpha_annual": -0.3852618502584455,
+      "idio_vol_annual": 0.30793991593963016,
+      "Market": 1.3121959083338388,
+      "Size": 1.1644009896928633,
+      "Value (SMID)": 1.1993329137328472,
+      "Momentum": -0.037489520811026085,
+      "Quality": -0.408469511700648,
+      "Profitability": 0.09590457662624711,
+      "Liquidity": -0.07578317127432534,
+      "Credit": 0.6321979981032217
     },
     {
       "ticker": "GRPN",
-      "r_squared": 0.16332585267442634,
-      "alpha_annual": -0.7416311621753563,
-      "idio_vol_annual": 0.6680585019772561,
-      "Market": 2.026655114577837,
-      "Size": 0.3314838610026398,
-      "Value (SMID)": -0.8765779973146055,
-      "Momentum": 0.18577512001323881,
-      "Quality": -1.8222792888890957,
-      "Profitability": 1.6201673107139292,
-      "Liquidity": 0.057849085569522285,
-      "Credit": 1.0009189851869302
+      "r_squared": 0.16332667740128937,
+      "alpha_annual": -0.7416295366985425,
+      "idio_vol_annual": 0.6680581727176931,
+      "Market": 2.0266479635271133,
+      "Size": 0.331489969068546,
+      "Value (SMID)": -0.8765880135871775,
+      "Momentum": 0.18577430925656252,
+      "Quality": -1.8223193361830878,
+      "Profitability": 1.6201721329969476,
+      "Liquidity": 0.05783513677097993,
+      "Credit": 1.0009445962891639
     },
     {
       "ticker": "JAKK",
-      "r_squared": 0.28455207276056405,
-      "alpha_annual": -0.22647233793722213,
-      "idio_vol_annual": 0.3513239139863054,
-      "Market": 1.3156641526348616,
-      "Size": 1.1007270339590765,
-      "Value (SMID)": 1.0222260820924223,
-      "Momentum": -0.277531212131676,
-      "Quality": 1.2596336830893808,
-      "Profitability": -0.24986577613632063,
-      "Liquidity": 0.26678809398873904,
-      "Credit": -0.5247683221889631
+      "r_squared": 0.2845530373555206,
+      "alpha_annual": -0.2264728950018804,
+      "idio_vol_annual": 0.351323581621011,
+      "Market": 1.3156635333056974,
+      "Size": 1.1007254968375106,
+      "Value (SMID)": 1.0222312116965,
+      "Momentum": -0.2775303449425993,
+      "Quality": 1.2596566181809365,
+      "Profitability": -0.24987203518536177,
+      "Liquidity": 0.2667923615982942,
+      "Credit": -0.5247568510250084
     },
     {
       "ticker": "KSPI",
-      "r_squared": 0.2116801189698868,
-      "alpha_annual": -0.12084452166210613,
-      "idio_vol_annual": 0.32324035379285043,
-      "Market": 1.1729570777773473,
-      "Size": 0.5566671827038732,
-      "Value (SMID)": -0.23403910401500908,
-      "Momentum": -0.4470437578232727,
-      "Quality": -0.027877223666229384,
-      "Profitability": 0.07302378668192147,
-      "Liquidity": -0.12117768877939772,
-      "Credit": 0.31431656021355747
+      "r_squared": 0.2116810659576387,
+      "alpha_annual": -0.12084455878931306,
+      "idio_vol_annual": 0.32324015964276287,
+      "Market": 1.172952230467704,
+      "Size": 0.5566688062303983,
+      "Value (SMID)": -0.23404007943153038,
+      "Momentum": -0.4470430234012999,
+      "Quality": -0.027871818636977835,
+      "Profitability": 0.07302301400968128,
+      "Liquidity": -0.12118555739645989,
+      "Credit": 0.31439975939060205
     },
     {
       "ticker": "OPEN",
-      "r_squared": 0.12466723167032234,
-      "alpha_annual": 1.3269405252277584,
-      "idio_vol_annual": 1.3383938063200218,
-      "Market": 2.9361678524442527,
-      "Size": 1.2562121957279229,
-      "Value (SMID)": -1.7245005694097695,
-      "Momentum": -1.5519444539334784,
-      "Quality": 0.5852395553452823,
-      "Profitability": 0.6938050332680161,
-      "Liquidity": 1.6677030500898606,
-      "Credit": -3.7186751136686933
+      "r_squared": 0.12466727657063514,
+      "alpha_annual": 1.3269371399709924,
+      "idio_vol_annual": 1.3383937719934755,
+      "Market": 2.9361707506124928,
+      "Size": 1.256226007828458,
+      "Value (SMID)": -1.7244793408444983,
+      "Momentum": -1.5519563872882278,
+      "Quality": 0.5851542979346214,
+      "Profitability": 0.6937846013969317,
+      "Liquidity": 1.667697095906425,
+      "Credit": -3.7187305995636124
     },
     {
       "ticker": "PYPL",
-      "r_squared": 0.3023727144844579,
-      "alpha_annual": -0.65081093190511,
-      "idio_vol_annual": 0.34039853197178377,
-      "Market": 1.8199976204055912,
-      "Size": -0.2892500936696669,
-      "Value (SMID)": -0.9153443482620754,
-      "Momentum": -0.8473395853249777,
-      "Quality": 1.383150335590824,
-      "Profitability": 0.7488429817648781,
-      "Liquidity": 0.2676793311830063,
-      "Credit": -0.1637099065663506
+      "r_squared": 0.30237285767565547,
+      "alpha_annual": -0.6508107100321833,
+      "idio_vol_annual": 0.34039848075889284,
+      "Market": 1.8199974343573282,
+      "Size": -0.28924857128532505,
+      "Value (SMID)": -0.9153452556315428,
+      "Momentum": -0.8473447511368765,
+      "Quality": 1.383154302975013,
+      "Profitability": 0.748835321786351,
+      "Liquidity": 0.2676815367970575,
+      "Credit": -0.16374755171664815
     },
     {
       "ticker": "TENB",
-      "r_squared": 0.15092142155672428,
-      "alpha_annual": -0.088311581852392,
-      "idio_vol_annual": 0.447038426557521,
-      "Market": 1.615144436636179,
-      "Size": -0.33932449715858154,
-      "Value (SMID)": -0.7673535574319112,
-      "Momentum": -0.36185379798879913,
-      "Quality": 0.29079516674054373,
-      "Profitability": 1.243590999169346,
-      "Liquidity": 0.4568407141813476,
-      "Credit": -0.1422633465473519
+      "r_squared": 0.15092107191862592,
+      "alpha_annual": -0.08831205086543181,
+      "idio_vol_annual": 0.44703851859944344,
+      "Market": 1.6151415599008443,
+      "Size": -0.33932442651917455,
+      "Value (SMID)": -0.7673505360530202,
+      "Momentum": -0.3618520392495912,
+      "Quality": 0.2908139345212436,
+      "Profitability": 1.2435884077594983,
+      "Liquidity": 0.4568437790266017,
+      "Credit": -0.14224135537522242
     },
     {
       "ticker": "VIA",
-      "r_squared": 0.11945959701805509,
-      "alpha_annual": -1.3657528923547821,
-      "idio_vol_annual": 0.6815615354639754,
-      "Market": 1.1631296387520735,
-      "Size": 0.2955422946336834,
-      "Value (SMID)": -1.1216130426990834,
-      "Momentum": -0.9748534766171013,
-      "Quality": -0.6797421393861308,
-      "Profitability": 0.5506900749829783,
-      "Liquidity": 1.2101882523196592,
-      "Credit": -1.3283915715741639
+      "r_squared": 0.11945968184661215,
+      "alpha_annual": -1.3657523407217826,
+      "idio_vol_annual": 0.6815615026342023,
+      "Market": 1.1631329550776526,
+      "Size": 0.29554349839309285,
+      "Value (SMID)": -1.121613362537559,
+      "Momentum": -0.9748539942522372,
+      "Quality": -0.6797607830555191,
+      "Profitability": 0.5506963152163084,
+      "Liquidity": 1.2101877375286805,
+      "Credit": -1.3284130045757985
     },
     {
       "ticker": "VST",
-      "r_squared": 0.2884677007551234,
-      "alpha_annual": -0.42873582639696445,
-      "idio_vol_annual": 0.41357009812390616,
-      "Market": 0.7075804916666947,
-      "Size": 0.8168992250665184,
-      "Value (SMID)": -0.6156331833150107,
-      "Momentum": 0.4961261209930972,
-      "Quality": -1.8748180185176189,
-      "Profitability": -0.3612592380365376,
-      "Liquidity": -0.725230567207183,
-      "Credit": -0.9365193179567369
+      "r_squared": 0.2884683980140875,
+      "alpha_annual": -0.428735476098824,
+      "idio_vol_annual": 0.41356987358873315,
+      "Market": 0.7075804561546609,
+      "Size": 0.8168982734185437,
+      "Value (SMID)": -0.6156385869650444,
+      "Momentum": 0.4961262886514876,
+      "Quality": -1.8748375138772508,
+      "Profitability": -0.3612540084508361,
+      "Liquidity": -0.7252401151427488,
+      "Credit": -0.9364934704041237
     },
     {
       "ticker": "XNET",
-      "r_squared": 0.17510856640839545,
-      "alpha_annual": -0.22773334535666495,
-      "idio_vol_annual": 0.6665730224509033,
-      "Market": 1.6103057447767113,
-      "Size": 0.19592078186637357,
-      "Value (SMID)": -0.9135443688298446,
-      "Momentum": -0.309271434136808,
-      "Quality": 0.5092995493329827,
-      "Profitability": 0.38452422819705445,
-      "Liquidity": 1.090796727303209,
-      "Credit": 2.474994208628943
+      "r_squared": 0.1751111267267258,
+      "alpha_annual": -0.22773299049942022,
+      "idio_vol_annual": 0.6665719879872257,
+      "Market": 1.6103019827629284,
+      "Size": 0.1959081600787292,
+      "Value (SMID)": -0.9135590244964192,
+      "Momentum": -0.30926479359898595,
+      "Quality": 0.5093251323224642,
+      "Profitability": 0.38454480823613113,
+      "Liquidity": 1.0907976858508124,
+      "Credit": 2.4751436394033552
     },
     {
       "ticker": "ZS",
-      "r_squared": 0.10274112385632406,
-      "alpha_annual": -0.9379021869660055,
-      "idio_vol_annual": 0.6040056452992093,
-      "Market": 1.3648454002267074,
-      "Size": -0.39113280218393764,
-      "Value (SMID)": -1.1296794256650855,
-      "Momentum": -0.933070930145387,
-      "Quality": -0.4352810533634025,
-      "Profitability": 0.8787537134139274,
-      "Liquidity": 0.4747178460001468,
-      "Credit": -0.0031071837492700483
+      "r_squared": 0.102740778320348,
+      "alpha_annual": -0.9379022351907523,
+      "idio_vol_annual": 0.6040057616010178,
+      "Market": 1.3648424601976614,
+      "Size": -0.3911370449354459,
+      "Value (SMID)": -1.1296801797402112,
+      "Momentum": -0.9330641250511809,
+      "Quality": -0.4352319964804035,
+      "Profitability": 0.8787612335542815,
+      "Liquidity": 0.4747214867603305,
+      "Credit": -0.0030579936219081207
     }
   ],
   "portfolio_factor_exposure": {
     "loadings": {
-      "Market": 1.5700550751457143,
-      "Size": 0.3523552975258703,
-      "Value (SMID)": -0.5196840628053163,
-      "Momentum": -0.1756562896279831,
-      "Quality": -0.4201533655720201,
-      "Profitability": 0.7277475395167358,
-      "Liquidity": 0.23697567773154138,
-      "Credit": 0.22621115345931456
+      "Market": 1.570052276634081,
+      "Size": 0.35235623897912016,
+      "Value (SMID)": -0.5196863653450577,
+      "Momentum": -0.17565570933161356,
+      "Quality": -0.420161800953144,
+      "Profitability": 0.7277496968499342,
+      "Liquidity": 0.23697160724085214,
+      "Credit": 0.22623800729081345
     },
-    "alpha_annual": -0.33492718984193987,
-    "r_squared_weighted": 0.2137246372994238
+    "alpha_annual": -0.33492692452576345,
+    "r_squared_weighted": 0.21372508620064218
   },
   "stress_tests": [
     {
       "scenario": "COVID Crash (Feb-Mar 2020)",
       "market_move": -0.339,
-      "portfolio_impact": -0.517654617168357,
-      "stressed_nav": 576603.7344870563,
-      "pnl": -618812.9835129438,
+      "portfolio_impact": -0.5176545258702023,
+      "stressed_nav": 576603.8436263967,
+      "pnl": -618812.8743736034,
       "description": "Rapid 33.9% selloff in SPY over 23 trading days as COVID-19 spread."
     },
     {
       "scenario": "2022 Rate Shock (Jan-Oct)",
       "market_move": -0.252,
-      "portfolio_impact": -0.38480520214284947,
-      "stressed_nav": 735414.1461850684,
-      "pnl": -460002.5718149317,
+      "portfolio_impact": -0.3848051342751947,
+      "stressed_nav": 735414.2273151975,
+      "pnl": -460002.49068480264,
       "description": "Grinding 9-month decline as the Fed hiked rates aggressively."
     },
     {
       "scenario": "GFC 2008-09",
       "market_move": -0.565,
-      "portfolio_impact": -0.862757695280595,
-      "stressed_nav": 164061.74547842707,
-      "pnl": -1031354.9725215731,
+      "portfolio_impact": -0.8627575431170038,
+      "stressed_nav": 164061.92737732784,
+      "pnl": -1031354.7906226723,
       "description": "Credit crisis bear market; SPY drew down 56.5% from Oct 2007 peak."
     },
     {
       "scenario": "Dot-Com Bust (2000-02)",
       "market_move": -0.491,
-      "portfolio_impact": -0.7497593422703932,
-      "stressed_nav": 299141.8657732879,
-      "pnl": -896274.8522267123,
+      "portfolio_impact": -0.7497592100361927,
+      "stressed_nav": 299142.02384826186,
+      "pnl": -896274.6941517382,
       "description": "Tech bubble burst; SPY -49.1% peak-to-trough over 30 months."
     },
     {
       "scenario": "Black Monday (Oct 1987)",
       "market_move": -0.204,
-      "portfolio_impact": -0.3115089731632591,
-      "stressed_nav": 823033.6836736269,
-      "pnl": -372383.03432637325,
+      "portfolio_impact": -0.3115089182227766,
+      "stressed_nav": 823033.7493503981,
+      "pnl": -372382.96864960203,
       "description": "Flash crash; -20.4% on a single trading day."
     },
     {
       "scenario": "Aug 2024 Yen Carry Unwind",
       "market_move": -0.084,
-      "portfolio_impact": -0.12826840071428317,
-      "stressed_nav": 1042082.5273950229,
-      "pnl": -153334.1906049772,
+      "portfolio_impact": -0.12826837809173156,
+      "stressed_nav": 1042082.5544383993,
+      "pnl": -153334.16356160084,
       "description": "Yen carry unwind shock; SPY -8.4% in one week."
     }
   ],
@@ -1804,22 +1804,22 @@
     "n_paths": 10000,
     "current_nav": 1195416.718,
     "terminal_return": {
-      "p5": -0.14880046624282176,
-      "p25": -0.0680383902902939,
-      "p50": -0.008359170757859025,
-      "p75": 0.05708908206495944,
-      "p95": 0.15796258997736173,
+      "p5": -0.14880051467270866,
+      "p25": -0.06803844751117374,
+      "p50": -0.008359180334390481,
+      "p75": 0.05708911559775187,
+      "p95": 0.15796263440400354,
       "prob_negative": 0.5351
     },
     "terminal_nav": {
-      "p5": 1017538.1530071363,
-      "p50": 1185424.0255274388,
-      "p95": 1384247.8388775177
+      "p5": 1017538.0951132398,
+      "p50": 1185424.0140794928,
+      "p95": 1384247.8919858679
     },
     "max_drawdown": {
-      "p5": -0.17419257470089863,
-      "p50": -0.08101615695019965,
-      "p95": -0.030139431573423123
+      "p5": -0.1741925909689615,
+      "p50": -0.08101614476842427,
+      "p95": -0.03013942869458402
     },
     "method": "Bootstrap of synthetic portfolio daily returns (current weights \u00d7 each holding's 252-day history). 10,000 paths, 21-trading-day horizon (~1 month)."
   },
@@ -1917,12 +1917,12 @@
     }
   ],
   "correlation_tail_risk": {
-    "current_correlation_avg": 0.17771148362574296,
-    "port_vol_annual_current": 0.30581730245491956,
-    "port_vol_annual_stressed_corr1": 0.5255344841831385,
-    "vol_expansion_pct": 0.7184589621465496,
-    "pnl_3sigma_1d_current": -64302.45208262377,
-    "pnl_3sigma_1d_stressed": -110501.12506938391,
+    "current_correlation_avg": 0.17771149759509122,
+    "port_vol_annual_current": 0.30581730664464923,
+    "port_vol_annual_stressed_corr1": 0.5255344828039097,
+    "vol_expansion_pct": 0.7184589340935024,
+    "pnl_3sigma_1d_current": -64302.45296357424,
+    "pnl_3sigma_1d_stressed": -110501.12477938135,
     "n_positions": 13,
     "method": "Portfolio variance recomputed with all cross-correlations forced to 1.0, holding individual vols constant. 3\u03c3 1-day P&L uses stressed annualized vol / \u221a252."
   },
@@ -2049,93 +2049,93 @@
     {
       "ticker": "GRPN",
       "weight": 0.24646258962558693,
-      "marginal_risk": 0.6225236470111489,
-      "total_risk_contribution": 0.15342879014553254,
-      "risk_share": 0.5017008158593298
+      "marginal_risk": 0.6225236567042188,
+      "total_risk_contribution": 0.15342879253451164,
+      "risk_share": 0.5017008167977602
     },
     {
       "ticker": "TENB",
       "weight": 0.15859865195561035,
-      "marginal_risk": 0.2951555438309552,
-      "total_risk_contribution": 0.046811271368814564,
-      "risk_share": 0.15306940121779083
+      "marginal_risk": 0.295155542499005,
+      "total_risk_contribution": 0.04681127115756905,
+      "risk_share": 0.15306939842996647
     },
     {
       "ticker": "KSPI",
       "weight": 0.11364242105237145,
-      "marginal_risk": 0.1786597765186665,
-      "total_risk_contribution": 0.020303329548256883,
-      "risk_share": 0.06639038859238448
+      "marginal_risk": 0.178659772104205,
+      "total_risk_contribution": 0.020303329046586792,
+      "risk_share": 0.06639038604240494
     },
     {
       "ticker": "VIA",
       "weight": 0.04919656812094207,
-      "marginal_risk": 0.31295159301246545,
-      "total_risk_contribution": 0.015396144364195095,
-      "risk_share": 0.05034425534658765
+      "marginal_risk": 0.31295160167755887,
+      "total_risk_contribution": 0.015396144790487953,
+      "risk_share": 0.050344256050812136
     },
     {
       "ticker": "XNET",
       "weight": 0.05045435544929362,
-      "marginal_risk": 0.296860611219603,
-      "total_risk_contribution": 0.014977910797368411,
-      "risk_share": 0.04897666246198187
+      "marginal_risk": 0.2968605998682131,
+      "total_risk_contribution": 0.014977910224641351,
+      "risk_share": 0.04897665991822119
     },
     {
       "ticker": "OPEN",
       "weight": 0.03264581247055974,
-      "marginal_risk": 0.41945795721074264,
-      "total_risk_contribution": 0.013693545810385977,
-      "risk_share": 0.04477688378146799
+      "marginal_risk": 0.4194579604871982,
+      "total_risk_contribution": 0.01369354591734853,
+      "risk_share": 0.04477688351777955
     },
     {
       "ticker": "ZS",
       "weight": 0.042523706783227366,
-      "marginal_risk": 0.2984332226115859,
-      "total_risk_contribution": 0.012690486852708698,
-      "risk_share": 0.04149695504746466
+      "marginal_risk": 0.29843322159272206,
+      "total_risk_contribution": 0.01269048680938283,
+      "risk_share": 0.04149695433727956
     },
     {
       "ticker": "CMI",
       "weight": 0.08651405693324091,
-      "marginal_risk": 0.11655980666468127,
-      "total_risk_contribution": 0.010084061749915788,
-      "risk_share": 0.032974137398266656
+      "marginal_risk": 0.11655980822382386,
+      "total_risk_contribution": 0.01008406188480354,
+      "risk_share": 0.032974137387590446
     },
     {
       "ticker": "JAKK",
       "weight": 0.065333100017763,
-      "marginal_risk": 0.10891962035883368,
-      "total_risk_contribution": 0.007116056450800457,
-      "risk_share": 0.023268979203194148
+      "marginal_risk": 0.1089196127889773,
+      "total_risk_contribution": 0.007116055956238272,
+      "risk_share": 0.023268977267224843
     },
     {
       "ticker": "PYPL",
       "weight": 0.02142764076685767,
-      "marginal_risk": 0.18286675344349584,
-      "total_risk_contribution": 0.003918403100988762,
-      "risk_share": 0.012812888837662718
+      "marginal_risk": 0.18286678357191666,
+      "total_risk_contribution": 0.00391840374656974,
+      "risk_share": 0.01281289077312688
     },
     {
       "ticker": "VST",
       "weight": 0.021528325321613914,
-      "marginal_risk": 0.14299486020346444,
-      "total_risk_contribution": 0.0030784398697788853,
-      "risk_share": 0.010066271087564372
+      "marginal_risk": 0.14299498403705826,
+      "total_risk_contribution": 0.003078442535708779,
+      "risk_share": 0.010066279667049188
     },
     {
       "ticker": "GENC",
       "weight": 0.02263896730947341,
-      "marginal_risk": 0.10047247960183005,
-      "total_risk_contribution": 0.0022745931812075647,
-      "risk_share": 0.007437751765346443
+      "marginal_risk": 0.1004724801412224,
+      "total_risk_contribution": 0.0022745931934188505,
+      "risk_share": 0.007437751703378453
     },
     {
       "ticker": "CEG",
       "weight": 0.019766931183239484,
-      "marginal_risk": 0.10341864379531933,
-      "total_risk_contribution": 0.002044269214966034,
-      "risk_share": 0.006684609400958861
+      "marginal_risk": 0.10341862519941052,
+      "total_risk_contribution": 0.0020442688473819846,
+      "risk_share": 0.006684608107406312
     }
   ],
   "income": {
