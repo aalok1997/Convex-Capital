@@ -65,21 +65,14 @@ def main(argv=None):
     trades = load_trades(trades_path)
     state = replay(trades)
 
-    # Hard safety: refuse to produce a snapshot that has negative cash. The
-    # paper-traded fund can't be overdrawn — if the staged trades.csv would
-    # cause it, the user is supposed to fix the trade ledger, not silently
-    # let the dashboard show negative cash.
-    if state.cash < -1.0:  # tiny tolerance for sub-dollar rounding artifacts
-        print(f"ERROR: Trades would result in NEGATIVE cash (${state.cash:,.2f}).",
-              file=sys.stderr)
-        print(f"  Total deposits: ${state.deposits:,.2f}", file=sys.stderr)
-        print(f"  Open positions: {len(state.positions)}", file=sys.stderr)
-        print(f"  Adjust trades.csv so total purchases <= deposits, then re-run.",
-              file=sys.stderr)
-        return 3
+    # NOTE: the negative-cash safeguard runs LATER, after dividends received
+    # are credited (dividends are real cash the fund can spend, so a buy that
+    # looks like an overdraft on trade cash alone may be fully funded once
+    # accumulated dividends are counted). See the check after
+    # `state.cash += total_dividends_received` below.
 
     print(f"Loaded {len(trades)} trades, {len(state.positions)} open positions, "
-          f"cash=${state.cash:,.2f}")
+          f"cash=${state.cash:,.2f} (pre-dividend)")
 
     tickers = sorted(state.positions.keys())  # currently-held positions
     # Tickers that were traded but are now fully sold. We still need their
@@ -237,6 +230,18 @@ def main(argv=None):
     # curve, which credits the same dividends day-by-day internally.
     total_dividends_received = dividends_received(trades, histories, end=pd.Timestamp.today().normalize())
     state.cash += total_dividends_received
+
+    # Hard safety: refuse to produce a snapshot with negative cash — checked
+    # AFTER dividends are credited, since those are real spendable cash. A buy
+    # funded partly by accumulated dividends is legitimate even though it looks
+    # like an overdraft on trade-cash alone.
+    if state.cash < -1.0:  # tiny tolerance for sub-dollar rounding artifacts
+        print(f"ERROR: Trades would result in NEGATIVE cash "
+              f"(${state.cash:,.2f}, incl. ${total_dividends_received:,.2f} dividends).",
+              file=sys.stderr)
+        print(f"  Reduce a purchase so total spend <= deposits + dividends, then re-run.",
+              file=sys.stderr)
+        return 3
 
     # NAV curve — computed AFTER the live-price injection so the curve
     # picks up today's close. Benchmarks reuse the same backfilled histories.
